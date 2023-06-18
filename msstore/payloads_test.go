@@ -1,4 +1,4 @@
-package payloads
+package msstore
 
 import (
 	"strings"
@@ -12,7 +12,7 @@ func TestFE3FileUrl(t *testing.T) {
 	expectedId := "bbbbb"
 	expectedRevisionNumber := "ccccc"
 
-	xml := strings.NewReader(FE3FileUrl(expectedTycketType, expectedId, expectedRevisionNumber))
+	xml := strings.NewReader(fE3FileUrl(expectedTycketType, expectedId, expectedRevisionNumber))
 
 	doc, err := xmlquery.Parse(xml)
 	if err != nil {
@@ -46,21 +46,12 @@ func TestFE3FileUrl(t *testing.T) {
 	}
 }
 
-func TestGetCookie(t *testing.T) {
-	xml := strings.NewReader(GetCookie())
-
-	_, err := xmlquery.Parse(xml)
-	if err != nil {
-		t.Fatalf(`Can not parse XML file`)
-	}
-}
-
 func TestWUIDRequest(t *testing.T) {
 	expectedTycketType := "aaaaa"
 	expectedCookie := "bbbbb"
 	expectedCategoryIdentifier := "ccccc"
 
-	xml := strings.NewReader(WUIDRequest(expectedTycketType, expectedCookie, expectedCategoryIdentifier))
+	xml := strings.NewReader(wuidRequest(expectedTycketType, expectedCookie, expectedCategoryIdentifier))
 
 	doc, err := xmlquery.Parse(xml)
 	if err != nil {
