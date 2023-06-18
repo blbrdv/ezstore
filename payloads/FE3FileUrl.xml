@@ -15,9 +15,7 @@
             <wuws:WindowsUpdateTicketsToken wsu:id="ClientMSA"
 				xmlns:wsu="http://docs.oasis-open.org/wss/2004/01/oasis-200401-wss-wssecurity-utility-1.0.xsd"
 				xmlns:wuws="http://schemas.microsoft.com/msus/2014/10/WindowsUpdateAuthorization">
-                <TicketType Name="MSA" Version="1.0" Policy="MBI_SSL">
-                    %s
-                </TicketType>
+                <TicketType Name="MSA" Version="1.0" Policy="MBI_SSL">%s</TicketType>
             </wuws:WindowsUpdateTicketsToken>
         </o:Security>
     </s:Header>
