@@ -7,6 +7,8 @@ require (
 	github.com/urfave/cli/v2 v2.25.6
 )
 
+require github.com/antchfx/jsonquery v1.3.3 // indirect
+
 require (
 	github.com/KnicKnic/go-powershell v0.0.10
 	github.com/antchfx/xpath v1.2.4 // indirect
