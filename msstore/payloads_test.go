@@ -12,7 +12,7 @@ func TestFE3FileUrl(t *testing.T) {
 	expectedId := "bbbbb"
 	expectedRevisionNumber := "ccccc"
 
-	xml := strings.NewReader(fE3FileUrl(expectedTycketType, expectedId, expectedRevisionNumber))
+	xml := strings.NewReader(fe3FileUrl(expectedTycketType, expectedId, expectedRevisionNumber))
 
 	doc, err := xmlquery.Parse(xml)
 	if err != nil {

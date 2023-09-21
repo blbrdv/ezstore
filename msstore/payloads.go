@@ -14,7 +14,7 @@ var getCookiePayload string
 //go:embed payloads/WUIDRequest.xml
 var wuidRequiestPayload string
 
-func fE3FileUrl(ticketType string, id string, revisionNumber string) string {
+func fe3FileUrl(ticketType string, id string, revisionNumber string) string {
 	return fmt.Sprintf(fileUrlPayload, ticketType, id, revisionNumber)
 }
 
