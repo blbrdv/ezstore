@@ -21,4 +21,4 @@
 go.work
 
 # generated files
-.gen
+*.gen.go
