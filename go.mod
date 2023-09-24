@@ -7,7 +7,7 @@ require (
 	github.com/urfave/cli/v2 v2.25.6
 )
 
-require github.com/antchfx/jsonquery v1.3.3 // indirect
+require github.com/antchfx/jsonquery v1.3.3
 
 require (
 	github.com/KnicKnic/go-powershell v0.0.10
