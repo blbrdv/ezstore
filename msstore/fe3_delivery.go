@@ -82,8 +82,24 @@ func GetProducts(cookie string, categoryIdentifier string) ([]string, error) {
 		return list, err
 	}
 
-	for _, element := range xml.SelectElements("//Xml") {
-		list = append(list, element.InnerText())
+	rawxml := strings.Replace(
+		strings.Replace(
+			strings.Replace(xml.OutputXML(true), "&lt;", "<", -1),
+			"&gt;", ">", -1),
+		"&#34;", "\"", -1)
+
+	newxml, err := xmlquery.Parse(strings.NewReader(rawxml))
+
+	if err != nil {
+		return list, err
+	}
+
+	for _, element := range newxml.SelectElements("//SecuredFragment/../../UpdateIdentity") {
+		num := element.SelectAttr("RevisionNumber")
+
+		if num != "" {
+			list = append(list, element.SelectAttr("UpdateID"))
+		}
 	}
 
 	return list, nil

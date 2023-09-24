@@ -112,10 +112,10 @@ func InstallFunc(ctx *cli.Context) error {
 		log.Fatal(err)
 	}
 
-	// for index, xml := range xmls {
-	//     fmt.Printf("%d\n%s\n", index, xml)
-	for index, _ := range xmls {
-		fmt.Printf("%d\n", index)
+	fmt.Printf("Len = %d\n", len(xmls))
+
+	for index, xml := range xmls {
+		fmt.Printf("%d\n%s\n", index, xml)
 	}
 
 	return nil
