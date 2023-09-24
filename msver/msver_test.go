@@ -74,7 +74,7 @@ func TestD(t *testing.T) {
 	}
 }
 
-func TestCompare(t *testing.T) {
+func TestCompareLeft(t *testing.T) {
 	expected := 1
 	a := msver.Version{1, 2, 3, 4}
 	b := msver.Version{0, 2, 3, 4}
@@ -86,10 +86,22 @@ func TestCompare(t *testing.T) {
 	}
 }
 
-func TestCompare2(t *testing.T) {
-	expected := 1
-	a := msver.Version{0, 0, 0, 4}
-	b := msver.Version{0, 0, 0, 3}
+func TestCompareRight(t *testing.T) {
+	expected := -1
+	a := msver.Version{0, 0, 0, 3}
+	b := msver.Version{0, 0, 0, 4}
+
+	actual := a.Compare(b)
+
+	if actual != expected {
+		t.Fatalf(`Incorrect comparsion, expected: %d, actual: %d`, expected, actual)
+	}
+}
+
+func TestCompareEqual(t *testing.T) {
+	expected := 0
+	a := msver.Version{1, 2, 3, 4}
+	b := msver.Version{1, 2, 3, 4}
 
 	actual := a.Compare(b)
 
