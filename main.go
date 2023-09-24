@@ -113,22 +113,31 @@ func InstallFunc(ctx *cli.Context) error {
 		log.Fatal(err)
 	}
 
-	var result []msstore.FileLocation
+	var result []string
 
 	for _, info := range productInfos {
-		loc, err := msstore.GetUrl(info)
+		urlstr, err := msstore.GetUrl(info)
 
 		if err != nil {
 			log.Fatal(err)
 		}
 
-		if !strings.HasPrefix(loc.Url, "http://dl.delivery.mp.microsoft.com") {
-			result = append(result, loc)
+		// we don't need .BlockMap files
+		if !strings.HasPrefix(urlstr, "http://dl.delivery.mp.microsoft.com") {
+			result = append(result, urlstr)
 		}
 	}
 
-	for index, res := range result {
-		fmt.Printf("%d\n%s\n", index, res)
+	for index, urlobj := range result {
+		name, err := msstore.GetFileName(urlobj)
+
+		if err != nil {
+			log.Fatal(err)
+		}
+
+		if strings.HasSuffix(strings.ToLower(name), "bundle") {
+			fmt.Printf("%d\n%s\n", index, name)
+		}
 	}
 
 	return nil

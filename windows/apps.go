@@ -15,7 +15,7 @@ func Install(fullPath string) {
 	}
 
 	if fileInfo.IsDir() {
-		for _, format := range []string{"appx", "msix", "appxbundle", "msixbundle", "eappxbundle"} {
+		for _, format := range []string{"appx", "msix", "appxbundle", "msixbundle", "eappxbundle", "emsixbundle"} {
 			installFiles(fullPath, format)
 		}
 	} else {

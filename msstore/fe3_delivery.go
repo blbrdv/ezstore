@@ -3,6 +3,8 @@ package msstore
 import (
 	"fmt"
 	"log"
+	"net/url"
+	"regexp"
 	"strings"
 
 	"github.com/antchfx/jsonquery"
@@ -20,11 +22,6 @@ const (
 type ProductInfo struct {
 	UpdateId       string
 	RevisionNumber string
-}
-
-type FileLocation struct {
-	Digest string
-	Url    string
 }
 
 func fe3Client() *resty.Client {
@@ -117,9 +114,7 @@ func GetProducts(cookie string, categoryIdentifier string) ([]ProductInfo, error
 	return list, nil
 }
 
-func GetUrl(info ProductInfo) (FileLocation, error) {
-	var result FileLocation
-
+func GetUrl(info ProductInfo) (string, error) {
 	resp, err := fe3Client().
 		R().
 		SetBody(fe3FileUrl(msaToken, info.UpdateId, info.RevisionNumber)).
@@ -132,12 +127,33 @@ func GetUrl(info ProductInfo) (FileLocation, error) {
 	xml, err := xmlquery.Parse(strings.NewReader(resp.String()))
 
 	if err != nil {
-		return result, err
+		return "", err
 	}
 
-	location := xml.SelectElement("//FileLocation")
+	return xml.SelectElement("//FileLocation/Url").InnerText(), nil
+}
 
-	resul := FileLocation{location.SelectElement("//FileDigest").InnerText(), location.SelectElement("//Url").InnerText()}
+func GetFileName(urlraw string) (string, error) {
+	uri, err := url.Parse(urlraw)
 
-	return resul, nil
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	fullurl := "http://" + uri.Host + uri.EscapedPath() + "?" + uri.Query().Encode()
+
+	name, err := http().R().
+		SetHeader("Connection", "Keep-Alive").
+		SetHeader("Accept", "*/*").
+		SetHeader("User-Agent", "Microsoft-Delivery-Optimization/10.0").
+		Head(fullurl)
+
+	if err != nil {
+		return "", err
+	}
+
+	header := name.Header().Get("Content-Disposition")
+	r := regexp.MustCompile(`filename=(\S+)`)
+
+	return r.FindStringSubmatch(header)[1], nil
 }
