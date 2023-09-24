@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"log"
 	"os"
+	"strings"
 
 	"github.com/blbrdv/ezstore/msstore"
 	"github.com/urfave/cli/v2"
@@ -106,16 +107,28 @@ func InstallFunc(ctx *cli.Context) error {
 		log.Fatal(err)
 	}
 
-	xmls, err := msstore.GetProducts(cookie, wuid)
+	productInfos, err := msstore.GetProducts(cookie, wuid)
 
 	if err != nil {
 		log.Fatal(err)
 	}
 
-	fmt.Printf("Len = %d\n", len(xmls))
+	var result []msstore.FileLocation
 
-	for index, xml := range xmls {
-		fmt.Printf("%d\n%s\n", index, xml)
+	for _, info := range productInfos {
+		loc, err := msstore.GetUrl(info)
+
+		if err != nil {
+			log.Fatal(err)
+		}
+
+		if !strings.HasPrefix(loc.Url, "http://dl.delivery.mp.microsoft.com") {
+			result = append(result, loc)
+		}
+	}
+
+	for index, res := range result {
+		fmt.Printf("%d\n%s\n", index, res)
 	}
 
 	return nil

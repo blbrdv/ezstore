@@ -2,6 +2,7 @@ package msstore
 
 import (
 	"fmt"
+	"log"
 	"strings"
 
 	"github.com/antchfx/jsonquery"
@@ -15,6 +16,16 @@ const (
 	wuidInfoUrl      = "https://displaycatalog.mp.microsoft.com/v7.0/products/"
 	msaToken         = "<Device>dAA9AEUAdwBBAHcAQQBzAE4AMwBCAEEAQQBVADEAYgB5AHMAZQBtAGIAZQBEAFYAQwArADMAZgBtADcAbwBXAHkASAA3AGIAbgBnAEcAWQBtAEEAQQBMAGoAbQBqAFYAVQB2AFEAYwA0AEsAVwBFAC8AYwBDAEwANQBYAGUANABnAHYAWABkAGkAegBHAGwAZABjADEAZAAvAFcAeQAvAHgASgBQAG4AVwBRAGUAYwBtAHYAbwBjAGkAZwA5AGoAZABwAE4AawBIAG0AYQBzAHAAVABKAEwARAArAFAAYwBBAFgAbQAvAFQAcAA3AEgAagBzAEYANAA0AEgAdABsAC8AMQBtAHUAcgAwAFMAdQBtAG8AMABZAGEAdgBqAFIANwArADQAcABoAC8AcwA4ADEANgBFAFkANQBNAFIAbQBnAFIAQwA2ADMAQwBSAEoAQQBVAHYAZgBzADQAaQB2AHgAYwB5AEwAbAA2AHoAOABlAHgAMABrAFgAOQBPAHcAYQB0ADEAdQBwAFMAOAAxAEgANgA4AEEASABzAEoAegBnAFQAQQBMAG8AbgBBADIAWQBBAEEAQQBpAGcANQBJADMAUQAvAFYASABLAHcANABBAEIAcQA5AFMAcQBhADEAQgA4AGsAVQAxAGEAbwBLAEEAdQA0AHYAbABWAG4AdwBWADMAUQB6AHMATgBtAEQAaQBqAGgANQBkAEcAcgBpADgAQQBlAEUARQBWAEcAbQBXAGgASQBCAE0AUAAyAEQAVwA0ADMAZABWAGkARABUAHoAVQB0AHQARQBMAEgAaABSAGYAcgBhAGIAWgBsAHQAQQBUAEUATABmAHMARQBGAFUAYQBRAFMASgB4ADUAeQBRADgAagBaAEUAZQAyAHgANABCADMAMQB2AEIAMgBqAC8AUgBLAGEAWQAvAHEAeQB0AHoANwBUAHYAdAB3AHQAagBzADYAUQBYAEIAZQA4AHMAZwBJAG8AOQBiADUAQQBCADcAOAAxAHMANgAvAGQAUwBFAHgATgBEAEQAYQBRAHoAQQBYAFAAWABCAFkAdQBYAFEARQBzAE8AegA4AHQAcgBpAGUATQBiAEIAZQBUAFkAOQBiAG8AQgBOAE8AaQBVADcATgBSAEYAOQAzAG8AVgArAFYAQQBiAGgAcAAwAHAAUgBQAFMAZQBmAEcARwBPAHEAdwBTAGcANwA3AHMAaAA5AEoASABNAHAARABNAFMAbgBrAHEAcgAyAGYARgBpAEMAUABrAHcAVgBvAHgANgBuAG4AeABGAEQAbwBXAC8AYQAxAHQAYQBaAHcAegB5AGwATABMADEAMgB3AHUAYgBtADUAdQBtAHAAcQB5AFcAYwBLAFIAagB5AGgAMgBKAFQARgBKAFcANQBnAFgARQBJADUAcAA4ADAARwB1ADIAbgB4AEwAUgBOAHcAaQB3AHIANwBXAE0AUgBBAFYASwBGAFcATQBlAFIAegBsADkAVQBxAGcALwBwAFgALwB2AGUATAB3AFMAawAyAFMAUwBIAGYAYQBLADYAagBhAG8AWQB1AG4AUgBHAHIAOABtAGIARQBvAEgAbABGADYASgBDAGEAYQBUAEIAWABCAGMAdgB1AGUAQwBKAG8AOQA4AGgAUgBBAHIARwB3ADQAKwBQAEgAZQBUAGIATgBTAEUAWABYAHoAdgBaADYAdQBXADUARQBBAGYAZABaAG0AUwA4ADgAVgBKAGMAWgBhAEYASwA3AHgAeABnADAAdwBvAG4ANwBoADAAeABDADYAWgBCADAAYwBZAGoATAByAC8ARwBlAE8AegA5AEcANABRAFUASAA5AEUAawB5ADAAZAB5AEYALwByAGUAVQAxAEkAeQBpAGEAcABwAGgATwBQADgAUwAyAHQANABCAHIAUABaAFgAVAB2AEMAMABQADcAegBPACsAZgBHAGsAeABWAG0AKwBVAGYAWgBiAFEANQA1AHMAdwBFAD0AJgBwAD0A</Device>"
 )
+
+type ProductInfo struct {
+	UpdateId       string
+	RevisionNumber string
+}
+
+type FileLocation struct {
+	Digest string
+	Url    string
+}
 
 func fe3Client() *resty.Client {
 	return http().
@@ -64,8 +75,8 @@ func GetWUID(id string, market string, lang string) (string, error) {
 	return fmt.Sprintf("%v", aboba), nil
 }
 
-func GetProducts(cookie string, categoryIdentifier string) ([]string, error) {
-	var list []string
+func GetProducts(cookie string, categoryIdentifier string) ([]ProductInfo, error) {
+	var list []ProductInfo
 
 	resp, err := fe3Client().
 		R().
@@ -96,11 +107,37 @@ func GetProducts(cookie string, categoryIdentifier string) ([]string, error) {
 
 	for _, element := range newxml.SelectElements("//SecuredFragment/../../UpdateIdentity") {
 		num := element.SelectAttr("RevisionNumber")
+		id := element.SelectAttr("UpdateID")
 
 		if num != "" {
-			list = append(list, element.SelectAttr("UpdateID"))
+			list = append(list, ProductInfo{id, num})
 		}
 	}
 
 	return list, nil
+}
+
+func GetUrl(info ProductInfo) (FileLocation, error) {
+	var result FileLocation
+
+	resp, err := fe3Client().
+		R().
+		SetBody(fe3FileUrl(msaToken, info.UpdateId, info.RevisionNumber)).
+		Post(clientSecuredUrl)
+
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	xml, err := xmlquery.Parse(strings.NewReader(resp.String()))
+
+	if err != nil {
+		return result, err
+	}
+
+	location := xml.SelectElement("//FileLocation")
+
+	resul := FileLocation{location.SelectElement("//FileDigest").InnerText(), location.SelectElement("//Url").InnerText()}
+
+	return resul, nil
 }
