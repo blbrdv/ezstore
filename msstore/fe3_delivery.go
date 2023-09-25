@@ -2,13 +2,14 @@ package msstore
 
 import (
 	"fmt"
-	"log"
 	"net/url"
 	"regexp"
+	"sort"
 	"strings"
 
 	"github.com/antchfx/jsonquery"
 	"github.com/antchfx/xmlquery"
+	"github.com/blbrdv/ezstore/msver"
 	"github.com/go-resty/resty/v2"
 )
 
@@ -29,7 +30,7 @@ func fe3Client() *resty.Client {
 		SetHeader("Content-Type", "application/soap+xml")
 }
 
-func GetCookie() (string, error) {
+func getCookie() (string, error) {
 	resp, err := fe3Client().
 		R().
 		SetBody(getCookiePayload).
@@ -50,7 +51,7 @@ func GetCookie() (string, error) {
 		InnerText(), nil
 }
 
-func GetWUID(id string, market string, lang string) (string, error) {
+func getWUID(id string, market string, lang string) (string, error) {
 	resp, err := fe3Client().
 		R().
 		Get(fmt.Sprintf("%s%s?market=%s&languages=%s-%s,%s,neutral", wuidInfoUrl, id, market, lang, market, lang))
@@ -72,7 +73,7 @@ func GetWUID(id string, market string, lang string) (string, error) {
 	return fmt.Sprintf("%v", aboba), nil
 }
 
-func GetProducts(cookie string, categoryIdentifier string) ([]ProductInfo, error) {
+func getProducts(cookie string, categoryIdentifier string) ([]ProductInfo, error) {
 	var list []ProductInfo
 
 	resp, err := fe3Client().
@@ -114,14 +115,14 @@ func GetProducts(cookie string, categoryIdentifier string) ([]ProductInfo, error
 	return list, nil
 }
 
-func GetUrl(info ProductInfo) (string, error) {
+func getUrl(info ProductInfo) (string, error) {
 	resp, err := fe3Client().
 		R().
 		SetBody(fe3FileUrl(msaToken, info.UpdateId, info.RevisionNumber)).
 		Post(clientSecuredUrl)
 
 	if err != nil {
-		log.Fatal(err)
+		return "", err
 	}
 
 	xml, err := xmlquery.Parse(strings.NewReader(resp.String()))
@@ -133,11 +134,11 @@ func GetUrl(info ProductInfo) (string, error) {
 	return xml.SelectElement("//FileLocation/Url").InnerText(), nil
 }
 
-func GetFileName(urlraw string) (string, error) {
+func getFileName(urlraw string) (string, error) {
 	uri, err := url.Parse(urlraw)
 
 	if err != nil {
-		log.Fatal(err)
+		return "", err
 	}
 
 	fullurl := "http://" + uri.Host + uri.EscapedPath() + "?" + uri.Query().Encode()
@@ -156,4 +157,109 @@ func GetFileName(urlraw string) (string, error) {
 	r := regexp.MustCompile(`filename=(\S+)`)
 
 	return r.FindStringSubmatch(header)[1], nil
+}
+
+func Download(id string, version string, destinationPath string) (string, error) {
+	fmt.Print("Getting cookies ...\n")
+
+	cookie, err := getCookie()
+
+	if err != nil {
+		return "", err
+	}
+
+	fmt.Print("Getting product WUID ...\n")
+
+	wuid, err := getWUID(id, "US", "en")
+
+	if err != nil {
+		return "", err
+	}
+
+	fmt.Print("Getting product urls ...\n")
+
+	productInfos, err := getProducts(cookie, wuid)
+
+	if err != nil {
+		return "", err
+	}
+
+	var result []string
+
+	for _, info := range productInfos {
+		urlstr, err := getUrl(info)
+
+		if err != nil {
+			return "", err
+		}
+
+		// we don't need .BlockMap files
+		if !strings.HasPrefix(urlstr, "http://dl.delivery.mp.microsoft.com") {
+			result = append(result, urlstr)
+		}
+	}
+
+	r := regexp.MustCompile(`^[a-zA-Z.-]+_([\d\.]+)_`)
+	var bundles msver.Bundles
+
+	for _, urlobj := range result {
+		name, err := getFileName(urlobj)
+
+		if err != nil {
+			return "", err
+		}
+
+		if strings.HasSuffix(strings.ToLower(name), "bundle") {
+			v, err := msver.New(r.FindStringSubmatch(name)[1])
+
+			if err != nil {
+				return "", err
+			}
+
+			bundles = append(bundles, msver.BundleData{v, name, urlobj})
+		}
+	}
+
+	sort.Sort(bundles)
+	var product msver.BundleData
+
+	if version == "latest" {
+		product = bundles[bundles.Len()-1]
+	} else {
+		var prodIndex int
+		found := false
+
+		for index, productInfo := range bundles {
+			if productInfo.Version.String() == "v"+version {
+				prodIndex = index
+				found = true
+				break
+			}
+		}
+
+		if !found {
+			return "", fmt.Errorf(`version "%s" not found`, version)
+		}
+
+		product = bundles[prodIndex]
+	}
+
+	fullPath := destinationPath + "\\" + product.Name
+
+	if err != nil {
+		return "", err
+	}
+
+	fmt.Printf(`Downloading product "%s"`, product.Name)
+	fmt.Println("")
+
+	_, err = http().R().
+		SetOutput(fullPath).
+		Get(product.Url)
+
+	if err != nil {
+		return "", err
+	}
+
+	return fullPath, nil
 }

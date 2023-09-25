@@ -5,9 +5,9 @@ import (
 	"fmt"
 	"log"
 	"os"
-	"strings"
 
 	"github.com/blbrdv/ezstore/msstore"
+	"github.com/blbrdv/ezstore/windows"
 	"github.com/urfave/cli/v2"
 )
 
@@ -16,22 +16,6 @@ func main() {
 		Name:  "ezstore",
 		Usage: "Search and install apps from MS Store",
 		Commands: []*cli.Command{
-			{
-				Name:   "search",
-				Action: SearchFunc,
-			},
-			{
-				Name:   "download",
-				Action: DownloadFunc,
-				Flags: []cli.Flag{
-					&cli.StringFlag{
-						Name:    "version",
-						Aliases: []string{"v"},
-						Value:   "latest",
-						Usage:   "Product version",
-					},
-				},
-			},
 			{
 				Name:   "install",
 				Action: InstallFunc,
@@ -52,38 +36,6 @@ func main() {
 	}
 }
 
-func SearchFunc(ctx *cli.Context) error {
-	args := ctx.Args()
-
-	if args.Len() < 1 {
-		return errors.New("words for search must be provided")
-	}
-
-	for _, word := range args.Slice() {
-		fmt.Printf("%s\n", word)
-	}
-
-	fmt.Print("search")
-
-	return nil
-}
-
-func DownloadFunc(ctx *cli.Context) error {
-	id := ctx.Args().Get(0)
-	version := ctx.String("version")
-
-	if id == "" || version == "" {
-		return errors.New("id and version must be set")
-	}
-
-	fmt.Printf("id      = %s\n", id)
-	fmt.Printf("version = %s\n", version)
-
-	fmt.Print("download")
-
-	return nil
-}
-
 func InstallFunc(ctx *cli.Context) error {
 	id := ctx.Args().Get(0)
 	version := ctx.String("version")
@@ -92,52 +44,30 @@ func InstallFunc(ctx *cli.Context) error {
 		return errors.New("id and version must be set")
 	}
 
+	localPath, err := os.UserCacheDir()
+	fullPath := localPath + "\\ezstore\\" + id
+
+	if err != nil {
+		return err
+	}
+
 	fmt.Printf("id      = %s\n", id)
 	fmt.Printf("version = %s\n", version)
 
-	cookie, err := msstore.GetCookie()
+	err = os.RemoveAll(fullPath)
 
 	if err != nil {
-		log.Fatal(err)
+		return err
 	}
 
-	wuid, err := msstore.GetWUID(id, "US", "en")
+	_, err = msstore.Download(id, version, fullPath)
 
 	if err != nil {
-		log.Fatal(err)
+		return err
 	}
 
-	productInfos, err := msstore.GetProducts(cookie, wuid)
-
-	if err != nil {
-		log.Fatal(err)
-	}
-
-	var result []string
-
-	for _, info := range productInfos {
-		urlstr, err := msstore.GetUrl(info)
-
-		if err != nil {
-			log.Fatal(err)
-		}
-
-		// we don't need .BlockMap files
-		if !strings.HasPrefix(urlstr, "http://dl.delivery.mp.microsoft.com") {
-			result = append(result, urlstr)
-		}
-	}
-
-	for index, urlobj := range result {
-		name, err := msstore.GetFileName(urlobj)
-
-		if err != nil {
-			log.Fatal(err)
-		}
-
-		if strings.HasSuffix(strings.ToLower(name), "bundle") {
-			fmt.Printf("%d\n%s\n", index, name)
-		}
+	if err := windows.Install(localPath + "\\ezstore\\" + id); err != nil {
+		return err
 	}
 
 	return nil
