@@ -66,17 +66,16 @@ func InstallFunc(ctx *cli.Context) error {
 		return err
 	}
 
-	// if err := windows.Install(localPath + "\\ezstore\\" + id); err != nil {
-	// 	return err
-	// }
+	fmt.Print("Installing product ...\n")
 
 	command := fmt.Sprintf(`Add-AppxPackage -Path %s`, filePath)
-	fmt.Printf("command = %s", command)
 
 	_, err = exec.Command("powershell", "-NoProfile", command).CombinedOutput()
 	if err != nil {
 		return err
 	}
+
+	fmt.Print("Done!\n")
 
 	return nil
 }

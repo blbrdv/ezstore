@@ -1,6 +1,7 @@
 package msstore
 
 import (
+	"errors"
 	"fmt"
 	"net/url"
 	"regexp"
@@ -60,17 +61,21 @@ func getWUID(id string, market string, lang string) (string, error) {
 		return "", err
 	}
 
+	if resp.StatusCode() == 404 {
+		return "", fmt.Errorf(`product with id "%s" not found`, id)
+	}
+
 	json, err := jsonquery.Parse(strings.NewReader(resp.String()))
 
 	if err != nil {
 		return "", err
 	}
 
-	aboba := jsonquery.
+	wuid := jsonquery.
 		FindOne(json, "//WuCategoryId").
 		Value()
 
-	return fmt.Sprintf("%v", aboba), nil
+	return fmt.Sprintf("%v", wuid), nil
 }
 
 func getProducts(cookie string, categoryIdentifier string) ([]ProductInfo, error) {
@@ -176,7 +181,7 @@ func Download(id string, version string, destinationPath string) (string, error)
 		return "", err
 	}
 
-	fmt.Print("Getting product urls ...\n")
+	fmt.Print("Getting product urls ...")
 
 	productInfos, err := getProducts(cookie, wuid)
 
@@ -187,6 +192,8 @@ func Download(id string, version string, destinationPath string) (string, error)
 	var result []string
 
 	for _, info := range productInfos {
+		fmt.Print(".")
+
 		urlstr, err := getUrl(info)
 
 		if err != nil {
@@ -199,17 +206,19 @@ func Download(id string, version string, destinationPath string) (string, error)
 		}
 	}
 
-	r := regexp.MustCompile(`^[a-zA-Z.-]+_([\d\.]+)_`)
+	r := regexp.MustCompile(`^[0-9a-zA-Z.-]+_([\d\.]+)_`)
 	var bundles types.Bundles
 
 	for _, urlobj := range result {
+		fmt.Print(".")
+
 		name, err := getFileName(urlobj)
 
 		if err != nil {
 			return "", err
 		}
 
-		if strings.HasSuffix(strings.ToLower(name), "bundle") {
+		if strings.HasSuffix(strings.ToLower(name), "appxbundle") || strings.HasSuffix(strings.ToLower(name), ".msix") {
 			v, err := types.New(r.FindStringSubmatch(name)[1])
 
 			if err != nil {
@@ -218,6 +227,10 @@ func Download(id string, version string, destinationPath string) (string, error)
 
 			bundles = append(bundles, types.BundleData{Version: v, Name: name, Url: urlobj})
 		}
+	}
+
+	if bundles.Len() == 0 {
+		return "", errors.New("this package is not compatible with the device")
 	}
 
 	sort.Sort(bundles)
@@ -250,7 +263,8 @@ func Download(id string, version string, destinationPath string) (string, error)
 		return "", err
 	}
 
-	fmt.Printf(`Downloading product "%s"`, product.Name)
+	fmt.Println("")
+	fmt.Printf(`Downloading product "%s" ...`, product.Name)
 	fmt.Println("")
 
 	_, err = http().R().

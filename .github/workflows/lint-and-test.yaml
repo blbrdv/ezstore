@@ -6,15 +6,18 @@ on:
 jobs:
   lint-and-test:
     runs-on: ubuntu-latest
+    env:
+      ACTIONS_ALLOW_UNSECURE_COMMANDS: 'true'
 
     steps:
       - uses: actions/checkout@v3
 
       - uses: actions/setup-go@v4
-
         with:
           go-version: '1.21'
           cache: false
+
+      - uses: 'lagren/setup-task@v1'
 
       - name: golangci-lint
         uses: golangci/golangci-lint-action@v3
@@ -22,5 +25,5 @@ jobs:
           version: v1.54
 
       - name: tests
-        run: go test ./...
+        run: task test
 
