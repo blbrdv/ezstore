@@ -1,6 +1,7 @@
 package msstore
 
 import (
+	"errors"
 	"fmt"
 	"net/url"
 	"regexp"
@@ -217,7 +218,7 @@ func Download(id string, version string, destinationPath string) (string, error)
 			return "", err
 		}
 
-		if strings.HasSuffix(strings.ToLower(name), "bundle") || strings.HasSuffix(strings.ToLower(name), ".msix") {
+		if strings.HasSuffix(strings.ToLower(name), "appxbundle") || strings.HasSuffix(strings.ToLower(name), ".msix") {
 			v, err := types.New(r.FindStringSubmatch(name)[1])
 
 			if err != nil {
@@ -226,6 +227,10 @@ func Download(id string, version string, destinationPath string) (string, error)
 
 			bundles = append(bundles, types.BundleData{Version: v, Name: name, Url: urlobj})
 		}
+	}
+
+	if bundles.Len() == 0 {
+		return "", errors.New("this package is not compatible with the device")
 	}
 
 	sort.Sort(bundles)
