@@ -7,7 +7,7 @@ import (
 	"os"
 	"os/exec"
 
-	"github.com/blbrdv/ezstore/msstore"
+	"github.com/blbrdv/ezstore/internal/msstore"
 	"github.com/urfave/cli/v2"
 )
 

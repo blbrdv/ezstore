@@ -9,7 +9,7 @@ import (
 
 	"github.com/antchfx/jsonquery"
 	"github.com/antchfx/xmlquery"
-	"github.com/blbrdv/ezstore/msver"
+	"github.com/blbrdv/ezstore/internal/types"
 	"github.com/go-resty/resty/v2"
 )
 
@@ -200,7 +200,7 @@ func Download(id string, version string, destinationPath string) (string, error)
 	}
 
 	r := regexp.MustCompile(`^[a-zA-Z.-]+_([\d\.]+)_`)
-	var bundles msver.Bundles
+	var bundles types.Bundles
 
 	for _, urlobj := range result {
 		name, err := getFileName(urlobj)
@@ -210,18 +210,18 @@ func Download(id string, version string, destinationPath string) (string, error)
 		}
 
 		if strings.HasSuffix(strings.ToLower(name), "bundle") {
-			v, err := msver.New(r.FindStringSubmatch(name)[1])
+			v, err := types.New(r.FindStringSubmatch(name)[1])
 
 			if err != nil {
 				return "", err
 			}
 
-			bundles = append(bundles, msver.BundleData{v, name, urlobj})
+			bundles = append(bundles, types.BundleData{v, name, urlobj})
 		}
 	}
 
 	sort.Sort(bundles)
-	var product msver.BundleData
+	var product types.BundleData
 
 	if version == "latest" {
 		product = bundles[bundles.Len()-1]

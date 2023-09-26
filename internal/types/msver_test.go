@@ -1,15 +1,15 @@
-package msver_test
+package types_test
 
 import (
 	"testing"
 
-	"github.com/blbrdv/ezstore/msver"
+	"github.com/blbrdv/ezstore/internal/types"
 )
 
 func TestA(t *testing.T) {
-	expected := msver.Version{1, 0, 0, 0}
+	expected := types.Version{1, 0, 0, 0}
 	raw := "v1"
-	actual, err := msver.New(raw)
+	actual, err := types.New(raw)
 
 	if err != nil {
 		t.Fatalf(`Can not parse version`)
@@ -24,9 +24,9 @@ func TestA(t *testing.T) {
 }
 
 func TestB(t *testing.T) {
-	expected := msver.Version{1, 2, 0, 0}
+	expected := types.Version{1, 2, 0, 0}
 	raw := "1.2"
-	actual, err := msver.New(raw)
+	actual, err := types.New(raw)
 
 	if err != nil {
 		t.Fatalf(`Can not parse version`)
@@ -41,9 +41,9 @@ func TestB(t *testing.T) {
 }
 
 func TestC(t *testing.T) {
-	expected := msver.Version{1, 2, 3, 0}
+	expected := types.Version{1, 2, 3, 0}
 	raw := "1.2.3"
-	actual, err := msver.New(raw)
+	actual, err := types.New(raw)
 
 	if err != nil {
 		t.Fatalf(`Can not parse version`)
@@ -58,9 +58,9 @@ func TestC(t *testing.T) {
 }
 
 func TestD(t *testing.T) {
-	expected := msver.Version{1, 2, 3, 4}
+	expected := types.Version{1, 2, 3, 4}
 	raw := "1.2.3.4"
-	actual, err := msver.New(raw)
+	actual, err := types.New(raw)
 
 	if err != nil {
 		t.Fatalf(`Can not parse version`)
@@ -76,8 +76,8 @@ func TestD(t *testing.T) {
 
 func TestCompareLeft(t *testing.T) {
 	expected := 1
-	a := msver.Version{1, 2, 3, 4}
-	b := msver.Version{0, 2, 3, 4}
+	a := types.Version{1, 2, 3, 4}
+	b := types.Version{0, 2, 3, 4}
 
 	actual := a.Compare(b)
 
@@ -88,8 +88,8 @@ func TestCompareLeft(t *testing.T) {
 
 func TestCompareRight(t *testing.T) {
 	expected := -1
-	a := msver.Version{0, 0, 0, 3}
-	b := msver.Version{0, 0, 0, 4}
+	a := types.Version{0, 0, 0, 3}
+	b := types.Version{0, 0, 0, 4}
 
 	actual := a.Compare(b)
 
@@ -100,8 +100,8 @@ func TestCompareRight(t *testing.T) {
 
 func TestCompareEqual(t *testing.T) {
 	expected := 0
-	a := msver.Version{1, 2, 3, 4}
-	b := msver.Version{1, 2, 3, 4}
+	a := types.Version{1, 2, 3, 4}
+	b := types.Version{1, 2, 3, 4}
 
 	actual := a.Compare(b)
 

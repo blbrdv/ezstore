@@ -1,4 +1,4 @@
-package msver
+package types
 
 type BundleData struct {
 	Version *Version
