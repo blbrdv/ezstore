@@ -5,9 +5,9 @@ import (
 	"fmt"
 	"log"
 	"os"
+	"os/exec"
 
 	"github.com/blbrdv/ezstore/msstore"
-	"github.com/blbrdv/ezstore/windows"
 	"github.com/urfave/cli/v2"
 )
 
@@ -60,13 +60,21 @@ func InstallFunc(ctx *cli.Context) error {
 		return err
 	}
 
-	_, err = msstore.Download(id, version, fullPath)
+	filePath, err := msstore.Download(id, version, fullPath)
 
 	if err != nil {
 		return err
 	}
 
-	if err := windows.Install(localPath + "\\ezstore\\" + id); err != nil {
+	// if err := windows.Install(localPath + "\\ezstore\\" + id); err != nil {
+	// 	return err
+	// }
+
+	command := fmt.Sprintf(`Add-AppxPackage -Path %s`, filePath)
+	fmt.Printf("command = %s", command)
+
+	_, err = exec.Command("powershell", "-NoProfile", command).CombinedOutput()
+	if err != nil {
 		return err
 	}
 
