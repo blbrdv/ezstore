@@ -42,16 +42,16 @@
         "info": {
           "0409": {
             "Comments": "",
-            "CompanyName": "",
-            "FileDescription": "",
-            "FileVersion": "",
-            "InternalName": "",
+            "CompanyName": "blbrdv",
+            "FileDescription": "Easy install apps from MS Store on Long-term Servicing Windows",
+            "FileVersion": "1.0.1.0",
+            "InternalName": "ezstore",
             "LegalCopyright": "",
             "LegalTrademarks": "",
-            "OriginalFilename": "",
+            "OriginalFilename": "ezstore",
             "PrivateBuild": "",
-            "ProductName": "",
-            "ProductVersion": "",
+            "ProductName": "ezstore",
+            "ProductVersion": "1.0.1.0",
             "SpecialBuild": ""
           }
         }

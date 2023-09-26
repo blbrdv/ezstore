@@ -22,3 +22,6 @@ go.work
 
 # generated files
 *.gen.go
+
+# winres files
+*.syso
