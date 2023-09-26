@@ -237,11 +237,7 @@ func Download(id string, version string, destinationPath string) (string, error)
 	var product types.BundleData
 
 	if version == "latest" {
-		if bundles.Len() == 1 {
-			product = bundles[0]
-		} else {
-			product = bundles[bundles.Len()-1]
-		}
+		product = bundles[bundles.Len()-1]
 	} else {
 		var prodIndex int
 		found := false
