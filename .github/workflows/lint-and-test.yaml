@@ -1,10 +1,10 @@
-name: Build and tests
+name: Lint and test
 
 on:
   pull_request:
 
 jobs:
-  codestyle-check:
+  lint-and-test:
     runs-on: windows-latest
 
     steps:
