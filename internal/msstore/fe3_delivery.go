@@ -216,7 +216,7 @@ func Download(id string, version string, destinationPath string) (string, error)
 				return "", err
 			}
 
-			bundles = append(bundles, types.BundleData{v, name, urlobj})
+			bundles = append(bundles, types.BundleData{Version: v, Name: name, Url: urlobj})
 		}
 	}
 
