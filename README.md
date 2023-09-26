@@ -12,7 +12,7 @@ where `id` is product identifier form MS store, e.g.
 
 ### Run tests
 
-`go test .\internal`
+`go test ./...`
 
 ### Build
 
