@@ -217,7 +217,7 @@ func Download(id string, version string, destinationPath string) (string, error)
 			return "", err
 		}
 
-		if strings.HasSuffix(strings.ToLower(name), "bundle") {
+		if strings.HasSuffix(strings.ToLower(name), "bundle") || strings.HasSuffix(strings.ToLower(name), ".msix") {
 			v, err := types.New(r.FindStringSubmatch(name)[1])
 
 			if err != nil {
@@ -232,7 +232,11 @@ func Download(id string, version string, destinationPath string) (string, error)
 	var product types.BundleData
 
 	if version == "latest" {
-		product = bundles[bundles.Len()-1]
+		if bundles.Len() == 1 {
+			product = bundles[0]
+		} else {
+			product = bundles[bundles.Len()-1]
+		}
 	} else {
 		var prodIndex int
 		found := false
@@ -259,7 +263,7 @@ func Download(id string, version string, destinationPath string) (string, error)
 	}
 
 	fmt.Println("")
-	fmt.Printf(`Downloading product "%s"`, product.Name)
+	fmt.Printf(`Downloading product "%s" ...`, product.Name)
 	fmt.Println("")
 
 	_, err = http().R().
