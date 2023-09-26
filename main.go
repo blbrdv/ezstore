@@ -66,12 +66,16 @@ func InstallFunc(ctx *cli.Context) error {
 		return err
 	}
 
+	fmt.Print("Installing product ...\n")
+
 	command := fmt.Sprintf(`Add-AppxPackage -Path %s`, filePath)
 
 	_, err = exec.Command("powershell", "-NoProfile", command).CombinedOutput()
 	if err != nil {
 		return err
 	}
+
+	fmt.Print("Done!\n")
 
 	return nil
 }
