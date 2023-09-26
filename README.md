@@ -12,11 +12,11 @@ where `id` is product identifier form MS store, e.g.
 
 ### Run tests
 
-`go test ./...`
+`task test`
 
 ### Build
 
-`go build`
+`task build`
 
 ## License
 
