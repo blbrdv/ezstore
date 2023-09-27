@@ -41,6 +41,10 @@ func getCookie() (string, error) {
 		return "", err
 	}
 
+	if resp.IsError() {
+		return "", fmt.Errorf("server error: %s", resp.Error())
+	}
+
 	xml, err := xmlquery.Parse(strings.NewReader(resp.String()))
 
 	if err != nil {
@@ -90,6 +94,10 @@ func getProducts(cookie string, categoryIdentifier string) ([]ProductInfo, error
 		return list, err
 	}
 
+	if resp.IsError() {
+		return list, fmt.Errorf("server error: %s", resp.Error())
+	}
+
 	xml, err := xmlquery.Parse(strings.NewReader(resp.String()))
 
 	if err != nil {
@@ -128,6 +136,10 @@ func getUrl(info ProductInfo) (string, error) {
 
 	if err != nil {
 		return "", err
+	}
+
+	if resp.IsError() {
+		return "", fmt.Errorf("server error: %s", resp.Error())
 	}
 
 	xml, err := xmlquery.Parse(strings.NewReader(resp.String()))
