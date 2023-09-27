@@ -5,8 +5,8 @@ import (
 	"fmt"
 	"log"
 	"os"
-	"os/exec"
 
+	windows "github.com/blbrdv/ezstore/internal"
 	"github.com/blbrdv/ezstore/internal/msstore"
 	"github.com/urfave/cli/v2"
 )
@@ -68,9 +68,7 @@ func InstallFunc(ctx *cli.Context) error {
 
 	fmt.Print("Installing product ...\n")
 
-	command := fmt.Sprintf(`Add-AppxPackage -Path %s`, filePath)
-
-	_, err = exec.Command("powershell", "-NoProfile", command).CombinedOutput()
+	err = windows.Install(filePath)
 	if err != nil {
 		return err
 	}
