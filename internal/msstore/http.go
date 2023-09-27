@@ -10,7 +10,7 @@ import (
 func http() *resty.Client {
 	return resty.
 		New().
-		SetRetryCount(3).
+		SetRetryCount(10).
 		SetRetryWaitTime(5*time.Second).
 		SetRetryMaxWaitTime(20*time.Second).
 		SetRetryAfter(func(client *resty.Client, resp *resty.Response) (time.Duration, error) {
