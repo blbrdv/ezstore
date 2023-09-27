@@ -210,8 +210,6 @@ func Download(id string, version string, destinationPath string) (string, error)
 	var bundles types.Bundles
 
 	for _, urlobj := range result {
-		fmt.Print(".")
-
 		name, err := getFileName(urlobj)
 
 		if err != nil {
@@ -224,6 +222,8 @@ func Download(id string, version string, destinationPath string) (string, error)
 			if err != nil {
 				return "", err
 			}
+
+			fmt.Printf("\n    %s", v)
 
 			bundles = append(bundles, types.BundleData{Version: v, Name: name, Url: urlobj})
 		}
