@@ -3,8 +3,8 @@ version: '2'
 tasks:
   build:
     cmds:
-      - go-winres make
-      - go build
+      - go-winres make --in ./winres.json
+      - go build -o ./output/ezstore.exe
 
   test:
     cmds:

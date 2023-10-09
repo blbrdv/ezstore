@@ -1,5 +1,10 @@
 # ![icon](/winres/icon16.png) ezstore
-Easy install apps from MS Store on Long-term Servicing Windows
+Easy install apps from MS Store on Long-term Servicing Windows.
+
+## Installation
+
+Download installer or portable version from
+[release page](https://github.com/blbrdv/ezstore/releases).
 
 ## Usage
 
