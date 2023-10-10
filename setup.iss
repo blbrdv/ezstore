@@ -1,5 +1,5 @@
 #define Name      "ezstore"
-#define Version   "1.0.2"
+#define Version   "1.0.3"
 #define Publisher "blbrdv"
 #define URL       "https://github.com/blbrdv/ezstore"
 #define ExeName   "ezstore.exe"
@@ -26,13 +26,36 @@ SetupIconFile=dist\icon.ico
 
 Compression=lzma
 SolidCompression=yes
+ChangesEnvironment=true
 
 
 ;------------------------------------------------------------------------------
 [Files]
-Source: "output\ezstore.exe"; DestDir: "{app}"; Flags: ignoreversion
+Source: "output\ezstore.exe"; DestDir: "{app}/bin"; Flags: ignoreversion
+Source: "dist\README.txt"; DestDir: "{app}"; Flags: ignoreversion
 
 
 ;------------------------------------------------------------------------------
 [Icons]
 Name: "{group}\{#Name}"; Filename: "{app}\{#ExeName}"
+
+
+;------------------------------------------------------------------------------
+[Tasks]
+Name: envPath; Description: "Add to PATH variable"
+
+
+;------------------------------------------------------------------------------
+#include "innosetup/environment.iss"
+[Code]
+procedure CurStepChanged(CurStep: TSetupStep);
+begin
+  if CurStep = ssPostInstall
+  then EnvAddPath(ExpandConstant('{app}') + '\bin');
+end;
+
+procedure CurUninstallStepChanged(CurUninstallStep: TUninstallStep);
+begin
+  if CurUninstallStep = usPostUninstall
+  then EnvRemovePath(ExpandConstant('{app}') + '\bin');
+end;
