@@ -21,6 +21,11 @@ where `id` is product identifier form MS store, e.g.
 
 ### Build
 
+Requirements:
+
+ 1. [go-task](https://github.com/go-task/task) installed;
+ 2. [Inn Setup 6](https://jrsoftware.org/isinfo.php) installed in put in $PATH.
+
 `task build`
 
 ## License
