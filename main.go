@@ -14,7 +14,7 @@ import (
 func main() {
 	app := &cli.App{
 		Name:  "ezstore",
-		Usage: "Search and install apps from MS Store",
+		Usage: "Easy install apps from MS Store",
 		Commands: []*cli.Command{
 			{
 				Name:   "install",
