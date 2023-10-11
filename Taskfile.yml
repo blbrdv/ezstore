@@ -5,6 +5,7 @@ tasks:
     cmds:
       - go-winres make --in ./winres.json
       - go build -o ./output/ezstore.exe
+      - iscc "setup.iss"
 
   test:
     cmds:
