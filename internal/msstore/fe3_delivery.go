@@ -273,7 +273,7 @@ func Download(id string, version string, arch string, locale string, destination
 	filesBar, _ := pterm.DefaultProgressbar.WithTotal(len(files)).WithTitle("Downloading product files...").Start()
 	var result []string
 	for _, file := range files {
-		fullPath := destinationPath + "\\" + file.Name + "." + file.Version.String() + "." + file.Format
+		fullPath := destinationPath + "\\" + file.Name + "-" + file.Version.String() + "." + file.Format
 
 		_, err = http().R().
 			SetOutput(fullPath).
