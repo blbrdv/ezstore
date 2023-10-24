@@ -22,6 +22,7 @@ jobs:
       with:
         go-version: '^1.21.0'
     - run: |
+        go install github.com/tc-hib/go-winres@latest
         go-winres make --in ./winres.json
         go build -o ./output/ezstore.exe
 
