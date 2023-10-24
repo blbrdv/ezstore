@@ -1,17 +1,16 @@
 package msstore
 
 import (
-	"errors"
 	"fmt"
 	"net/url"
 	"regexp"
-	"sort"
 	"strings"
 
 	"github.com/antchfx/jsonquery"
 	"github.com/antchfx/xmlquery"
 	"github.com/blbrdv/ezstore/internal/types"
 	"github.com/go-resty/resty/v2"
+	"github.com/pterm/pterm"
 )
 
 const (
@@ -56,10 +55,11 @@ func getCookie() (string, error) {
 		InnerText(), nil
 }
 
-func getWUID(id string, market string, lang string) (string, error) {
+func getWUID(id string, locale string) (string, error) {
+	localeRaw := strings.Split(locale, "_")
 	resp, err := fe3Client().
 		R().
-		Get(fmt.Sprintf("%s%s?market=%s&languages=%s-%s,%s,neutral", wuidInfoUrl, id, market, lang, market, lang))
+		Get(fmt.Sprintf("%s%s?market=%s&languages=%s-%s,%s,neutral", wuidInfoUrl, id, localeRaw[1], localeRaw[0], localeRaw[1], localeRaw[0]))
 
 	if err != nil {
 		return "", err
@@ -67,6 +67,10 @@ func getWUID(id string, market string, lang string) (string, error) {
 
 	if resp.StatusCode() == 404 {
 		return "", fmt.Errorf(`product with id "%s" not found`, id)
+	}
+
+	if resp.IsError() {
+		return "", fmt.Errorf("server error: %s", resp.Error())
 	}
 
 	json, err := jsonquery.Parse(strings.NewReader(resp.String()))
@@ -176,116 +180,112 @@ func getFileName(urlraw string) (string, error) {
 	return r.FindStringSubmatch(header)[1], nil
 }
 
-func Download(id string, version string, destinationPath string) (string, error) {
-	fmt.Print("Getting cookies ...\n")
-
+func Download(id string, version string, arch string, locale string, destinationPath string) ([]string, error) {
+	sCoockie, _ := pterm.DefaultSpinner.Start("Fetching cookie...")
 	cookie, err := getCookie()
-
 	if err != nil {
-		return "", err
+		return nil, err
 	}
+	sCoockie.Success("Cookie fetched")
 
-	fmt.Print("Getting product WUID ...\n")
-
-	wuid, err := getWUID(id, "US", "en")
-
+	sWUID, _ := pterm.DefaultSpinner.Start("Fetching product WUID...")
+	wuid, err := getWUID(id, locale)
 	if err != nil {
-		return "", err
+		return nil, err
 	}
+	sWUID.Success("WUID fetched")
 
-	fmt.Print("Getting product urls ...")
-
+	sLinks, _ := pterm.DefaultSpinner.Start("Fetching product links...")
 	productInfos, err := getProducts(cookie, wuid)
-
 	if err != nil {
-		return "", err
+		return nil, err
 	}
 
-	var result []string
-
+	var urls []string
 	for _, info := range productInfos {
-		fmt.Print(".")
-
 		urlstr, err := getUrl(info)
-
 		if err != nil {
-			return "", err
+			return nil, err
 		}
-
 		// we don't need .BlockMap files
 		if !strings.HasPrefix(urlstr, "http://dl.delivery.mp.microsoft.com") {
-			result = append(result, urlstr)
+			urls = append(urls, urlstr)
+		}
+	}
+	sLinks.Success("Product links fetched")
+
+	productsBar, _ := pterm.DefaultProgressbar.WithTotal(len(urls)).WithTitle("Fetching product files info...").Start()
+	regex := regexp.MustCompile(`^([0-9a-zA-Z.-]+)_([\d\.]+)_([a-z0-9]+)_~?_[a-z0-9]+.([a-zA-Z]+)`)
+	var bundles types.Bundles
+	for _, urlobj := range urls {
+		name, err := getFileName(urlobj)
+		if err != nil {
+			return nil, err
+		}
+
+		regexData := regex.FindStringSubmatch(name)
+		v, err := types.New(regexData[2])
+		if err != nil {
+			return nil, err
+		}
+		bundle := types.BundleData{Version: v, Name: regexData[1], Url: urlobj, Arch: regexData[3], Format: strings.ToLower(regexData[4])}
+		bundles = append(bundles, bundle)
+		productsBar.Increment()
+	}
+
+	var files types.Bundles
+	for _, bundle := range bundles {
+		if bundle.Format == "appx" {
+			if bundle.Arch == arch {
+				found := false
+				for index, file := range files {
+					if bundle.Name == file.Name {
+						if bundle.Version.Compare(*file.Version) >= 0 {
+							files[index] = bundle
+						}
+						found = true
+						break
+					}
+				}
+
+				if !found {
+					files = append(files, bundle)
+				}
+			}
+		} else {
+			found := false
+			for index, file := range files {
+				if bundle.Name == file.Name {
+					if bundle.Version.Compare(*file.Version) >= 0 {
+						files[index] = bundle
+					}
+					found = true
+					break
+				}
+			}
+
+			if !found {
+				files = append(files, bundle)
+			}
 		}
 	}
 
-	r := regexp.MustCompile(`^[0-9a-zA-Z.-]+_([\d\.]+)_`)
-	var bundles types.Bundles
+	filesBar, _ := pterm.DefaultProgressbar.WithTotal(len(files)).WithTitle("Downloading product files...").Start()
+	var result []string
+	for _, file := range files {
+		fullPath := destinationPath + "\\" + file.Name + "-" + file.Version.String() + "." + file.Format
 
-	for _, urlobj := range result {
-		name, err := getFileName(urlobj)
+		_, err = http().R().
+			SetOutput(fullPath).
+			Get(file.Url)
 
 		if err != nil {
-			return "", err
+			return nil, err
 		}
 
-		if strings.HasSuffix(strings.ToLower(name), "appxbundle") || strings.HasSuffix(strings.ToLower(name), ".msix") {
-			v, err := types.New(r.FindStringSubmatch(name)[1])
-
-			if err != nil {
-				return "", err
-			}
-
-			fmt.Printf("\n    %s", v)
-
-			bundles = append(bundles, types.BundleData{Version: v, Name: name, Url: urlobj})
-		}
+		result = append(result, fullPath)
+		filesBar.Increment()
 	}
 
-	if bundles.Len() == 0 {
-		return "", errors.New("this package is not compatible with the device")
-	}
-
-	sort.Sort(bundles)
-	var product types.BundleData
-
-	if version == "latest" {
-		product = bundles[bundles.Len()-1]
-	} else {
-		var prodIndex int
-		found := false
-
-		for index, productInfo := range bundles {
-			if productInfo.Version.String() == "v"+version {
-				prodIndex = index
-				found = true
-				break
-			}
-		}
-
-		if !found {
-			return "", fmt.Errorf(`version "%s" not found`, version)
-		}
-
-		product = bundles[prodIndex]
-	}
-
-	fullPath := destinationPath + "\\" + product.Name
-
-	if err != nil {
-		return "", err
-	}
-
-	fmt.Println("")
-	fmt.Printf(`Downloading product "%s" ...`, product.Name)
-	fmt.Println("")
-
-	_, err = http().R().
-		SetOutput(fullPath).
-		Get(product.Url)
-
-	if err != nil {
-		return "", err
-	}
-
-	return fullPath, nil
+	return result, nil
 }

@@ -1,0 +1,36 @@
+name: Release
+
+on:
+  push:
+    paths-ignore:
+    - '.vscode/**'
+    tags:
+      - "*"
+
+jobs:
+  release-lib:
+    runs-on: windows-latest
+
+    permissions:
+      contents: write
+
+    steps:
+    - uses: actions/checkout@v3
+
+    - name: Ezstore compile
+      uses: actions/setup-go@v4
+      with:
+        go-version: '^1.21.0'
+    - run: |
+        go-winres make --in ./winres.json
+        go build -o ./output/ezstore.exe
+
+    - name: Compile installer
+      uses: Minionguyjpro/Inno-Setup-Action@v1.0.0
+      with:
+        path: setup.iss
+
+    - name: Github release
+      uses: docker://antonyurchenko/git-release:latest
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}

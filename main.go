@@ -3,11 +3,12 @@ package main
 import (
 	"errors"
 	"fmt"
-	"log"
 	"os"
+	"runtime"
 
 	windows "github.com/blbrdv/ezstore/internal"
 	"github.com/blbrdv/ezstore/internal/msstore"
+	"github.com/pterm/pterm"
 	"github.com/urfave/cli/v2"
 )
 
@@ -26,22 +27,49 @@ func main() {
 						Value:   "latest",
 						Usage:   "Product version",
 					},
+					&cli.StringFlag{
+						Name:    "locale",
+						Aliases: []string{"l"},
+						Value:   "",
+						Usage:   "Product locale",
+					},
 				},
 			},
 		},
 	}
 
 	if err := app.Run(os.Args); err != nil {
-		log.Fatal(err)
+		pterm.Fatal.Println(err)
 	}
 }
 
 func InstallFunc(ctx *cli.Context) error {
 	id := ctx.Args().Get(0)
 	version := ctx.String("version")
+	var arch string
+	switch goarch := runtime.GOARCH; goarch {
+	case "amd64":
+		arch = "x64"
+	case "amd64p32":
+		arch = "x86"
+	case "arm":
+		arch = "arm"
+	case "arm64":
+		arch = "arm64"
+	default:
+		return fmt.Errorf("%s architecture not supported", goarch)
+	}
+	locale, err := windows.GetLocale()
+
+	if err != nil {
+		return err
+	}
 
 	if id == "" || version == "" {
 		return errors.New("id and version must be set")
+	}
+	if ctx.String("locale") != "" {
+		locale = ctx.String("locale")
 	}
 
 	localPath, err := os.UserCacheDir()
@@ -51,29 +79,27 @@ func InstallFunc(ctx *cli.Context) error {
 		return err
 	}
 
-	fmt.Printf("id      = %s\n", id)
-	fmt.Printf("version = %s\n", version)
-
 	err = os.RemoveAll(fullPath)
 
 	if err != nil {
 		return err
 	}
 
-	filePath, err := msstore.Download(id, version, fullPath)
+	files, err := msstore.Download(id, version, arch, locale, fullPath)
 
 	if err != nil {
 		return err
 	}
 
-	fmt.Print("Installing product ...\n")
+	for _, file := range files {
+		err = windows.Install(file)
 
-	err = windows.Install(filePath)
-	if err != nil {
-		return err
+		if err != nil {
+			return err
+		}
 	}
 
-	fmt.Print("Done!\n")
+	pterm.Success.Println("Done!")
 
 	return nil
 }

@@ -1,8 +1,10 @@
 package windows
 
 import (
+	"fmt"
 	"os"
 	"os/exec"
+	"strings"
 )
 
 func Install(fullPath string) error {
@@ -16,4 +18,20 @@ func Install(fullPath string) error {
 	}
 
 	return nil
+}
+
+// https://stackoverflow.com/a/51831590
+func GetLocale() (string, error) {
+	envlang, ok := os.LookupEnv("LANG")
+	if ok {
+		return strings.Split(envlang, ".")[0], nil
+	}
+
+	cmd := exec.Command("powershell", "Get-Culture | select -exp Name")
+	output, err := cmd.Output()
+	if err == nil {
+		return strings.Trim(string(output), "\r\n"), nil
+	}
+
+	return "", fmt.Errorf("cannot determine locale")
 }

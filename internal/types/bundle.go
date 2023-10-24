@@ -4,6 +4,8 @@ type BundleData struct {
 	Version *Version
 	Name    string
 	Url     string
+	Arch    string
+	Format  string
 }
 
 type Bundles []BundleData
