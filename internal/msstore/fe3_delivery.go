@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"net/url"
 	"regexp"
+	"sort"
 	"strings"
 
 	"github.com/antchfx/jsonquery"
@@ -269,6 +270,13 @@ func Download(id string, version string, arch string, locale string, destination
 			}
 		}
 	}
+
+	sort.Slice(files, func(i, j int) bool {
+		if files[i].Format == "appx" {
+			return true
+		}
+		return false
+	})
 
 	filesBar, _ := pterm.DefaultProgressbar.WithTotal(len(files)).WithTitle("Downloading product files...").Start()
 	var result []string
