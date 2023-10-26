@@ -33,6 +33,12 @@ func main() {
 						Value:   "",
 						Usage:   "Product locale",
 					},
+					&cli.BoolFlag{
+						Name:    "debug",
+						Aliases: []string{"d"},
+						Value:   false,
+						Usage:   "debug output",
+					},
 				},
 			},
 		},
@@ -71,6 +77,14 @@ func InstallFunc(ctx *cli.Context) error {
 	if ctx.String("locale") != "" {
 		locale = ctx.String("locale")
 	}
+	if ctx.Bool("debug") {
+		pterm.EnableDebugMessages()
+	}
+
+	pterm.Debug.Println(fmt.Sprintf("id           = %s", id))
+	pterm.Debug.Println(fmt.Sprintf("version      = %s", version))
+	pterm.Debug.Println(fmt.Sprintf("locale       = %s", locale))
+	pterm.Debug.Println(fmt.Sprintf("architecture = %s", arch))
 
 	localPath, err := os.UserCacheDir()
 	fullPath := localPath + "\\ezstore\\" + id
