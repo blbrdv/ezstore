@@ -8,7 +8,7 @@ on:
       - "*"
 
 jobs:
-  release-lib:
+  build:
     runs-on: windows-latest
 
     permissions:
@@ -30,6 +30,13 @@ jobs:
       uses: Minionguyjpro/Inno-Setup-Action@v1.0.0
       with:
         path: setup.iss
+
+    artifacts:
+      paths:
+      - output/*
+
+  release:
+    runs-on: ubuntu-latest
 
     - name: Github release
       uses: docker://antonyurchenko/git-release:latest
