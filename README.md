@@ -13,6 +13,12 @@ Download installer or portable version from
 where `id` is product identifier form MS store, e.g.
 [9NH2GPH4JZS4](https://apps.microsoft.com/store/detail/tiktok/9NH2GPH4JZS4).
 
+### Options
+  - `--version value`, `-v value` for product version (default: "latest")
+  - `--locale value`, `-l value` for product locale
+  - `--debug`, `-d` for debug output (default: false)
+  - `--help`, `-h` - show help
+
 ## Development
 
 ### Run tests
