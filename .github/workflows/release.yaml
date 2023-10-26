@@ -37,6 +37,7 @@ jobs:
         path: output
 
   release:
+    needs: build
     runs-on: ubuntu-latest
 
     steps:
