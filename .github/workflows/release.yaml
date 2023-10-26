@@ -31,14 +31,25 @@ jobs:
       with:
         path: setup.iss
 
-    artifacts:
-      paths:
-      - output/*
+    - uses: actions/upload-artifact@master
+      with:
+        name: my-artifact
+        path: output
 
   release:
     runs-on: ubuntu-latest
+
+    steps:
+    - uses: actions/checkout@v3
+
+    - uses: actions/download-artifact@master
+      with:
+        name: my-artifact
+        path: output
 
     - name: Github release
       uses: docker://antonyurchenko/git-release:latest
       env:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      with:
+        args: output
