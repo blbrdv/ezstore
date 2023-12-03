@@ -1,4 +1,4 @@
-# ![icon](/winres/icon16.png) ezstore
+# ![icon](/dist/icon16.png) ezstore
 Easy install apps from MS Store on Long-term Servicing Windows.
 
 ## Installation
@@ -14,8 +14,8 @@ where `id` is product identifier form MS store, e.g.
 [9NH2GPH4JZS4](https://apps.microsoft.com/store/detail/tiktok/9NH2GPH4JZS4).
 
 ### Options
-  - `--version value`, `-v value` for product version (default: "latest")
-  - `--locale value`, `-l value` for product locale
+  - `--version <value>`, `-v <value>` for product version (default: "latest")
+  - `--locale <value>`, `-l <value>` for product locale
   - `--debug`, `-d` for debug output (default: false)
   - `--help`, `-h` - show help
 
@@ -30,7 +30,7 @@ where `id` is product identifier form MS store, e.g.
 Requirements:
 
  1. [go-task](https://github.com/go-task/task) installed;
- 2. [Inn Setup 6](https://jrsoftware.org/isinfo.php) installed and put in $PATH.
+ 2. [Inno Setup 6](https://jrsoftware.org/isinfo.php) installed and put in $PATH.
 
 `task build`
 
