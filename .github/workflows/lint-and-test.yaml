@@ -19,10 +19,15 @@ jobs:
 
       - uses: 'lagren/setup-task@v1'
 
-      - name: golangci-lint
-        uses: golangci/golangci-lint-action@v3
+      - uses: actions/setup-go@v4
         with:
-          version: v1.54
+          go-version: '^1.21.0'
+      - run: go vet
+
+      - name: lint
+        uses: dominikh/staticcheck-action@v1.3.0
+        with:
+          install-go: false
 
       - name: tests
         run: task test

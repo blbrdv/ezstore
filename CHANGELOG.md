@@ -1,5 +1,12 @@
 # Changelog
 
+## [1.2.0] - 2024-02-12
+
+### Fixed
+
+- Go dependency vulnerabilities
+- CI/CD
+
 ## [1.1.1] - 2023-10-26
 
 ### Fixed
@@ -34,6 +41,7 @@
 
 Initial release.
 
+[1.2.0]: https://github.com/blbrdv/ezstore/releases/tag/v1.2.0
 [1.1.1]: https://github.com/blbrdv/ezstore/releases/tag/v1.1.1
 [1.1.0]: https://github.com/blbrdv/ezstore/releases/tag/v1.1.0
 [1.0.3]: https://github.com/blbrdv/ezstore/releases/tag/v1.0.3
