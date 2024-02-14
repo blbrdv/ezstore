@@ -272,6 +272,7 @@ func Download(id string, version string, arch string, locale string, destination
 	}
 
 	sort.Slice(files, func(i, j int) bool {
+		// return files[i].Format == "appx"
 		if files[i].Format == "appx" {
 			return true
 		}
