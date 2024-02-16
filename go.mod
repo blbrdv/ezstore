@@ -29,6 +29,7 @@ require (
 )
 
 require (
+	github.com/KnicKnic/go-powershell v0.0.10
 	github.com/antchfx/xpath v1.2.4 // indirect
 	github.com/cpuguy83/go-md2man/v2 v2.0.2 // indirect
 	github.com/go-resty/resty/v2 v2.7.0

@@ -1,11 +1,12 @@
 # Changelog
 
-## [1.2.0] - 2024-02-12
+## [1.2.0] - 2024-02-16
 
 ### Fixed
 
 - Go dependency vulnerabilities
 - CI/CD
+- Lower version app dependency installation
 
 ## [1.1.1] - 2023-10-26
 

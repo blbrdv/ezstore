@@ -76,8 +76,8 @@ func TestD(t *testing.T) {
 
 func TestCompareLeft(t *testing.T) {
 	expected := 1
-	a := types.Version{1, 2, 3, 4}
-	b := types.Version{0, 2, 3, 4}
+	a := &types.Version{1, 2, 3, 4}
+	b := &types.Version{0, 2, 3, 4}
 
 	actual := a.Compare(b)
 
@@ -88,8 +88,8 @@ func TestCompareLeft(t *testing.T) {
 
 func TestCompareRight(t *testing.T) {
 	expected := -1
-	a := types.Version{0, 0, 0, 3}
-	b := types.Version{0, 0, 0, 4}
+	a := &types.Version{0, 0, 0, 3}
+	b := &types.Version{0, 0, 0, 4}
 
 	actual := a.Compare(b)
 
@@ -100,8 +100,8 @@ func TestCompareRight(t *testing.T) {
 
 func TestCompareEqual(t *testing.T) {
 	expected := 0
-	a := types.Version{1, 2, 3, 4}
-	b := types.Version{1, 2, 3, 4}
+	a := &types.Version{1, 2, 3, 4}
+	b := &types.Version{1, 2, 3, 4}
 
 	actual := a.Compare(b)
 

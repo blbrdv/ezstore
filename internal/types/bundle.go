@@ -15,7 +15,7 @@ func (d Bundles) Len() int {
 }
 
 func (d Bundles) Less(i, j int) bool {
-	return d[i].Version.Compare(*d[j].Version) < 0
+	return d[i].Version.Compare(d[j].Version) < 0
 }
 
 func (d Bundles) Swap(i, j int) {
