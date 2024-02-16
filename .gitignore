@@ -5,6 +5,7 @@
 *.exe
 *.exe~
 *.dll
+!psh_host.dll
 *.so
 *.dylib
 

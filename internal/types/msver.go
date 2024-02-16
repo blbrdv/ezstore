@@ -17,12 +17,7 @@ type Version struct {
 type Versions []Version
 
 func New(version string) (*Version, error) {
-	r, err := regexp.Compile(`^v?(\d+)(?:\.(\d+))?(?:\.(\d+))?(?:\.(\d+))?$`)
-
-	if err != nil {
-		return nil, err
-	}
-
+	r := regexp.MustCompile(`^v?(\d+)(?:\.(\d+))?(?:\.(\d+))?(?:\.(\d+))?$`)
 	f := r.FindStringSubmatch(version)
 
 	a, err := strconv.ParseInt(f[1], 10, 64)
@@ -77,11 +72,11 @@ func (v Version) String() string {
 	return fmt.Sprintf("v%d.%d.%d.%d", v.A, v.B, v.C, v.D)
 }
 
-func (v Version) Compare(versionB Version) int {
+func (v Version) Compare(versionB *Version) int {
 	return recursiveCompare(v.Slice(), versionB.Slice())
 }
 
-func (v Version) LessThan(versionB Version) bool {
+func (v Version) LessThan(versionB *Version) bool {
 	return v.Compare(versionB) < 0
 }
 
@@ -98,7 +93,7 @@ func (s Versions) Swap(i, j int) {
 }
 
 func (s Versions) Less(i, j int) bool {
-	return s[i].LessThan(s[j])
+	return s[i].LessThan(&s[j])
 }
 
 func recursiveCompare(versionA []int64, versionB []int64) int {

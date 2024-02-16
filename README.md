@@ -8,7 +8,7 @@ Download installer or portable version from
 
 ## Usage
 
-`.\ezstore.exe install <id>`
+`.\ezstore.exe [OPTIONS] install <id>`
 
 where `id` is product identifier form MS store, e.g.
 [9NH2GPH4JZS4](https://apps.microsoft.com/store/detail/tiktok/9NH2GPH4JZS4).

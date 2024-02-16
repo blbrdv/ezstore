@@ -9,7 +9,10 @@ require (
 	github.com/urfave/cli/v2 v2.25.6
 )
 
-require github.com/antchfx/jsonquery v1.3.3
+require (
+	github.com/antchfx/jsonquery v1.3.3
+	github.com/pterm/pterm v0.12.69
+)
 
 require (
 	atomicgo.dev/cursor v0.2.0 // indirect
@@ -23,7 +26,6 @@ require (
 	github.com/mattn/go-colorable v0.1.13 // indirect
 	github.com/mattn/go-isatty v0.0.17 // indirect
 	github.com/mattn/go-runewidth v0.0.15 // indirect
-	github.com/pterm/pterm v0.12.69 // indirect
 	github.com/rivo/uniseg v0.4.4 // indirect
 	github.com/snakeice/gogress v1.0.3 // indirect
 	github.com/xo/terminfo v0.0.0-20220910002029-abceb7e1c41e // indirect
@@ -32,6 +34,7 @@ require (
 )
 
 require (
+	github.com/KnicKnic/go-powershell v0.0.10
 	github.com/antchfx/xpath v1.2.4 // indirect
 	github.com/cpuguy83/go-md2man/v2 v2.0.2 // indirect
 	github.com/go-resty/resty/v2 v2.7.0

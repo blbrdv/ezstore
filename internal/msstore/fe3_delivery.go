@@ -57,10 +57,16 @@ func getCookie() (string, error) {
 }
 
 func getWUID(id string, locale string) (string, error) {
-	localeRaw := strings.Split(locale, "_")
+	var localeRaw []string
+	if strings.Contains(locale, "_") {
+		localeRaw = strings.Split(locale, "_")
+	} else if strings.Contains(locale, "-") {
+		localeRaw = strings.Split(locale, "-")
+	}
 	resp, err := fe3Client().
 		R().
-		Get(fmt.Sprintf("%s%s?market=%s&languages=%s-%s,%s,neutral", wuidInfoUrl, id, localeRaw[1], localeRaw[0], localeRaw[1], localeRaw[0]))
+		Get(fmt.Sprintf("%s%s?market=%s&languages=%s-%s,%s,neutral", wuidInfoUrl, id, localeRaw[1], localeRaw[0],
+			localeRaw[1], localeRaw[0]))
 
 	if err != nil {
 		return "", err
@@ -241,7 +247,7 @@ func Download(id string, version string, arch string, locale string, destination
 				found := false
 				for index, file := range files {
 					if bundle.Name == file.Name {
-						if bundle.Version.Compare(*file.Version) >= 0 {
+						if bundle.Version.Compare(file.Version) >= 0 {
 							files[index] = bundle
 						}
 						found = true
@@ -257,7 +263,7 @@ func Download(id string, version string, arch string, locale string, destination
 			found := false
 			for index, file := range files {
 				if bundle.Name == file.Name {
-					if bundle.Version.Compare(*file.Version) >= 0 {
+					if bundle.Version.Compare(file.Version) >= 0 {
 						files[index] = bundle
 					}
 					found = true
