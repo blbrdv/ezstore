@@ -21,19 +21,24 @@ where `id` is product identifier form MS store, e.g.
 
 ## Development
 
-### Run tests
+### Requirements
 
-`task test`
+1. [Golang](https://go.dev/dl/) version `1.24` or later installed;
+2. [go-task](https://github.com/go-task/task) installed;
+3. [staticcheck](https://staticcheck.dev/) installed;
+4. [Inno Setup 6](https://jrsoftware.org/isinfo.php) installed and put in $PATH.
 
-### Build
+### Automation
 
-Requirements:
+Run `task <task>`
 
- 1. [go-task](https://github.com/go-task/task) installed;
- 2. [staticcheck](https://staticcheck.dev/) installed;
- 3. [Inno Setup 6](https://jrsoftware.org/isinfo.php) installed and put in $PATH.
-
-`task build`
+```
+task: Available tasks for this project:
+* build:       Build project and compile installer.
+* clean:       Clean output files.
+* lint:        Lint project.
+* test:        Run unit tests.
+```
 
 ## License
 
