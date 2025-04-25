@@ -5,9 +5,7 @@ on:
 
 jobs:
   lint-and-test:
-    runs-on: ubuntu-latest
-    env:
-      ACTIONS_ALLOW_UNSECURE_COMMANDS: 'true'
+    runs-on: windows-latest
 
     name: Lint and test project
 
