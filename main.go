@@ -2,8 +2,10 @@ package main
 
 import (
 	"context"
+	_ "embed"
 	"errors"
 	"fmt"
+	"io"
 	"os"
 	"path/filepath"
 	"runtime"
@@ -14,10 +16,12 @@ import (
 	"github.com/urfave/cli/v3"
 )
 
+//go:embed dist/README.txt
+var help string
+
 func main() {
 	app := &cli.Command{
 		Name:                  "ezstore",
-		Usage:                 "Easy install apps from MS Store",
 		EnableShellCompletion: true,
 		Commands: []*cli.Command{
 			{
@@ -25,9 +29,8 @@ func main() {
 				Action: InstallFunc,
 				Arguments: []cli.Argument{
 					&cli.StringArg{
-						Name:      "id",
-						Value:     "",
-						UsageText: "id",
+						Name:  "id",
+						Value: "",
 					},
 				},
 				Flags: []cli.Flag{
@@ -35,7 +38,6 @@ func main() {
 						Name:             "version",
 						Aliases:          []string{"v"},
 						Value:            "latest",
-						Usage:            "Product version",
 						Validator:        validateNotEmpty,
 						ValidateDefaults: false,
 					},
@@ -43,17 +45,19 @@ func main() {
 						Name:    "locale",
 						Aliases: []string{"l"},
 						Value:   "",
-						Usage:   "Product locale",
 					},
 					&cli.BoolFlag{
 						Name:    "debug",
 						Aliases: []string{"d"},
 						Value:   false,
-						Usage:   "debug output",
 					},
 				},
 			},
 		},
+	}
+
+	cli.HelpPrinter = func(_ io.Writer, _ string, _ interface{}) {
+		fmt.Print(help)
 	}
 
 	if err := app.Run(context.Background(), os.Args); err != nil {
