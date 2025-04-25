@@ -5,6 +5,7 @@ import (
 	"errors"
 	"fmt"
 	"os"
+	"path/filepath"
 	"runtime"
 
 	windows "github.com/blbrdv/ezstore/internal"
@@ -22,12 +23,21 @@ func main() {
 			{
 				Name:   "install",
 				Action: InstallFunc,
+				Arguments: []cli.Argument{
+					&cli.StringArg{
+						Name:      "id",
+						Value:     "",
+						UsageText: "id",
+					},
+				},
 				Flags: []cli.Flag{
 					&cli.StringFlag{
-						Name:    "version",
-						Aliases: []string{"v"},
-						Value:   "latest",
-						Usage:   "Product version",
+						Name:             "version",
+						Aliases:          []string{"v"},
+						Value:            "latest",
+						Usage:            "Product version",
+						Validator:        validateNotEmpty,
+						ValidateDefaults: false,
 					},
 					&cli.StringFlag{
 						Name:    "locale",
@@ -52,34 +62,35 @@ func main() {
 }
 
 func InstallFunc(_ context.Context, cmd *cli.Command) error {
-	id := cmd.Args().Get(0)
-	version := "latest"
-	var arch string
-	switch goarch := runtime.GOARCH; goarch {
+	var err error
+
+	arch := runtime.GOARCH
+	switch arch {
 	case "amd64":
 		arch = "x64"
 	case "amd64p32":
 		arch = "x86"
 	case "arm", "arm64":
-		arch = goarch
+		break
 	default:
-		return fmt.Errorf("%s architecture not supported", goarch)
-	}
-	locale, err := windows.GetLocale()
-
-	if err != nil {
-		return err
+		return fmt.Errorf("%s architecture not supported", arch)
 	}
 
+	id := cmd.StringArg("id")
 	if id == "" {
 		return errors.New("id must be set")
 	}
-	if cmd.String("version") != "" {
-		version = cmd.String("version")
+
+	version := cmd.String("version")
+
+	locale := cmd.String("locale")
+	if locale == "" {
+		locale, err = windows.GetLocale()
+		if err != nil {
+			return err
+		}
 	}
-	if cmd.String("locale") != "" {
-		locale = cmd.String("locale")
-	}
+
 	if cmd.Bool("debug") {
 		pterm.EnableDebugMessages()
 	}
@@ -89,34 +100,39 @@ func InstallFunc(_ context.Context, cmd *cli.Command) error {
 	pterm.Debug.Println(fmt.Sprintf("locale       = %s", locale))
 	pterm.Debug.Println(fmt.Sprintf("architecture = %s", arch))
 
-	localPath, err := os.UserCacheDir()
-	fullPath := localPath + "\\ezstore\\" + id
+	tmpPath := filepath.Join("%LocalAppData%", "ezstore", id)
+	removeDir(tmpPath)
 
-	if err != nil {
-		return err
-	}
+	defer removeDir(tmpPath)
 
-	err = os.RemoveAll(fullPath)
-
-	if err != nil {
-		return err
-	}
-
-	files, err := msstore.Download(id, version, arch, locale, fullPath)
-
+	files, err := msstore.Download(id, version, arch, locale, tmpPath)
 	if err != nil {
 		return err
 	}
 
 	for _, file := range files {
 		err = windows.Install(file)
-
 		if err != nil {
 			return err
 		}
 	}
 
 	pterm.Success.Println("Done!")
+
+	return nil
+}
+
+func removeDir(path string) {
+	err := os.RemoveAll(path)
+	if err != nil {
+		panic(err)
+	}
+}
+
+func validateNotEmpty(value string) error {
+	if value == "" {
+		return errors.New("value must be not empty")
+	}
 
 	return nil
 }
