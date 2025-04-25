@@ -19,11 +19,10 @@ jobs:
           go-version-file: 'go.mod'
           cache: false
 
-      - uses: 'lagren/setup-task@v1'
+      - uses: arduino/setup-task@v2
 
       - name: Lint project
         run: task lint
 
       - name: Run unit tests
         run: task test
-
