@@ -1,8 +1,8 @@
 module github.com/blbrdv/ezstore
 
-go 1.21
+go 1.24
 
-toolchain go1.21.1
+toolchain go1.24.2
 
 require (
 	github.com/antchfx/xmlquery v1.3.17
