@@ -1,6 +1,7 @@
 package main
 
 import (
+	"context"
 	"errors"
 	"fmt"
 	"os"
@@ -9,13 +10,14 @@ import (
 	windows "github.com/blbrdv/ezstore/internal"
 	"github.com/blbrdv/ezstore/internal/msstore"
 	"github.com/pterm/pterm"
-	"github.com/urfave/cli/v2"
+	"github.com/urfave/cli/v3"
 )
 
 func main() {
-	app := &cli.App{
-		Name:  "ezstore",
-		Usage: "Easy install apps from MS Store",
+	app := &cli.Command{
+		Name:                  "ezstore",
+		Usage:                 "Easy install apps from MS Store",
+		EnableShellCompletion: true,
 		Commands: []*cli.Command{
 			{
 				Name:   "install",
@@ -44,24 +46,22 @@ func main() {
 		},
 	}
 
-	if err := app.Run(os.Args); err != nil {
+	if err := app.Run(context.Background(), os.Args); err != nil {
 		pterm.Fatal.Println(err)
 	}
 }
 
-func InstallFunc(ctx *cli.Context) error {
-	id := ctx.Args().Get(0)
-	version := ctx.String("version")
+func InstallFunc(_ context.Context, cmd *cli.Command) error {
+	id := cmd.Args().Get(0)
+	version := "latest"
 	var arch string
 	switch goarch := runtime.GOARCH; goarch {
 	case "amd64":
 		arch = "x64"
 	case "amd64p32":
 		arch = "x86"
-	case "arm":
-		arch = "arm"
-	case "arm64":
-		arch = "arm64"
+	case "arm", "arm64":
+		arch = goarch
 	default:
 		return fmt.Errorf("%s architecture not supported", goarch)
 	}
@@ -71,13 +71,16 @@ func InstallFunc(ctx *cli.Context) error {
 		return err
 	}
 
-	if id == "" || version == "" {
-		return errors.New("id and version must be set")
+	if id == "" {
+		return errors.New("id must be set")
 	}
-	if ctx.String("locale") != "" {
-		locale = ctx.String("locale")
+	if cmd.String("version") != "" {
+		version = cmd.String("version")
 	}
-	if ctx.Bool("debug") {
+	if cmd.String("locale") != "" {
+		locale = cmd.String("locale")
+	}
+	if cmd.Bool("debug") {
 		pterm.EnableDebugMessages()
 	}
 
