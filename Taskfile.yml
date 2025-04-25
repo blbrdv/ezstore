@@ -1,17 +1,41 @@
 version: '3'
 
 tasks:
-  build:
+  run:
+    internal: true
+    cmd: cmd /c "{{.COMMAND}} > nul 2> nul"
+
+  clean-winres:
+    internal: true
     cmds:
+      - task: run
+        vars:
+          COMMAND: (del /f rsrc_windows_386.syso && del /f rsrc_windows_amd64.syso)
+    ignore_error: true
+
+  clean:
+    desc: Clean output files.
+    cmds:
+      - task: run
+        vars:
+          COMMAND: rmdir /s /q output
+      - task: clean-winres
+    ignore_error: true
+
+  build:
+    desc: Build project and compile installer.
+    cmds:
+      - defer: { task: clean-winres }
       - go-winres make --in ./winres.json
       - go build -o ./output/ezstore.exe
-      - iscc "setup.iss"
+      - iscc /Q "setup.iss"
 
   test:
-    cmds:
-      - go test ./...
+    desc: Run unit tests.
+    cmd: go test ./...
 
   lint:
+    desc: Lint project.
     cmds:
       - go vet
       - staticcheck .
