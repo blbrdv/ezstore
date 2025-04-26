@@ -12,6 +12,7 @@ import (
 
 	windows "github.com/blbrdv/ezstore/internal"
 	"github.com/blbrdv/ezstore/internal/msstore"
+	"github.com/blbrdv/ezstore/internal/types"
 	"github.com/pterm/pterm"
 	"github.com/urfave/cli/v3"
 )
@@ -87,12 +88,9 @@ func InstallFunc(_ context.Context, cmd *cli.Command) error {
 
 	version := cmd.String("version")
 
-	locale := cmd.String("locale")
-	if locale == "" {
-		locale, err = windows.GetLocale()
-		if err != nil {
-			return err
-		}
+	locale, err := types.Parse(cmd.String("locale"))
+	if err != nil {
+		locale = windows.GetLocale()
 	}
 
 	if cmd.Bool("debug") {

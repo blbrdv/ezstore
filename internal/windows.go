@@ -4,7 +4,6 @@ import (
 	"fmt"
 	"github.com/blbrdv/ezstore/internal/types"
 	"github.com/pterm/pterm"
-	"os"
 	"os/exec"
 	"regexp"
 	"strings"
@@ -59,18 +58,24 @@ func Install(fullPath string) error {
 	return nil
 }
 
-// https://stackoverflow.com/a/51831590
-func GetLocale() (string, error) {
-	envlang, ok := os.LookupEnv("LANG")
-	if ok {
-		return strings.Split(envlang, ".")[0], nil
-	}
+var defaultLocale = types.Locale{Language: "en", Country: "US"}
 
+// GetLocale returns current locale set in hosted OS.
+// If error occurred or returned value is empty, returns default locale.
+func GetLocale() types.Locale {
 	cmd := exec.Command("powershell", "Get-Culture | select -exp Name")
 	output, err := cmd.Output()
-	if err == nil {
-		return strings.Trim(string(output), "\r\n"), nil
+	if err != nil {
+		return defaultLocale
 	}
 
-	return "", fmt.Errorf("cannot determine locale")
+	localeStr := strings.TrimSpace(string(output))
+	localeStr = strings.Trim(localeStr, "\r\n")
+
+	locale, err := types.Parse(localeStr)
+	if err != nil {
+		return defaultLocale
+	}
+
+	return locale
 }

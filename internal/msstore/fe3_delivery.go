@@ -56,17 +56,11 @@ func getCookie() (string, error) {
 		InnerText(), nil
 }
 
-func getWUID(id string, locale string) (string, error) {
-	var localeRaw []string
-	if strings.Contains(locale, "_") {
-		localeRaw = strings.Split(locale, "_")
-	} else if strings.Contains(locale, "-") {
-		localeRaw = strings.Split(locale, "-")
-	}
+func getWUID(id string, locale types.Locale) (string, error) {
 	resp, err := fe3Client().
 		R().
-		Get(fmt.Sprintf("%s%s?market=%s&languages=%s-%s,%s,neutral", wuidInfoUrl, id, localeRaw[1], localeRaw[0],
-			localeRaw[1], localeRaw[0]))
+		Get(fmt.Sprintf("%s%s?market=%s&languages=%s-%s,%s,neutral", wuidInfoUrl, id, locale.Country, locale.Language,
+			locale.Country, locale.Language))
 
 	if err != nil {
 		return "", err
@@ -187,7 +181,7 @@ func getFileName(urlraw string) (string, error) {
 	return r.FindStringSubmatch(header)[1], nil
 }
 
-func Download(id string, version string, arch string, locale string, destinationPath string) ([]string, error) {
+func Download(id string, version string, arch string, locale types.Locale, destinationPath string) ([]string, error) {
 	sCoockie, _ := pterm.DefaultSpinner.Start("Fetching cookie...")
 	cookie, err := getCookie()
 	if err != nil {
