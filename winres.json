@@ -12,7 +12,7 @@
       "0409": {
         "identity": {
           "name": "ezstore",
-          "version": "<<<VERSION>>>"
+          "version": "<<<PRODUCT_VERSION>>>"
         },
         "description": "Easy install apps from MS Store on Long-term Servicing Windows",
         "minimum-os": "win10",
@@ -36,22 +36,22 @@
     "#1": {
       "0000": {
         "fixed": {
-          "file_version": "<<<VERSIONLONG>>>",
-          "product_version": "<<<VERSIONLONG>>>"
+          "file_version": "<<<FILE_VERSION>>>",
+          "product_version": "<<<VPRODUCT_VERSION>>>"
         },
         "info": {
           "0409": {
             "Comments": "",
             "CompanyName": "blbrdv",
             "FileDescription": "Easy install apps from MS Store on Long-term Servicing Windows",
-            "FileVersion": "<<<VERSIONLONG>>>",
+            "FileVersion": "<<<FILE_VERSION>>>",
             "InternalName": "ezstore",
             "LegalCopyright": "",
             "LegalTrademarks": "",
             "OriginalFilename": "ezstore",
             "PrivateBuild": "",
             "ProductName": "ezstore",
-            "ProductVersion": "<<<VERSIONLONG>>>",
+            "ProductVersion": "<<<PRODUCT_VERSION>>>",
             "SpecialBuild": ""
           }
         }
