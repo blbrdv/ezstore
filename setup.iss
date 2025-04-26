@@ -1,5 +1,5 @@
 #define Name      "ezstore"
-#define Version   "1.1.1"
+#define Version   "<<<VERSION>>>"
 #define Publisher "blbrdv"
 #define URL       "https://github.com/blbrdv/ezstore"
 #define ExeName   "ezstore.exe"
