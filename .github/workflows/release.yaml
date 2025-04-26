@@ -21,12 +21,10 @@ jobs:
         go-version-file: 'go.mod'
         cache: false
 
-    - uses: arduino/setup-task@v2
-
     - uses: pwall2222/inno-setup-download@v0.0.8
 
     - name: Build project
-      run: task build
+      run: .\run.ps1 build
 
     - name: Release project
       uses: anton-yurchenko/git-release@v6
