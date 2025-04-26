@@ -9,6 +9,7 @@ import (
 	"strings"
 )
 
+// Install package if its version higher that installed counterpart.
 func Install(fullPath string) error {
 	regex := regexp.MustCompile(`^([0-9a-zA-Z.-]+)[-_]v?([\d\.]+)\.`)
 	arr := strings.Split(fullPath, "\\")
