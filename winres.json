@@ -37,7 +37,7 @@
       "0000": {
         "fixed": {
           "file_version": "<<<FILE_VERSION>>>",
-          "product_version": "<<<VPRODUCT_VERSION>>>"
+          "product_version": "<<<PRODUCT_VERSION>>>"
         },
         "info": {
           "0409": {
