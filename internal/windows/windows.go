@@ -2,8 +2,7 @@ package windows
 
 import (
 	"fmt"
-	. "github.com/blbrdv/ezstore/internal/locale"
-	. "github.com/blbrdv/ezstore/internal/msver"
+	types "github.com/blbrdv/ezstore/internal"
 	"github.com/pterm/pterm"
 	"os/exec"
 	"regexp"
@@ -16,7 +15,7 @@ func Install(fullPath string) error {
 	arr := strings.Split(fullPath, "\\")
 	regexData := regex.FindStringSubmatch(arr[len(arr)-1])
 	name := regexData[1]
-	version, err := NewVersion(strings.TrimSuffix(regexData[2], "."))
+	version, err := types.NewVersion(strings.TrimSuffix(regexData[2], "."))
 
 	if err != nil {
 		return err
@@ -34,12 +33,12 @@ func Install(fullPath string) error {
 
 	vString := strings.Trim(string(vBytes), "\n\r")
 
-	var latestVersion *Version
+	var latestVersion *types.Version
 
 	if vString == "" {
-		latestVersion, _ = NewVersion("0")
+		latestVersion, _ = types.NewVersion("0")
 	} else {
-		latestVersion, err = NewVersion(vString)
+		latestVersion, err = types.NewVersion(vString)
 
 		if err != nil {
 			return err
@@ -60,11 +59,11 @@ func Install(fullPath string) error {
 	return nil
 }
 
-var defaultLocale = Locale{Language: "en", Country: "US"}
+var defaultLocale = types.Locale{Language: "en", Country: "US"}
 
 // GetLocale returns current locale set in hosted OS.
 // If error occurred or returned value is empty, returns default locale.
-func GetLocale() Locale {
+func GetLocale() types.Locale {
 	cmd := exec.Command("powershell", "Get-Culture | select -exp Name")
 	output, err := cmd.Output()
 	if err != nil {
@@ -74,7 +73,7 @@ func GetLocale() Locale {
 	localeStr := strings.TrimSpace(string(output))
 	localeStr = strings.Trim(localeStr, "\r\n")
 
-	locale, err := NewLocale(localeStr)
+	locale, err := types.NewLocale(localeStr)
 	if err != nil {
 		return defaultLocale
 	}

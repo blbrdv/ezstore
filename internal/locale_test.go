@@ -1,9 +1,9 @@
-package locale_test
+package internal_test
 
 import (
 	"testing"
 
-	. "github.com/blbrdv/ezstore/internal/locale"
+	. "github.com/blbrdv/ezstore/internal"
 )
 
 var langOnlyData = []struct {

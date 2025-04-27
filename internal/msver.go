@@ -1,4 +1,4 @@
-package msver
+package internal
 
 import (
 	"fmt"

@@ -1,9 +1,9 @@
-package msver_test
+package internal_test
 
 import (
 	"testing"
 
-	. "github.com/blbrdv/ezstore/internal/msver"
+	. "github.com/blbrdv/ezstore/internal"
 )
 
 var versionData = []struct {

@@ -22,7 +22,7 @@ OutputDir=.\output
 OutputBaseFileName=ezsetup
 
 LicenseFile=LICENSE
-SetupIconFile=dist\icon.ico
+SetupIconFile=icons\icon.ico
 
 Compression=lzma
 SolidCompression=yes
@@ -32,7 +32,7 @@ ChangesEnvironment=true
 ;------------------------------------------------------------------------------
 [Files]
 Source: "output\ezstore.exe"; DestDir: "{app}/bin"; Flags: ignoreversion
-Source: "dist\README.txt"; DestDir: "{app}"; Flags: ignoreversion
+Source: "cmd\README.txt"; DestDir: "{app}"; Flags: ignoreversion
 
 
 ;------------------------------------------------------------------------------

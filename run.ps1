@@ -131,7 +131,7 @@ function Exec {
 function Remove-Winres-Files {
 
     foreach ($File in $global:SysoFiles) {
-        Exec "Remove-Item -Path $File -Force -ErrorAction SilentlyContinue";
+        Exec "Remove-Item -Path .\cmd\$File -Force -ErrorAction SilentlyContinue";
     }
 
 }
@@ -148,8 +148,8 @@ function Lint {
     Check-If-Installed "Staticcheck" "staticcheck";
 
     try {
-        Exec "go vet";
-        Exec "staticcheck .";
+        Exec "go vet .\...";
+        Exec "staticcheck .\...";
     }
     catch {
         $global:ExitCode = $lastexitcode;
@@ -160,7 +160,7 @@ function Lint {
 function Test {
 
     try {
-        Exec "go test ./...";
+        Exec "go test .\internal\...";
     }
     catch {
         $global:ExitCode = $lastexitcode;
@@ -177,8 +177,13 @@ function Build {
     $FileVersion = Get-File-Version $ProductVersion;
 
     try {
-        Exec "go-winres make --in ./winres.json --product-version $ProductVersion --file-version $FileVersion";
-        Exec "go build -o ./output/ezstore.exe";
+        Exec "go-winres make --in .\winres.json --product-version $ProductVersion --file-version $FileVersion";
+
+        foreach ($File in $global:SysoFiles) {
+            Exec "Move-Item -Path $File -Destination .\cmd\$File -Force -ErrorAction SilentlyContinue";
+        }
+
+        Exec "go build -o .\output\ezstore.exe .\cmd";
         Exec "iscc /Q 'setup.iss' /DPV='$ProductVersion' /DFV='$FileVersion'";
     }
     catch {

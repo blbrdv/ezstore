@@ -1,4 +1,4 @@
-package writer
+package cmd
 
 import (
 	"github.com/pterm/pterm"

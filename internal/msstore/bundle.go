@@ -1,11 +1,11 @@
 package msstore
 
 import (
-	. "github.com/blbrdv/ezstore/internal/msver"
+	types "github.com/blbrdv/ezstore/internal"
 )
 
 type BundleData struct {
-	Version *Version
+	Version *types.Version
 	Name    string
 	Url     string
 	Arch    string

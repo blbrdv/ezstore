@@ -1,4 +1,4 @@
-# ![icon](/dist/icon16.png) ezstore
+# ![icon](/cmd/icon16.png) ezstore
 Easy install apps from MS Store on Long-term Servicing Windows.
 
 ## Installation

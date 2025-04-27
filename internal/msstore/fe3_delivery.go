@@ -9,8 +9,7 @@ import (
 
 	"github.com/antchfx/jsonquery"
 	"github.com/antchfx/xmlquery"
-	. "github.com/blbrdv/ezstore/internal/locale"
-	. "github.com/blbrdv/ezstore/internal/msver"
+	types "github.com/blbrdv/ezstore/internal"
 	"github.com/go-resty/resty/v2"
 	"github.com/pterm/pterm"
 )
@@ -59,7 +58,7 @@ func getCookie() (string, error) {
 		InnerText(), nil
 }
 
-func getWUID(id string, locale Locale) (string, error) {
+func getWUID(id string, locale types.Locale) (string, error) {
 	resp, err :=
 		execute(
 			"get",
@@ -198,7 +197,7 @@ func getFileName(urlraw string) (string, error) {
 	return r.FindStringSubmatch(header)[1], nil
 }
 
-func Download(id string, version string, arch string, locale Locale, destinationPath string) ([]string, error) {
+func Download(id string, version string, arch string, locale types.Locale, destinationPath string) ([]string, error) {
 	sCoockie, _ := pterm.DefaultSpinner.Start("Fetching cookie...")
 	cookie, err := getCookie()
 	if err != nil {
@@ -242,7 +241,7 @@ func Download(id string, version string, arch string, locale Locale, destination
 		}
 
 		regexData := regex.FindStringSubmatch(name)
-		v, err := NewVersion(regexData[2])
+		v, err := types.NewVersion(regexData[2])
 		if err != nil {
 			return nil, err
 		}
