@@ -197,6 +197,8 @@ func getFileName(urlraw string) (string, error) {
 	return r.FindStringSubmatch(header)[1], nil
 }
 
+// Download backage and its dependencies from MS Store by id, version and locale to destination directory
+// and returns array of backage and its dependencies paths.
 func Download(id string, version string, arch string, locale types.Locale, destinationPath string) ([]string, error) {
 	sCoockie, _ := pterm.DefaultSpinner.Start("Fetching cookie...")
 	cookie, err := getCookie()

@@ -14,6 +14,8 @@ import (
 	"runtime"
 )
 
+// Install download package with its dependencies from MS Store by id and version,
+// and then install it with its dependencies.
 func Install(_ context.Context, cmd *cli.Command) error {
 	var err error
 

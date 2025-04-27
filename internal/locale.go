@@ -13,7 +13,7 @@ type Locale struct {
 	Country  string
 }
 
-// String returns MS Store compatible locale literal
+// String returns MS Store compatible locale literal.
 func (l Locale) String() string {
 	if l.Country == "" {
 		return l.Language
@@ -22,7 +22,7 @@ func (l Locale) String() string {
 	return fmt.Sprintf("%s_%s", l.Language, l.Country)
 }
 
-// NewLocale returns Locale from RFC 5646 input string or error if invalid format.
+// NewLocale returns [Locale] from RFC 5646 input string or error if invalid format.
 // See Appendix A for examples.
 func NewLocale(input string) (Locale, error) {
 	regex := regexp.MustCompile(pattern)

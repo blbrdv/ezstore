@@ -6,7 +6,7 @@ import (
 	"strconv"
 )
 
-// Version represents 4-digit SemVer used in Windows and MS Store
+// Version represents 4-digit SemVer used in Windows and MS Store.
 type Version struct {
 	A int64
 	B int64
@@ -14,26 +14,27 @@ type Version struct {
 	D int64
 }
 
-func NewVersion(version string) (*Version, error) {
-	r := regexp.MustCompile(`^v?(\d+)(?:\.(\d+))?(?:\.(\d+))?(?:\.(\d+))?$`)
-	f := r.FindStringSubmatch(version)
+// NewVersion returns [Version] from string representing SemVer.
+func NewVersion(input string) (*Version, error) {
+	semverRegexp := regexp.MustCompile(`^v?(\d+)(?:\.(\d+))?(?:\.(\d+))?(?:\.(\d+))?$`)
+	matches := semverRegexp.FindStringSubmatch(input)
 
-	a, err := strconv.ParseInt(f[1], 10, 64)
+	a, err := strconv.ParseInt(matches[1], 10, 64)
 	if err != nil {
 		return nil, err
 	}
 
-	b, err := parse(f[2])
+	b, err := parse(matches[2])
 	if err != nil {
 		return nil, err
 	}
 
-	c, err := parse(f[3])
+	c, err := parse(matches[3])
 	if err != nil {
 		return nil, err
 	}
 
-	d, err := parse(f[4])
+	d, err := parse(matches[4])
 	if err != nil {
 		return nil, err
 	}
@@ -41,9 +42,9 @@ func NewVersion(version string) (*Version, error) {
 	return &Version{a, b, c, d}, nil
 }
 
-func parse(value string) (int64, error) {
-	if value != "" {
-		result, err := strconv.ParseInt(value, 10, 64)
+func parse(input string) (int64, error) {
+	if input != "" {
+		result, err := strconv.ParseInt(input, 10, 64)
 
 		if err != nil {
 			return 0, err
@@ -55,18 +56,22 @@ func parse(value string) (int64, error) {
 	}
 }
 
+// String returns SemVer representation.
 func (v Version) String() string {
 	return fmt.Sprintf("v%d.%d.%d.%d", v.A, v.B, v.C, v.D)
 }
 
+// Compare two versions.
 func (v Version) Compare(versionB *Version) int {
 	return recursiveCompare(v.Slice(), versionB.Slice())
 }
 
+// LessThan returns true if this [Version] less than provided [Version].
 func (v Version) LessThan(versionB *Version) bool {
 	return v.Compare(versionB) < 0
 }
 
+// Slice converts [Version] to array of 4 numbers.
 func (v Version) Slice() []int64 {
 	return []int64{v.A, v.B, v.C, v.D}
 }
