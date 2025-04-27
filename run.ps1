@@ -5,10 +5,12 @@ Param (
     [string]$Command
 )
 
+$global:ExitCode = 0;
+
 $global:SysoFiles = @(
     "rsrc_windows_386.syso",
     "rsrc_windows_amd64.syso"
-)
+);
 
 #######
 # Utils
@@ -169,10 +171,11 @@ function Build {
         Exec "go build -o ./output/ezstore.exe";
         Exec "iscc /Q 'setup.iss' /DPV='$ProductVersion' /DFV='$FileVersion'";
     }
+    catch {
+        $global:ExitCode = $lastexitcode;
+    }
     finally {
-        $Code = $lastexitcode;
         Remove-Winres-Files;
-        exit $Code;
     }
 
 }
@@ -210,4 +213,11 @@ switch ( $Command ) {
 $sw.Stop();
 $duration = GetDuration $sw.Elapsed;
 
-Write-Host "Finished $duration";
+if ( $global:ExitCode -eq 0 ) {
+    Write-Host "Finished $duration";
+}
+else {
+    Write-Host "Failed with code $global:ExitCode $duration";
+}
+
+exit $global:ExitCode;
