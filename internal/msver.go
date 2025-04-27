@@ -6,7 +6,7 @@ import (
 	"strconv"
 )
 
-// 4-digit semver used in MS Store
+// Version represents 4-digit SemVer used in Windows and MS Store
 type Version struct {
 	A int64
 	B int64
