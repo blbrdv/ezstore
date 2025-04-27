@@ -21,51 +21,40 @@ func NewVersion(version string) (*Version, error) {
 	f := r.FindStringSubmatch(version)
 
 	a, err := strconv.ParseInt(f[1], 10, 64)
-
 	if err != nil {
 		return nil, err
 	}
 
-	var b int64
-	if f[2] != "" {
-		value, err := strconv.ParseInt(f[2], 10, 64)
-
-		if err != nil {
-			return nil, err
-		}
-
-		b = value
-	} else {
-		b = 0
+	b, err := parse(f[2])
+	if err != nil {
+		return nil, err
 	}
 
-	var c int64
-	if f[3] != "" {
-		value, err := strconv.ParseInt(f[3], 10, 64)
-
-		if err != nil {
-			return nil, err
-		}
-
-		c = value
-	} else {
-		c = 0
+	c, err := parse(f[3])
+	if err != nil {
+		return nil, err
 	}
 
-	var d int64
-	if f[4] != "" {
-		value, err := strconv.ParseInt(f[4], 10, 64)
-
-		if err != nil {
-			return nil, err
-		}
-
-		d = value
-	} else {
-		d = 0
+	d, err := parse(f[4])
+	if err != nil {
+		return nil, err
 	}
 
 	return &Version{a, b, c, d}, nil
+}
+
+func parse(value string) (int64, error) {
+	if value != "" {
+		result, err := strconv.ParseInt(value, 10, 64)
+
+		if err != nil {
+			return 0, err
+		}
+
+		return result, nil
+	} else {
+		return 0, nil
+	}
 }
 
 func (v Version) String() string {
