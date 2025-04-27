@@ -15,14 +15,14 @@ import (
 )
 
 const (
-	clientUrl        = "https://fe3.delivery.mp.microsoft.com/ClientWebService/client.asmx"
-	clientSecuredUrl = "https://fe3.delivery.mp.microsoft.com/ClientWebService/client.asmx/secured"
-	wuidInfoUrl      = "https://displaycatalog.mp.microsoft.com/v7.0/products/"
+	clientURL        = "https://fe3.delivery.mp.microsoft.com/ClientWebService/client.asmx"
+	clientSecuredURL = "https://fe3.delivery.mp.microsoft.com/ClientWebService/client.asmx/secured"
+	wuidInfoURL      = "https://displaycatalog.mp.microsoft.com/v7.0/products/"
 	msaToken         = "<Device>dAA9AEUAdwBBAHcAQQBzAE4AMwBCAEEAQQBVADEAYgB5AHMAZQBtAGIAZQBEAFYAQwArADMAZgBtADcAbwBXAHkASAA3AGIAbgBnAEcAWQBtAEEAQQBMAGoAbQBqAFYAVQB2AFEAYwA0AEsAVwBFAC8AYwBDAEwANQBYAGUANABnAHYAWABkAGkAegBHAGwAZABjADEAZAAvAFcAeQAvAHgASgBQAG4AVwBRAGUAYwBtAHYAbwBjAGkAZwA5AGoAZABwAE4AawBIAG0AYQBzAHAAVABKAEwARAArAFAAYwBBAFgAbQAvAFQAcAA3AEgAagBzAEYANAA0AEgAdABsAC8AMQBtAHUAcgAwAFMAdQBtAG8AMABZAGEAdgBqAFIANwArADQAcABoAC8AcwA4ADEANgBFAFkANQBNAFIAbQBnAFIAQwA2ADMAQwBSAEoAQQBVAHYAZgBzADQAaQB2AHgAYwB5AEwAbAA2AHoAOABlAHgAMABrAFgAOQBPAHcAYQB0ADEAdQBwAFMAOAAxAEgANgA4AEEASABzAEoAegBnAFQAQQBMAG8AbgBBADIAWQBBAEEAQQBpAGcANQBJADMAUQAvAFYASABLAHcANABBAEIAcQA5AFMAcQBhADEAQgA4AGsAVQAxAGEAbwBLAEEAdQA0AHYAbABWAG4AdwBWADMAUQB6AHMATgBtAEQAaQBqAGgANQBkAEcAcgBpADgAQQBlAEUARQBWAEcAbQBXAGgASQBCAE0AUAAyAEQAVwA0ADMAZABWAGkARABUAHoAVQB0AHQARQBMAEgAaABSAGYAcgBhAGIAWgBsAHQAQQBUAEUATABmAHMARQBGAFUAYQBRAFMASgB4ADUAeQBRADgAagBaAEUAZQAyAHgANABCADMAMQB2AEIAMgBqAC8AUgBLAGEAWQAvAHEAeQB0AHoANwBUAHYAdAB3AHQAagBzADYAUQBYAEIAZQA4AHMAZwBJAG8AOQBiADUAQQBCADcAOAAxAHMANgAvAGQAUwBFAHgATgBEAEQAYQBRAHoAQQBYAFAAWABCAFkAdQBYAFEARQBzAE8AegA4AHQAcgBpAGUATQBiAEIAZQBUAFkAOQBiAG8AQgBOAE8AaQBVADcATgBSAEYAOQAzAG8AVgArAFYAQQBiAGgAcAAwAHAAUgBQAFMAZQBmAEcARwBPAHEAdwBTAGcANwA3AHMAaAA5AEoASABNAHAARABNAFMAbgBrAHEAcgAyAGYARgBpAEMAUABrAHcAVgBvAHgANgBuAG4AeABGAEQAbwBXAC8AYQAxAHQAYQBaAHcAegB5AGwATABMADEAMgB3AHUAYgBtADUAdQBtAHAAcQB5AFcAYwBLAFIAagB5AGgAMgBKAFQARgBKAFcANQBnAFgARQBJADUAcAA4ADAARwB1ADIAbgB4AEwAUgBOAHcAaQB3AHIANwBXAE0AUgBBAFYASwBGAFcATQBlAFIAegBsADkAVQBxAGcALwBwAFgALwB2AGUATAB3AFMAawAyAFMAUwBIAGYAYQBLADYAagBhAG8AWQB1AG4AUgBHAHIAOABtAGIARQBvAEgAbABGADYASgBDAGEAYQBUAEIAWABCAGMAdgB1AGUAQwBKAG8AOQA4AGgAUgBBAHIARwB3ADQAKwBQAEgAZQBUAGIATgBTAEUAWABYAHoAdgBaADYAdQBXADUARQBBAGYAZABaAG0AUwA4ADgAVgBKAGMAWgBhAEYASwA3AHgAeABnADAAdwBvAG4ANwBoADAAeABDADYAWgBCADAAYwBZAGoATAByAC8ARwBlAE8AegA5AEcANABRAFUASAA5AEUAawB5ADAAZAB5AEYALwByAGUAVQAxAEkAeQBpAGEAcABwAGgATwBQADgAUwAyAHQANABCAHIAUABaAFgAVAB2AEMAMABQADcAegBPACsAZgBHAGsAeABWAG0AKwBVAGYAWgBiAFEANQA1AHMAdwBFAD0AJgBwAD0A</Device>"
 )
 
 type ProductInfo struct {
-	UpdateId       string
+	UpdateID       string
 	RevisionNumber string
 }
 
@@ -33,7 +33,7 @@ func fe3Client() *resty.Client {
 
 func getCookie() (string, error) {
 	resp, err :=
-		execute("post", clientUrl,
+		execute("post", clientURL,
 			fe3Client().
 				R().
 				SetBody(getCookiePayload),
@@ -64,7 +64,7 @@ func getWUID(id string, locale types.Locale) (string, error) {
 			"get",
 			fmt.Sprintf(
 				"%s%s?market=%s&languages=%s-%s,%s,neutral",
-				wuidInfoUrl,
+				wuidInfoURL,
 				id,
 				locale.Country,
 				locale.Language,
@@ -103,7 +103,7 @@ func getProducts(cookie string, categoryIdentifier string) ([]ProductInfo, error
 	var list []ProductInfo
 
 	resp, err :=
-		execute("post", clientUrl,
+		execute("post", clientURL,
 			fe3Client().R().
 				SetBody(wuidRequest(msaToken, cookie, categoryIdentifier)),
 		)
@@ -146,11 +146,11 @@ func getProducts(cookie string, categoryIdentifier string) ([]ProductInfo, error
 	return list, nil
 }
 
-func getUrl(info ProductInfo) (string, error) {
+func getURL(info ProductInfo) (string, error) {
 	resp, err :=
-		execute("post", clientSecuredUrl,
+		execute("post", clientSecuredURL,
 			fe3Client().R().
-				SetBody(fe3FileUrl(msaToken, info.UpdateId, info.RevisionNumber)),
+				SetBody(fe3FileURL(msaToken, info.UpdateID, info.RevisionNumber)),
 		)
 
 	if err != nil {
@@ -220,7 +220,7 @@ func Download(id string, version string, arch string, locale types.Locale, desti
 
 	var urls []string
 	for _, info := range productInfos {
-		urlstr, err := getUrl(info)
+		urlstr, err := getURL(info)
 		if err != nil {
 			return nil, err
 		}
@@ -245,7 +245,7 @@ func Download(id string, version string, arch string, locale types.Locale, desti
 		if err != nil {
 			return nil, err
 		}
-		bundle := BundleData{Version: v, Name: regexData[1], Url: urlobj, Arch: regexData[3], Format: strings.ToLower(regexData[4])}
+		bundle := BundleData{Version: v, Name: regexData[1], URL: urlobj, Arch: regexData[3], Format: strings.ToLower(regexData[4])}
 		bundles = append(bundles, bundle)
 		productsBar.Increment()
 	}
@@ -296,7 +296,7 @@ func Download(id string, version string, arch string, locale types.Locale, desti
 	for _, file := range files {
 		fullPath := destinationPath + "\\" + file.Name + "-" + file.Version.String() + "." + file.Format
 
-		_, err = execute("get", file.Url, http().R().SetOutput(fullPath))
+		_, err = execute("get", file.URL, http().R().SetOutput(fullPath))
 
 		if err != nil {
 			return nil, err

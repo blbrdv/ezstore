@@ -9,10 +9,10 @@ import (
 
 func TestFE3FileUrl(t *testing.T) {
 	expectedTycketType := "aaaaa"
-	expectedId := "bbbbb"
+	expectedID := "bbbbb"
 	expectedRevisionNumber := "ccccc"
 
-	xml := strings.NewReader(fe3FileUrl(expectedTycketType, expectedId, expectedRevisionNumber))
+	xml := strings.NewReader(fe3FileURL(expectedTycketType, expectedID, expectedRevisionNumber))
 
 	doc, err := xmlquery.Parse(xml)
 	if err != nil {
@@ -31,11 +31,11 @@ func TestFE3FileUrl(t *testing.T) {
 	identity := root.
 		SelectElement("//s:Body/GetExtendedUpdateInfo2/updateIDs/UpdateIdentity")
 
-	actualId := identity.
+	actualID := identity.
 		SelectElement("//UpdateID").
 		InnerText()
-	if actualId != expectedId {
-		t.Fatalf(`Incorrect TycketType, expected: "%s", actual: "%s"`, expectedId, actualId)
+	if actualID != expectedID {
+		t.Fatalf(`Incorrect TycketType, expected: "%s", actual: "%s"`, expectedID, actualID)
 	}
 
 	actualRevisionNumber := identity.

@@ -7,7 +7,7 @@ import (
 type BundleData struct {
 	Version *types.Version
 	Name    string
-	Url     string
+	URL     string
 	Arch    string
 	Format  string
 }
