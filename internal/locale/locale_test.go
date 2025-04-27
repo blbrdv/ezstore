@@ -1,9 +1,9 @@
-package types_test
+package locale_test
 
 import (
 	"testing"
 
-	"github.com/blbrdv/ezstore/internal/types"
+	. "github.com/blbrdv/ezstore/internal/locale"
 )
 
 var langOnlyData = []struct {
@@ -19,8 +19,8 @@ var langOnlyData = []struct {
 func TestLocaleLangOnly(t *testing.T) {
 	for _, data := range langOnlyData {
 		t.Run(data.Name, func(t *testing.T) {
-			expected := types.Locale{Language: data.Raw}
-			actual, err := types.Parse(data.Raw)
+			expected := Locale{Language: data.Raw}
+			actual, err := NewLocale(data.Raw)
 
 			if err != nil {
 				t.Fatalf(`Can not parse locale`)
@@ -50,8 +50,8 @@ var langOnlyWithNoiseData = []struct {
 func TestLocaleLangOnlyWithNoise(t *testing.T) {
 	for _, data := range langOnlyWithNoiseData {
 		t.Run(data.Name, func(t *testing.T) {
-			expected := types.Locale{Language: data.Language}
-			actual, err := types.Parse(data.Raw)
+			expected := Locale{Language: data.Language}
+			actual, err := NewLocale(data.Raw)
 
 			if err != nil {
 				t.Fatalf(`Can not parse locale`)
@@ -95,8 +95,8 @@ var langWithCountryData = []struct {
 func TestLocaleLangWithCountry(t *testing.T) {
 	for _, data := range langWithCountryData {
 		t.Run(data.Name, func(t *testing.T) {
-			expected := types.Locale{Language: data.Language, Country: data.Country}
-			actual, err := types.Parse(data.Raw)
+			expected := Locale{Language: data.Language, Country: data.Country}
+			actual, err := NewLocale(data.Raw)
 
 			if err != nil {
 				t.Fatalf(`Can not parse locale`)

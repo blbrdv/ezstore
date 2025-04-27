@@ -1,4 +1,4 @@
-package types
+package msver
 
 import (
 	"fmt"
@@ -16,7 +16,7 @@ type Version struct {
 
 type Versions []Version
 
-func New(version string) (*Version, error) {
+func NewVersion(version string) (*Version, error) {
 	r := regexp.MustCompile(`^v?(\d+)(?:\.(\d+))?(?:\.(\d+))?(?:\.(\d+))?$`)
 	f := r.FindStringSubmatch(version)
 

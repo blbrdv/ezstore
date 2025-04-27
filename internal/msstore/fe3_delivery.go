@@ -9,7 +9,8 @@ import (
 
 	"github.com/antchfx/jsonquery"
 	"github.com/antchfx/xmlquery"
-	"github.com/blbrdv/ezstore/internal/types"
+	. "github.com/blbrdv/ezstore/internal/locale"
+	. "github.com/blbrdv/ezstore/internal/msver"
 	"github.com/go-resty/resty/v2"
 	"github.com/pterm/pterm"
 )
@@ -56,7 +57,7 @@ func getCookie() (string, error) {
 		InnerText(), nil
 }
 
-func getWUID(id string, locale types.Locale) (string, error) {
+func getWUID(id string, locale Locale) (string, error) {
 	resp, err := fe3Client().
 		R().
 		Get(fmt.Sprintf("%s%s?market=%s&languages=%s-%s,%s,neutral", wuidInfoUrl, id, locale.Country, locale.Language,
@@ -181,7 +182,7 @@ func getFileName(urlraw string) (string, error) {
 	return r.FindStringSubmatch(header)[1], nil
 }
 
-func Download(id string, version string, arch string, locale types.Locale, destinationPath string) ([]string, error) {
+func Download(id string, version string, arch string, locale Locale, destinationPath string) ([]string, error) {
 	sCoockie, _ := pterm.DefaultSpinner.Start("Fetching cookie...")
 	cookie, err := getCookie()
 	if err != nil {
@@ -217,7 +218,7 @@ func Download(id string, version string, arch string, locale types.Locale, desti
 
 	productsBar, _ := pterm.DefaultProgressbar.WithTotal(len(urls)).WithTitle("Fetching product files info...").Start()
 	regex := regexp.MustCompile(`^([0-9a-zA-Z.-]+)_([\d\.]+)_([a-z0-9]+)_~?_[a-z0-9]+.([a-zA-Z]+)`)
-	var bundles types.Bundles
+	var bundles Bundles
 	for _, urlobj := range urls {
 		name, err := getFileName(urlobj)
 		if err != nil {
@@ -225,16 +226,16 @@ func Download(id string, version string, arch string, locale types.Locale, desti
 		}
 
 		regexData := regex.FindStringSubmatch(name)
-		v, err := types.New(regexData[2])
+		v, err := NewVersion(regexData[2])
 		if err != nil {
 			return nil, err
 		}
-		bundle := types.BundleData{Version: v, Name: regexData[1], Url: urlobj, Arch: regexData[3], Format: strings.ToLower(regexData[4])}
+		bundle := BundleData{Version: v, Name: regexData[1], Url: urlobj, Arch: regexData[3], Format: strings.ToLower(regexData[4])}
 		bundles = append(bundles, bundle)
 		productsBar.Increment()
 	}
 
-	var files types.Bundles
+	var files Bundles
 	for _, bundle := range bundles {
 		if bundle.Format == "appx" {
 			if bundle.Arch == arch {

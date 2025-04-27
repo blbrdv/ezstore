@@ -1,4 +1,8 @@
-package types
+package msstore
+
+import (
+	. "github.com/blbrdv/ezstore/internal/msver"
+)
 
 type BundleData struct {
 	Version *Version

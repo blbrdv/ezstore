@@ -1,4 +1,4 @@
-package types
+package locale
 
 import (
 	"fmt"
@@ -22,9 +22,9 @@ func (l Locale) String() string {
 	return fmt.Sprintf("%s_%s", l.Language, l.Country)
 }
 
-// Parse returns Locale from RFC 5646 input string or error if invalid format.
+// NewLocale returns Locale from RFC 5646 input string or error if invalid format.
 // See Appendix A for examples.
-func Parse(input string) (Locale, error) {
+func NewLocale(input string) (Locale, error) {
 	regex := regexp.MustCompile(pattern)
 	match := regex.FindStringSubmatch(input)
 	if match == nil {
