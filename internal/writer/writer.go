@@ -10,7 +10,7 @@ type DebugWriter struct {
 }
 
 func (w DebugWriter) Write(p []byte) (n int, err error) {
-	pterm.Debug.Printf(string(p))
+	pterm.Debug.Print(string(p))
 	return len(p) - 1, nil
 }
 
@@ -19,6 +19,6 @@ type ErrorWriter struct {
 }
 
 func (w ErrorWriter) Write(p []byte) (n int, err error) {
-	pterm.Error.Printf(string(p))
+	pterm.Error.Print(string(p))
 	return len(p) - 1, nil
 }
