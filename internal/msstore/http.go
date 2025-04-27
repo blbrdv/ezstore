@@ -2,6 +2,7 @@ package msstore
 
 import (
 	"errors"
+	"fmt"
 	"github.com/pterm/pterm"
 	"time"
 
@@ -28,11 +29,47 @@ func http() *resty.Client {
 	return resty.
 		New().
 		SetLogger(ptermLogger{}).
-		SetRetryCount(10).
 		SetRetryWaitTime(5*time.Second).
 		SetRetryMaxWaitTime(20*time.Second).
-		SetRetryAfter(func(client *resty.Client, resp *resty.Response) (time.Duration, error) {
-			return 0, errors.New("quota exceeded")
-		}).
 		SetHeader("Content-Encoding", "Encoding.UTF8")
+}
+
+const maxAttempts = 5
+
+// execute [resty.Request] retrying on panic 5 times.
+func execute(method string, url string, r *resty.Request) (*resty.Response, error) {
+	var result *resty.Response
+	var err error
+
+	for attempt := 1; attempt <= maxAttempts; attempt += 1 {
+		func() {
+			defer func() {
+				if r := recover(); r != nil {
+					switch recoverType := r.(type) {
+					case string:
+						err = errors.New(recoverType)
+					case error:
+						err = recoverType
+					default:
+						err = errors.New("unexpected type")
+					}
+				}
+			}()
+
+			result, err = r.Execute(method, url)
+		}()
+
+		if err == nil {
+			return result, nil
+		}
+
+		pterm.Warning.Printfln("%s, Attempt %d", err.Error(), attempt)
+
+		if attempt < maxAttempts {
+			duration, _ := time.ParseDuration(fmt.Sprintf("%ds", 5*attempt))
+			time.Sleep(duration)
+		}
+	}
+
+	return nil, err
 }

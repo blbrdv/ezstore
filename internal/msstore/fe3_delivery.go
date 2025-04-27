@@ -33,10 +33,12 @@ func fe3Client() *resty.Client {
 }
 
 func getCookie() (string, error) {
-	resp, err := fe3Client().
-		R().
-		SetBody(getCookiePayload).
-		Post(clientUrl)
+	resp, err :=
+		execute("post", clientUrl,
+			fe3Client().
+				R().
+				SetBody(getCookiePayload),
+		)
 
 	if err != nil {
 		return "", err
@@ -58,10 +60,20 @@ func getCookie() (string, error) {
 }
 
 func getWUID(id string, locale Locale) (string, error) {
-	resp, err := fe3Client().
-		R().
-		Get(fmt.Sprintf("%s%s?market=%s&languages=%s-%s,%s,neutral", wuidInfoUrl, id, locale.Country, locale.Language,
-			locale.Country, locale.Language))
+	resp, err :=
+		execute(
+			"get",
+			fmt.Sprintf(
+				"%s%s?market=%s&languages=%s-%s,%s,neutral",
+				wuidInfoUrl,
+				id,
+				locale.Country,
+				locale.Language,
+				locale.Country,
+				locale.Language,
+			),
+			fe3Client().R(),
+		)
 
 	if err != nil {
 		return "", err
@@ -91,10 +103,11 @@ func getWUID(id string, locale Locale) (string, error) {
 func getProducts(cookie string, categoryIdentifier string) ([]ProductInfo, error) {
 	var list []ProductInfo
 
-	resp, err := fe3Client().
-		R().
-		SetBody(wuidRequest(msaToken, cookie, categoryIdentifier)).
-		Post(clientUrl)
+	resp, err :=
+		execute("post", clientUrl,
+			fe3Client().R().
+				SetBody(wuidRequest(msaToken, cookie, categoryIdentifier)),
+		)
 
 	if err != nil {
 		return list, err
@@ -135,10 +148,11 @@ func getProducts(cookie string, categoryIdentifier string) ([]ProductInfo, error
 }
 
 func getUrl(info ProductInfo) (string, error) {
-	resp, err := fe3Client().
-		R().
-		SetBody(fe3FileUrl(msaToken, info.UpdateId, info.RevisionNumber)).
-		Post(clientSecuredUrl)
+	resp, err :=
+		execute("post", clientSecuredUrl,
+			fe3Client().R().
+				SetBody(fe3FileUrl(msaToken, info.UpdateId, info.RevisionNumber)),
+		)
 
 	if err != nil {
 		return "", err
@@ -166,11 +180,13 @@ func getFileName(urlraw string) (string, error) {
 
 	fullurl := "http://" + uri.Host + uri.EscapedPath() + "?" + uri.Query().Encode()
 
-	name, err := http().R().
-		SetHeader("Connection", "Keep-Alive").
-		SetHeader("Accept", "*/*").
-		SetHeader("User-Agent", "Microsoft-Delivery-Optimization/10.0").
-		Head(fullurl)
+	name, err :=
+		execute("head", fullurl,
+			http().R().
+				SetHeader("Connection", "Keep-Alive").
+				SetHeader("Accept", "*/*").
+				SetHeader("User-Agent", "Microsoft-Delivery-Optimization/10.0"),
+		)
 
 	if err != nil {
 		return "", err
@@ -281,9 +297,7 @@ func Download(id string, version string, arch string, locale Locale, destination
 	for _, file := range files {
 		fullPath := destinationPath + "\\" + file.Name + "-" + file.Version.String() + "." + file.Format
 
-		_, err = http().R().
-			SetOutput(fullPath).
-			Get(file.Url)
+		_, err = execute("get", file.Url, http().R().SetOutput(fullPath))
 
 		if err != nil {
 			return nil, err
