@@ -1,6 +1,4 @@
 #define Name        "ezstore"
-#define Version     "<<<PRODUCT_VERSION>>>"
-#define FileVersion "<<<FILE_VERSION>>>"
 #define Publisher   "blbrdv"
 #define URL         "https://github.com/blbrdv/ezstore"
 #define ExeName     "ezstore.exe"
@@ -10,8 +8,8 @@
 [Setup]
 AppId={{27F6680A-E22B-4611-A5A0-089A828C5F96}
 AppName={#Name}
-AppVersion={#Version}
-VersionInfoVersion={#FileVersion}
+AppVersion={#PV}
+VersionInfoVersion={#FV}
 AppPublisher={#Publisher}
 AppPublisherURL={#URL}
 AppSupportURL={#URL}

@@ -5,6 +5,11 @@ Param (
     [string]$Command
 )
 
+$global:SysoFiles = @(
+    "rsrc_windows_386.syso",
+    "rsrc_windows_amd64.syso"
+)
+
 #######
 # Utils
 #######
@@ -19,7 +24,7 @@ function GetDuration {
     $Data = New-Object System.Collections.Generic.List[string]
 
     if ( $TimeSpan.Days -gt 0 ) {
-        $DayString = $TimeSpan.Days;
+        $DayString = $TimeSpan.Days.ToString();
         $Data.Add("${DayString}d");
     }
 
@@ -42,6 +47,7 @@ function GetDuration {
     $Data.Add("${MillString}ms");
 
     return "[" + (($Data) -join " ") + "]";
+
 }
 
 function Check-If-Installed {
@@ -57,6 +63,44 @@ function Check-If-Installed {
         Write-Host "Error: $Command not found in `$PATH. $Name must be installed.";
         exit 1;
     }
+
+}
+
+function Get-Product-Version {
+
+    $Version =
+        Select-String -LiteralPath "CHANGELOG.md" -Pattern "## \[([\d\.]+)\] - \d\d\d\d-\d\d-\d\d"
+        | Select-Object -Index 0
+        | %{$_.Matches.Groups[1].Value};
+
+    if ( $Version -eq "" ) {
+        Write-Host "Can not get version from CHANGELOG.md file...";
+        exit 1;
+    }
+
+    return $Version;
+
+}
+
+function Get-File-Version {
+
+    Param (
+        [Parameter(Mandatory=$true,Position=0)]
+        [string]$Version
+    )
+
+    $Value = "0"
+
+    $LastTag = git describe --tags --abbrev=0;
+
+    $Count = Invoke-Expression "git log $LastTag..HEAD --oneline"  | Measure-Object -Line | %{$_.Lines};
+
+    if ( $Count -ne "" ) {
+        $Value = $Count
+    }
+
+    return "${Version}.${Value}"
+
 }
 
 function Exec {
@@ -68,7 +112,13 @@ function Exec {
 
     $TaskName = (Get-PSCallStack)[1].Command;
     Write-Host " > ${TaskName}: $Command";
-    Invoke-Expression "$Command";
+
+    $global:LASTEXITCODE = 0
+    Invoke-Expression "${Command}";
+
+    if ( $LASTEXITCODE -ne 0 ) {
+        throw "Command exited with code $LASTEXITCODE";
+    }
 
 }
 
@@ -76,14 +126,9 @@ function Exec {
 # Tasks
 #######
 
-function Clean-Winres-Files {
+function Remove-Winres-Files {
 
-    $SysoFiles = (
-        "rsrc_windows_386.syso",
-        "rsrc_windows_amd64.syso"
-    )
-
-    foreach ($File in $SysoFiles) {
+    foreach ($File in $global:SysoFiles) {
         Exec "Remove-Item -Path $File -Force -ErrorAction SilentlyContinue";
     }
 
@@ -92,7 +137,7 @@ function Clean-Winres-Files {
 function Clean {
 
     Exec "Remove-Item -Path 'output' -Recurse -Force -ErrorAction SilentlyContinue";
-    Clean-Winres-Files;
+    Remove-Winres-Files;
 
 }
 
@@ -113,18 +158,21 @@ function Test {
 
 function Build {
 
-    begin {
-        Check-If-Installed "Inno Setup" "iscc";
-    }
+    Check-If-Installed "go-winres" "go-winres";
+    Check-If-Installed "Inno Setup" "iscc";
 
-    process {
-        Exec "go-winres make --in ./winres.json";
+    $ProductVersion = Get-Product-Version;
+    $FileVersion = Get-File-Version $ProductVersion;
+
+    try {
+        Exec "go-winres make --in ./winres.json --product-version $ProductVersion --file-version $FileVersion";
         Exec "go build -o ./output/ezstore.exe";
-        Exec "iscc /Q 'setup.iss'";
+        Exec "iscc /Q 'setup.iss' /DPV='$ProductVersion' /DFV='$FileVersion'";
     }
-
-    end {
-        Clean-Winres-Files;
+    finally {
+        $Code = $lastexitcode;
+        Remove-Winres-Files;
+        exit $Code;
     }
 
 }
