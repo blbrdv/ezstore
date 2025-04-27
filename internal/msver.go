@@ -14,8 +14,6 @@ type Version struct {
 	D int64
 }
 
-type Versions []Version
-
 func NewVersion(version string) (*Version, error) {
 	r := regexp.MustCompile(`^v?(\d+)(?:\.(\d+))?(?:\.(\d+))?(?:\.(\d+))?$`)
 	f := r.FindStringSubmatch(version)
@@ -71,18 +69,6 @@ func (v Version) LessThan(versionB *Version) bool {
 
 func (v Version) Slice() []int64 {
 	return []int64{v.A, v.B, v.C, v.D}
-}
-
-func (s Versions) Len() int {
-	return len(s)
-}
-
-func (s Versions) Swap(i, j int) {
-	s[i], s[j] = s[j], s[i]
-}
-
-func (s Versions) Less(i, j int) bool {
-	return s[i].LessThan(&s[j])
 }
 
 func recursiveCompare(versionA []int64, versionB []int64) int {
