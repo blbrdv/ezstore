@@ -5,25 +5,32 @@ import (
 	_ "embed"
 	"errors"
 	"fmt"
+	. "github.com/blbrdv/ezstore/internal/locale"
+	"github.com/blbrdv/ezstore/internal/msstore"
+	"github.com/blbrdv/ezstore/internal/windows"
+	. "github.com/blbrdv/ezstore/internal/writer"
+	"github.com/pterm/pterm"
+	"github.com/urfave/cli/v3"
 	"io"
 	"os"
 	"path/filepath"
 	"runtime"
-
-	. "github.com/blbrdv/ezstore/internal/locale"
-	"github.com/blbrdv/ezstore/internal/msstore"
-	"github.com/blbrdv/ezstore/internal/windows"
-	"github.com/pterm/pterm"
-	"github.com/urfave/cli/v3"
 )
 
 //go:embed dist/README.txt
 var help string
 
 func main() {
+	defer func() {
+		_ = recover()
+		os.Exit(1)
+	}()
+
 	app := &cli.Command{
 		Name:                  "ezstore",
 		EnableShellCompletion: true,
+		Writer:                DebugWriter{},
+		ErrWriter:             ErrorWriter{},
 		Commands: []*cli.Command{
 			{
 				Name:   "install",
@@ -62,7 +69,7 @@ func main() {
 	}
 
 	if err := app.Run(context.Background(), os.Args); err != nil {
-		pterm.Fatal.Println(err)
+		pterm.Fatal.Println(err.Error())
 	}
 }
 
