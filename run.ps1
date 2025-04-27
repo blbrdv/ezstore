@@ -147,14 +147,24 @@ function Lint {
 
     Check-If-Installed "Staticcheck" "staticcheck";
 
-    Exec "go vet";
-    Exec "staticcheck .";
+    try {
+        Exec "go vet";
+        Exec "staticcheck .";
+    }
+    catch {
+        $global:ExitCode = $lastexitcode;
+    }
 
 }
 
 function Test {
 
-    Exec "go test ./...";
+    try {
+        Exec "go test ./...";
+    }
+    catch {
+        $global:ExitCode = $lastexitcode;
+    }
 
 }
 
