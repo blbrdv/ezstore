@@ -10,50 +10,47 @@ import (
 )
 
 // Install package if its version higher that installed counterpart.
-func Install(fullPath string) error {
-	regex := regexp.MustCompile(`^([0-9a-zA-Z.-]+)[-_]v?([\d\.]+)\.`)
-	arr := strings.Split(fullPath, "\\")
-	regexData := regex.FindStringSubmatch(arr[len(arr)-1])
-	name := regexData[1]
-	version, err := types.NewVersion(strings.TrimSuffix(regexData[2], "."))
+func Install(filePath string) error {
+	fileNameRegexp := regexp.MustCompile(`^([0-9a-zA-Z.-]+)[-_]v?([\d\.]+)\.`)
+	pathSlice := strings.Split(filePath, "\\")
+	matches := fileNameRegexp.FindStringSubmatch(pathSlice[len(pathSlice)-1])
 
+	name := matches[1]
+	newVersion, err := types.NewVersion(strings.TrimSuffix(matches[2], "."))
 	if err != nil {
 		return err
 	}
 
-	cmd1 := exec.Command("powershell", "-Command",
+	cmd := exec.Command("powershell", "-Command",
 		fmt.Sprintf(
 			"Get-AppxPackage -Name %s* | Sort-Object -Property Version | Select-Object -ExpandProperty Version -Last 1",
 			name))
-	vBytes, err := cmd1.CombinedOutput()
+	result, err := cmd.CombinedOutput()
 
 	if err != nil {
 		return err
 	}
 
-	vString := strings.Trim(string(vBytes), "\n\r")
+	installedVersionStr := strings.Trim(string(result), "\n\r")
 
-	var latestVersion *types.Version
+	var installedVersion *types.Version
 
-	if vString == "" {
-		latestVersion, _ = types.NewVersion("0")
+	if installedVersionStr == "" {
+		installedVersion, _ = types.NewVersion("0")
 	} else {
-		latestVersion, err = types.NewVersion(vString)
-
+		installedVersion, err = types.NewVersion(installedVersionStr)
 		if err != nil {
 			return err
 		}
 	}
 
-	if latestVersion.LessThan(version) {
-		cmd2 := exec.Command("powershell", "-NoProfile", "Add-AppxPackage", "-Path", fullPath)
-		cmd2err := cmd2.Run()
-
-		if cmd2err != nil {
-			return cmd2err
+	if installedVersion.LessThan(newVersion) {
+		cmd = exec.Command("powershell", "-NoProfile", "Add-AppxPackage", "-Path", filePath)
+		if err = cmd.Run(); err != nil {
+			return err
 		}
 
-		pterm.Debug.Println(fmt.Sprintf("Package %s v%s installed", name, version))
+		pterm.Debug.Println(fmt.Sprintf("Package %s %s installed", name, newVersion.String()))
 	}
 
 	return nil
@@ -65,12 +62,12 @@ var defaultLocale = types.Locale{Language: "en", Country: "US"}
 // If error occurred or returned value is empty, returns default locale.
 func GetLocale() types.Locale {
 	cmd := exec.Command("powershell", "Get-Culture | select -exp Name")
-	output, err := cmd.Output()
+	cultureName, err := cmd.Output()
 	if err != nil {
 		return defaultLocale
 	}
 
-	localeStr := strings.TrimSpace(string(output))
+	localeStr := strings.TrimSpace(string(cultureName))
 	localeStr = strings.Trim(localeStr, "\r\n")
 
 	locale, err := types.NewLocale(localeStr)

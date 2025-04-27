@@ -4,6 +4,7 @@ import (
 	"errors"
 	"fmt"
 	"github.com/pterm/pterm"
+	"strings"
 	"time"
 
 	"github.com/go-resty/resty/v2"
@@ -37,17 +38,27 @@ func http() *resty.Client {
 const maxAttempts = 5
 
 // execute [resty.Request] retrying on panic 5 times.
-func execute(method string, url string, r *resty.Request) (*resty.Response, error) {
+func execute(method string, url string, request *resty.Request) (*resty.Response, error) {
 	var result *resty.Response
 	var err error
 
 	for attempt := 1; attempt <= maxAttempts; attempt += 1 {
 		func() {
 			defer func() {
-				if r := recover(); r != nil {
-					switch recoverType := r.(type) {
+				if rec := recover(); rec != nil {
+					switch recoverType := rec.(type) {
 					case string:
-						err = errors.New(recoverType)
+						recoverData := strings.Split(recoverType, ":")
+						recLen := len(recoverData)
+
+						var str string
+						if recLen == 1 {
+							str = recoverType
+						} else {
+							str = fmt.Sprintf("%s:%s", recoverData[recLen-2], recoverData[recLen-1])
+						}
+
+						err = errors.New(str)
 					case error:
 						err = recoverType
 					default:
@@ -56,14 +67,15 @@ func execute(method string, url string, r *resty.Request) (*resty.Response, erro
 				}
 			}()
 
-			result, err = r.Execute(method, url)
+			pterm.Debug.Println(fmt.Sprintf("Sending %s to %s", method, url))
+			result, err = request.Execute(method, url)
 		}()
 
 		if err == nil {
 			return result, nil
 		}
 
-		pterm.Warning.Printfln("%s, Attempt %d", err.Error(), attempt)
+		pterm.Warning.Printfln("%s \"%s\": %s, Attempt %d", strings.ToUpper(method), url, err.Error(), attempt)
 
 		if attempt < maxAttempts {
 			duration, _ := time.ParseDuration(fmt.Sprintf("%ds", 5*attempt))

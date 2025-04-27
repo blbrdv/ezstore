@@ -19,20 +19,20 @@ func (l Locale) String() string {
 		return l.Language
 	}
 
-	return fmt.Sprintf("%s_%s", l.Language, l.Country)
+	return fmt.Sprintf("%s-%s", l.Language, l.Country)
 }
 
 // NewLocale returns [Locale] from RFC 5646 input string or error if invalid format.
 // See Appendix A for examples.
 func NewLocale(input string) (Locale, error) {
-	regex := regexp.MustCompile(pattern)
-	match := regex.FindStringSubmatch(input)
-	if match == nil {
+	localeRegexp := regexp.MustCompile(pattern)
+	matches := localeRegexp.FindStringSubmatch(input)
+	if matches == nil {
 		return Locale{}, fmt.Errorf("%s is not a valid locale", input)
 	}
 
 	return Locale{
-		Language: match[regex.SubexpIndex("lang")],
-		Country:  match[regex.SubexpIndex("country")],
+		Language: matches[localeRegexp.SubexpIndex("lang")],
+		Country:  matches[localeRegexp.SubexpIndex("country")],
 	}, nil
 }

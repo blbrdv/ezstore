@@ -6,12 +6,12 @@ import (
 	"strconv"
 )
 
-// Version represents 4-digit SemVer used in Windows and MS Store.
+// Version type represents 4-digit version used in Windows and MS Store.
 type Version struct {
-	A int64
-	B int64
-	C int64
-	D int64
+	Major    int64
+	Minor    int64
+	Build    int64
+	Revision int64
 }
 
 // NewVersion returns [Version] from string representing SemVer.
@@ -58,37 +58,37 @@ func parse(input string) (int64, error) {
 
 // String returns SemVer representation.
 func (v Version) String() string {
-	return fmt.Sprintf("v%d.%d.%d.%d", v.A, v.B, v.C, v.D)
+	return fmt.Sprintf("v%d.%d.%d.%d", v.Major, v.Minor, v.Build, v.Revision)
 }
 
 // Compare two versions.
-func (v Version) Compare(versionB *Version) int {
-	return recursiveCompare(v.Slice(), versionB.Slice())
+func (v Version) Compare(other *Version) int {
+	return recursiveCompare(v.Slice(), other.Slice())
 }
 
-// LessThan returns true if this [Version] less than provided [Version].
-func (v Version) LessThan(versionB *Version) bool {
-	return v.Compare(versionB) < 0
+// LessThan returns true if this [Version] less than other [Version].
+func (v Version) LessThan(other *Version) bool {
+	return v.Compare(other) < 0
 }
 
 // Slice converts [Version] to array of 4 numbers.
 func (v Version) Slice() []int64 {
-	return []int64{v.A, v.B, v.C, v.D}
+	return []int64{v.Major, v.Minor, v.Build, v.Revision}
 }
 
-func recursiveCompare(versionA []int64, versionB []int64) int {
-	if len(versionA) == 0 {
+func recursiveCompare(left []int64, right []int64) int {
+	if len(left) == 0 {
 		return 0
 	}
 
-	a := versionA[0]
-	b := versionB[0]
+	leftNumber := left[0]
+	rightNumber := right[0]
 
-	if a > b {
+	if leftNumber > rightNumber {
 		return 1
-	} else if a < b {
+	} else if leftNumber < rightNumber {
 		return -1
 	}
 
-	return recursiveCompare(versionA[1:], versionB[1:])
+	return recursiveCompare(left[1:], right[1:])
 }

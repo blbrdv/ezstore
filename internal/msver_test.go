@@ -11,10 +11,10 @@ var versionData = []struct {
 	Version *Version
 	Raw     string
 }{
-	{"TestVersionAOnly", &Version{A: 1}, "v1"},
-	{"TestVersionAB", &Version{A: 1, B: 2}, "1.2"},
-	{"TestVersionABC", &Version{A: 1, B: 2, C: 3}, "1.2.3"},
-	{"TestVersionABCD", &Version{A: 1, B: 2, C: 3, D: 4}, "1.2.3.4"},
+	{"TestVersionMajor", &Version{Major: 1}, "v1"},
+	{"TestVersionMajorMinor", &Version{Major: 1, Minor: 2}, "1.2"},
+	{"TestVersionMajorMinorBuild", &Version{Major: 1, Minor: 2, Build: 3}, "1.2.3"},
+	{"TestVersionMajorMinorBuildRevision", &Version{Major: 1, Minor: 2, Build: 3, Revision: 4}, "1.2.3.4"},
 }
 
 func TestVersion(t *testing.T) {
@@ -40,22 +40,19 @@ func TestVersion(t *testing.T) {
 var versionCompareData = []struct {
 	Name     string
 	Expected int
-	A        *Version
-	B        *Version
+	Left     *Version
+	Right    *Version
 }{
-	{"TestCompareLeft", 1, &Version{A: 1, B: 2, C: 3, D: 4}, &Version{B: 2, C: 3, D: 4}},
-	{"TestCompareRight", -1, &Version{D: 3}, &Version{D: 4}},
-	{"TestCompareEqual", 0, &Version{A: 1, B: 2, C: 3, D: 4}, &Version{A: 1, B: 2, C: 3, D: 4}},
+	{"TestCompareLeft", 1, &Version{Major: 1, Minor: 2, Build: 3, Revision: 4}, &Version{Minor: 2, Build: 3, Revision: 4}},
+	{"TestCompareRight", -1, &Version{Revision: 3}, &Version{Revision: 4}},
+	{"TestCompareEqual", 0, &Version{Major: 1, Minor: 2, Build: 3, Revision: 4}, &Version{Major: 1, Minor: 2, Build: 3, Revision: 4}},
 }
 
 func TestCompare(t *testing.T) {
 	for _, data := range versionCompareData {
 		t.Run(data.Name, func(t *testing.T) {
 			expected := data.Expected
-			a := data.A
-			b := data.B
-
-			actual := a.Compare(b)
+			actual := data.Left.Compare(data.Right)
 
 			if actual != expected {
 				t.Fatalf(`Incorrect comparsion, expected: %d, actual: %d`, expected, actual)
