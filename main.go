@@ -43,10 +43,15 @@ func main() {
 				},
 				Flags: []cli.Flag{
 					&cli.StringFlag{
-						Name:             "version",
-						Aliases:          []string{"v"},
-						Value:            "latest",
-						Validator:        validateNotEmpty,
+						Name:    "version",
+						Aliases: []string{"v"},
+						Value:   "latest",
+						Validator: func(s string) error {
+							if s == "" {
+								return errors.New("value must be not empty")
+							}
+							return nil
+						},
 						ValidateDefaults: false,
 					},
 					&cli.StringFlag{
@@ -136,12 +141,4 @@ func removeDir(path string) {
 	if err != nil {
 		panic(err)
 	}
-}
-
-func validateNotEmpty(value string) error {
-	if value == "" {
-		return errors.New("value must be not empty")
-	}
-
-	return nil
 }
