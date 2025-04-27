@@ -6,106 +6,60 @@ import (
 	. "github.com/blbrdv/ezstore/internal/msver"
 )
 
-func TestA(t *testing.T) {
-	expected := Version{A: 1}
-	raw := "v1"
-	actual, err := NewVersion(raw)
+var versionData = []struct {
+	Name    string
+	Version *Version
+	Raw     string
+}{
+	{"TestVersionAOnly", &Version{A: 1}, "v1"},
+	{"TestVersionAB", &Version{A: 1, B: 2}, "1.2"},
+	{"TestVersionABC", &Version{A: 1, B: 2, C: 3}, "1.2.3"},
+	{"TestVersionABCD", &Version{A: 1, B: 2, C: 3, D: 4}, "1.2.3.4"},
+}
 
-	if err != nil {
-		t.Fatalf(`Can not parse version`)
-	}
+func TestVersion(t *testing.T) {
+	for _, data := range versionData {
+		t.Run(data.Name, func(t *testing.T) {
+			expected := data.Version
+			actual, err := NewVersion(data.Raw)
 
-	expectedStr := expected.String()
-	actualStr := actual.String()
+			if err != nil {
+				t.Fatalf(`Can not parse version`)
+			}
 
-	if actualStr != expectedStr {
-		t.Fatalf(`Incorrect Version, expected: "%s", actual: "%s"`, expectedStr, actualStr)
+			expectedStr := expected.String()
+			actualStr := actual.String()
+
+			if actualStr != expectedStr {
+				t.Fatalf(`Incorrect Version, expected: "%s", actual: "%s"`, expectedStr, actualStr)
+			}
+		})
 	}
 }
 
-func TestB(t *testing.T) {
-	expected := Version{A: 1, B: 2}
-	raw := "1.2"
-	actual, err := NewVersion(raw)
-
-	if err != nil {
-		t.Fatalf(`Can not parse version`)
-	}
-
-	expectedStr := expected.String()
-	actualStr := actual.String()
-
-	if actualStr != expectedStr {
-		t.Fatalf(`Incorrect Version, expected: "%s", actual: "%s"`, expectedStr, actualStr)
-	}
+var versionCompareData = []struct {
+	Name     string
+	Expected int
+	A        *Version
+	B        *Version
+}{
+	{"TestCompareLeft", 1, &Version{A: 1, B: 2, C: 3, D: 4}, &Version{B: 2, C: 3, D: 4}},
+	{"TestCompareRight", -1, &Version{D: 3}, &Version{D: 4}},
+	{"TestCompareEqual", 0, &Version{A: 1, B: 2, C: 3, D: 4}, &Version{A: 1, B: 2, C: 3, D: 4}},
 }
 
-func TestC(t *testing.T) {
-	expected := Version{A: 1, B: 2, C: 3}
-	raw := "1.2.3"
-	actual, err := NewVersion(raw)
+func TestCompare(t *testing.T) {
+	for _, data := range versionCompareData {
+		t.Run(data.Name, func(t *testing.T) {
+			expected := data.Expected
+			a := data.A
+			b := data.B
 
-	if err != nil {
-		t.Fatalf(`Can not parse version`)
-	}
+			actual := a.Compare(b)
 
-	expectedStr := expected.String()
-	actualStr := actual.String()
-
-	if actualStr != expectedStr {
-		t.Fatalf(`Incorrect Version, expected: "%s", actual: "%s"`, expectedStr, actualStr)
-	}
-}
-
-func TestD(t *testing.T) {
-	expected := Version{A: 1, B: 2, C: 3, D: 4}
-	raw := "1.2.3.4"
-	actual, err := NewVersion(raw)
-
-	if err != nil {
-		t.Fatalf(`Can not parse version`)
-	}
-
-	expectedStr := expected.String()
-	actualStr := actual.String()
-
-	if actualStr != expectedStr {
-		t.Fatalf(`Incorrect Version, expected: "%s", actual: "%s"`, expectedStr, actualStr)
-	}
-}
-
-func TestCompareLeft(t *testing.T) {
-	expected := 1
-	a := &Version{A: 1, B: 2, C: 3, D: 4}
-	b := &Version{B: 2, C: 3, D: 4}
-
-	actual := a.Compare(b)
-
-	if actual != expected {
-		t.Fatalf(`Incorrect comparsion, expected: %d, actual: %d`, expected, actual)
-	}
-}
-
-func TestCompareRight(t *testing.T) {
-	expected := -1
-	a := &Version{D: 3}
-	b := &Version{D: 4}
-
-	actual := a.Compare(b)
-
-	if actual != expected {
-		t.Fatalf(`Incorrect comparsion, expected: %d, actual: %d`, expected, actual)
-	}
-}
-
-func TestCompareEqual(t *testing.T) {
-	expected := 0
-	a := &Version{A: 1, B: 2, C: 3, D: 4}
-	b := &Version{A: 1, B: 2, C: 3, D: 4}
-
-	actual := a.Compare(b)
-
-	if actual != expected {
-		t.Fatalf(`Incorrect comparsion, expected: %d, actual: %d`, expected, actual)
+			if actual != expected {
+				t.Fatalf(`Incorrect comparsion, expected: %d, actual: %d`, expected, actual)
+			}
+		})
 	}
 }
