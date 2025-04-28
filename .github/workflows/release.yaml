@@ -8,48 +8,26 @@ on:
       - "*"
 
 jobs:
-  build:
+  release:
     runs-on: windows-latest
 
-    steps:
-    - uses: actions/checkout@v3
-
-    - name: Ezstore compile
-      uses: actions/setup-go@v4
-      with:
-        go-version: '^1.21.0'
-    - run: |
-        go install github.com/tc-hib/go-winres@latest
-        go-winres make --in ./winres.json
-        go build -o ./output/ezstore.exe
-
-    - name: Compile installer
-      uses: Minionguyjpro/Inno-Setup-Action@v1.0.0
-      with:
-        path: setup.iss
-
-    - uses: actions/upload-artifact@master
-      with:
-        name: my-artifact
-        path: output
-
-  release:
-    needs: build
-    runs-on: ubuntu-latest
-
-    permissions:
-      contents: write
+    name: Build and release project
 
     steps:
-    - uses: actions/checkout@v3
+    - uses: actions/checkout@v4
 
-    - uses: actions/download-artifact@master
+    - uses: actions/setup-go@v5
       with:
-        name: my-artifact
-        path: output
+        go-version-file: 'go.mod'
+        cache: false
 
-    - name: Github release
-      uses: docker://antonyurchenko/git-release:latest
+    - uses: pwall2222/inno-setup-download@v0.0.8
+
+    - name: Build project
+      run: .\run.ps1 build
+
+    - name: Release project
+      uses: anton-yurchenko/git-release@v6
       env:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       with:

@@ -6,18 +6,18 @@ import (
 )
 
 //go:embed payloads/FE3FileUrl.xml
-var fileUrlPayload string
+var fileURLPayload string
 
 //go:embed payloads/GetCookie.xml
 var getCookiePayload string
 
 //go:embed payloads/WUIDRequest.xml
-var wuidRequiestPayload string
+var wuidRequestPayload string
 
-func fe3FileUrl(ticketType string, id string, revisionNumber string) string {
-	return fmt.Sprintf(fileUrlPayload, ticketType, id, revisionNumber)
+func fe3FileURL(ticketType string, id string, revisionNumber string) string {
+	return fmt.Sprintf(fileURLPayload, ticketType, id, revisionNumber)
 }
 
 func wuidRequest(ticketType string, cookie string, categoryIdentifier string) string {
-	return fmt.Sprintf(wuidRequiestPayload, ticketType, cookie, categoryIdentifier)
+	return fmt.Sprintf(wuidRequestPayload, ticketType, cookie, categoryIdentifier)
 }

@@ -5,30 +5,25 @@ on:
 
 jobs:
   lint-and-test:
-    runs-on: ubuntu-latest
-    env:
-      ACTIONS_ALLOW_UNSECURE_COMMANDS: 'true'
+    runs-on: windows-latest
+
+    name: Lint and test project
 
     steps:
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v4
 
-      - uses: actions/setup-go@v4
+      - uses: actions/setup-go@v5
         with:
-          go-version: '1.21'
+          go-version-file: 'go.mod'
           cache: false
 
-      - uses: 'lagren/setup-task@v1'
+      - name: Setup staticcheck@latest
+        run: |
+          go install "honnef.co/go/tools/cmd/staticcheck@latest"
+          echo "$(go env GOPATH)/bin/staticcheck" | Out-File -FilePath $env:GITHUB_PATH -Encoding utf8 -Append
 
-      - uses: actions/setup-go@v4
-        with:
-          go-version: '^1.21.0'
-      - run: go vet
+      - name: Lint project
+        run: .\run.ps1 lint
 
-      - name: lint
-        uses: dominikh/staticcheck-action@v1.3.0
-        with:
-          install-go: false
-
-      - name: tests
-        run: task test
-
+      - name: Run unit tests
+        run: .\run.ps1 test

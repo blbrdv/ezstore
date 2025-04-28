@@ -1,15 +1,15 @@
-#define Name      "ezstore"
-#define Version   "1.1.1"
-#define Publisher "blbrdv"
-#define URL       "https://github.com/blbrdv/ezstore"
-#define ExeName   "ezstore.exe"
+#define Name        "ezstore"
+#define Publisher   "blbrdv"
+#define URL         "https://github.com/blbrdv/ezstore"
+#define ExeName     "ezstore.exe"
 
 
 ;------------------------------------------------------------------------------
 [Setup]
 AppId={{27F6680A-E22B-4611-A5A0-089A828C5F96}
 AppName={#Name}
-AppVersion={#Version}
+AppVersion={#PV}
+VersionInfoVersion={#FV}
 AppPublisher={#Publisher}
 AppPublisherURL={#URL}
 AppSupportURL={#URL}
@@ -22,7 +22,7 @@ OutputDir=.\output
 OutputBaseFileName=ezsetup
 
 LicenseFile=LICENSE
-SetupIconFile=dist\icon.ico
+SetupIconFile=icons\icon.ico
 
 Compression=lzma
 SolidCompression=yes
@@ -32,7 +32,7 @@ ChangesEnvironment=true
 ;------------------------------------------------------------------------------
 [Files]
 Source: "output\ezstore.exe"; DestDir: "{app}/bin"; Flags: ignoreversion
-Source: "dist\README.txt"; DestDir: "{app}"; Flags: ignoreversion
+Source: "cmd\README.txt"; DestDir: "{app}"; Flags: ignoreversion
 
 
 ;------------------------------------------------------------------------------

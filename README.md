@@ -1,4 +1,4 @@
-# ![icon](/dist/icon16.png) ezstore
+# ![icon](/icons/icon16.png) ezstore
 Easy install apps from MS Store on Long-term Servicing Windows.
 
 ## Installation
@@ -21,19 +21,23 @@ where `id` is product identifier form MS store, e.g.
 
 ## Development
 
-### Run tests
+### Requirements
 
-`task test`
+1. [Golang](https://go.dev/dl/) version `1.24` or later installed;
+2. [staticcheck](https://staticcheck.dev/) installed;
+3. [go-winres](https://github.com/tc-hib/go-winres) installed;
+4. [Inno Setup 6](https://jrsoftware.org/isinfo.php) installed and put in $PATH.
 
-### Build
+### Automation
 
-Requirements:
+Use `.\run.ps1 <task>`.
 
- 1. [go-task](https://github.com/go-task/task) installed;
- 2. [staticcheck](https://staticcheck.dev/) installed;
- 3. [Inno Setup 6](https://jrsoftware.org/isinfo.php) installed and put in $PATH.
-
-`task build`
+Available tasks:
+ - `clean`
+ - `format`
+ - `lint`
+ - `test`
+ - `build`
 
 ## License
 

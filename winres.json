@@ -2,8 +2,8 @@
   "RT_GROUP_ICON": {
     "APP": {
       "0000": [
-        "dist\\icon.png",
-        "dist\\icon16.png"
+        "icons\\icon.png",
+        "icons\\icon16.png"
       ]
     }
   },
@@ -11,8 +11,7 @@
     "#1": {
       "0409": {
         "identity": {
-          "name": "ezstore",
-          "version": "1.1.1"
+          "name": "ezstore"
         },
         "description": "Easy install apps from MS Store on Long-term Servicing Windows",
         "minimum-os": "win10",
@@ -35,23 +34,17 @@
   "RT_VERSION": {
     "#1": {
       "0000": {
-        "fixed": {
-          "file_version": "1.1.1.0",
-          "product_version": "1.1.1.0"
-        },
         "info": {
           "0409": {
             "Comments": "",
             "CompanyName": "blbrdv",
             "FileDescription": "Easy install apps from MS Store on Long-term Servicing Windows",
-            "FileVersion": "1.1.1.0",
             "InternalName": "ezstore",
             "LegalCopyright": "",
             "LegalTrademarks": "",
             "OriginalFilename": "ezstore",
             "PrivateBuild": "",
             "ProductName": "ezstore",
-            "ProductVersion": "1.1.1.0",
             "SpecialBuild": ""
           }
         }
