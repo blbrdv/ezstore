@@ -1,7 +1,7 @@
 Param (
     [Parameter(Mandatory=$true,Position=0)]
     [ValidateNotNullOrEmpty()]
-    [ValidateSet('clean','lint','test','build')]
+    [ValidateSet('clean','format','lint','test','build')]
     [string]$Command
 )
 
@@ -23,7 +23,7 @@ function GetDuration {
         [System.TimeSpan]$TimeSpan
     )
 
-    $Data = New-Object System.Collections.Generic.List[string]
+    $Data = New-Object System.Collections.Generic.List[string];
 
     if ( $TimeSpan.Days -gt 0 ) {
         $DayString = $TimeSpan.Days.ToString();
@@ -91,17 +91,17 @@ function Get-File-Version {
         [string]$Version
     )
 
-    $Value = "0"
+    $Value = "0";
 
     $LastTag = git describe --tags --abbrev=0;
 
     $Count = Invoke-Expression "git log $LastTag..HEAD --oneline"  | Measure-Object -Line | %{$_.Lines};
 
     if ( $Count -ne "" ) {
-        $Value = $Count
+        $Value = $Count;
     }
 
-    return "${Version}.${Value}"
+    return "${Version}.${Value}";
 
 }
 
@@ -115,7 +115,7 @@ function Exec {
     $TaskName = (Get-PSCallStack)[1].Command;
     Write-Host " > ${TaskName}: $Command";
 
-    $global:LASTEXITCODE = 0
+    $global:LASTEXITCODE = 0;
     Invoke-Expression "${Command}";
 
     if ( $LASTEXITCODE -ne 0 ) {
@@ -140,6 +140,17 @@ function Clean {
 
     Exec "Remove-Item -Path 'output' -Recurse -Force -ErrorAction SilentlyContinue";
     Remove-Winres-Files;
+
+}
+
+function Format {
+
+    try {
+        Exec "go fmt .\...";
+    }
+    catch {
+        $global:ExitCode = $lastexitcode;
+    }
 
 }
 
@@ -201,7 +212,7 @@ function Build {
 
 Check-If-Installed "Golang" "go";
 
-Write-Host "Starting..."
+Write-Host "Starting...";
 
 $sw = [System.Diagnostics.Stopwatch]::New();
 $sw.Start();
@@ -209,6 +220,10 @@ $sw.Start();
 switch ( $Command ) {
     'clean' {
         Clean;
+        break;
+    }
+    'format' {
+        Format;
         break;
     }
     'lint' {
