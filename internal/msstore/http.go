@@ -37,6 +37,28 @@ func http() *resty.Client {
 
 const maxAttempts = 5
 
+func formatString(data string) string {
+	rawData := strings.Split(data, ":")
+	rawDataLen := len(rawData)
+
+	if rawDataLen == 1 {
+		return data
+	} else {
+		return fmt.Sprintf("%s:%s", rawData[rawDataLen-2], rawData[rawDataLen-1])
+	}
+}
+
+func formatError(data any) error {
+	switch dataType := data.(type) {
+	case string:
+		return errors.New(formatString(dataType))
+	case error:
+		return errors.New(formatString(dataType.Error()))
+	default:
+		return errors.New("unknown error")
+	}
+}
+
 // execute [resty.Request] retrying on panic 5 times.
 func execute(method string, url string, request *resty.Request) (*resty.Response, error) {
 	var result *resty.Response
@@ -46,24 +68,7 @@ func execute(method string, url string, request *resty.Request) (*resty.Response
 		func() {
 			defer func() {
 				if rec := recover(); rec != nil {
-					switch recoverType := rec.(type) {
-					case string:
-						recoverData := strings.Split(recoverType, ":")
-						recLen := len(recoverData)
-
-						var str string
-						if recLen == 1 {
-							str = recoverType
-						} else {
-							str = fmt.Sprintf("%s:%s", recoverData[recLen-2], recoverData[recLen-1])
-						}
-
-						err = errors.New(str)
-					case error:
-						err = recoverType
-					default:
-						err = errors.New("unexpected type")
-					}
+					err = formatError(rec)
 				}
 			}()
 
@@ -74,6 +79,9 @@ func execute(method string, url string, request *resty.Request) (*resty.Response
 			return result, nil
 		}
 
+		err = formatError(err)
+
+		//goland:noinspection GoDfaNilDereference
 		pterm.Warning.Printfln("%s \"%s\": %s, Attempt %d", strings.ToUpper(method), url, err.Error(), attempt)
 
 		if attempt < maxAttempts {
