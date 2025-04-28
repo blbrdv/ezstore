@@ -50,7 +50,7 @@ func Install(filePath string) error {
 			return err
 		}
 
-		pterm.Debug.Println(fmt.Sprintf("Package %s %s installed", name, newVersion.String()))
+		pterm.Info.Println(fmt.Sprintf("Package %s %s installed", name, newVersion.String()))
 	}
 
 	return nil

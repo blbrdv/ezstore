@@ -67,7 +67,6 @@ func execute(method string, url string, request *resty.Request) (*resty.Response
 				}
 			}()
 
-			pterm.Debug.Println(fmt.Sprintf("Sending %s to %s", method, url))
 			result, err = request.Execute(method, url)
 		}()
 
