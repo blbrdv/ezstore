@@ -9,8 +9,8 @@ require (
 	github.com/antchfx/xmlquery v1.4.4
 	github.com/go-resty/resty/v2 v2.16.5
 	github.com/pterm/pterm v0.12.80
-	github.com/urfave/cli/v3 v3.2.0
-	golang.org/x/net v0.39.0 // indirect
+	github.com/urfave/cli/v3 v3.3.1
+	golang.org/x/net v0.39.0
 )
 
 require (
