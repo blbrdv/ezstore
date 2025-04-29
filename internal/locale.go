@@ -24,14 +24,14 @@ func (l Locale) String() string {
 
 // NewLocale returns [Locale] from RFC 5646 input string or error if invalid format.
 // See Appendix A for examples.
-func NewLocale(input string) (Locale, error) {
+func NewLocale(input string) (*Locale, error) {
 	localeRegexp := regexp.MustCompile(pattern)
 	matches := localeRegexp.FindStringSubmatch(input)
 	if matches == nil {
-		return Locale{}, fmt.Errorf("%s is not a valid locale", input)
+		return nil, fmt.Errorf("%s is not a valid locale", input)
 	}
 
-	return Locale{
+	return &Locale{
 		Language: matches[localeRegexp.SubexpIndex("lang")],
 		Country:  matches[localeRegexp.SubexpIndex("country")],
 	}, nil

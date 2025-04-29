@@ -60,11 +60,11 @@ var defaultLocale = types.Locale{Language: "en", Country: "US"}
 
 // GetLocale returns current locale set in hosted OS.
 // If error occurred or returned value is empty, returns default locale.
-func GetLocale() types.Locale {
+func GetLocale() *types.Locale {
 	cmd := exec.Command("powershell", "Get-Culture | select -exp Name")
 	cultureName, err := cmd.Output()
 	if err != nil {
-		return defaultLocale
+		return &defaultLocale
 	}
 
 	localeStr := strings.TrimSpace(string(cultureName))
@@ -72,7 +72,7 @@ func GetLocale() types.Locale {
 
 	locale, err := types.NewLocale(localeStr)
 	if err != nil {
-		return defaultLocale
+		return &defaultLocale
 	}
 
 	return locale

@@ -17,18 +17,9 @@ import (
 // Install download package with its dependencies from MS Store by id and version,
 // and then install it with its dependencies.
 func Install(_ context.Context, cmd *cli.Command) error {
-	var err error
-
-	arch := runtime.GOARCH
-	switch arch {
-	case "amd64":
-		arch = "x64"
-	case "amd64p32":
-		arch = "x86"
-	case "arm", "arm64":
-		break
-	default:
-		return fmt.Errorf("%s architecture not supported", arch)
+	arch, err := types.NewArchitecture(runtime.GOARCH)
+	if err != nil {
+		return err
 	}
 
 	id := cmd.StringArg("id")
@@ -36,11 +27,20 @@ func Install(_ context.Context, cmd *cli.Command) error {
 		return errors.New("id must be set")
 	}
 
-	version := cmd.String("version")
-
-	locale, err := types.NewLocale(cmd.String("locale"))
+	version, err := types.NewVersion(cmd.String("version"))
 	if err != nil {
+		return err
+	}
+
+	var locale *types.Locale
+	if cmd.String("locale") == "" {
 		locale = windows.GetLocale()
+
+	} else {
+		locale, err = types.NewLocale(cmd.String("locale"))
+		if err != nil {
+			return err
+		}
 	}
 
 	if cmd.Bool("debug") {

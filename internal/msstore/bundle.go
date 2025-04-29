@@ -8,7 +8,7 @@ type BundleData struct {
 	Version *types.Version
 	Name    string
 	URL     string
-	Arch    string
+	Arch    types.Architecture
 	Format  string
 }
 
