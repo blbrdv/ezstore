@@ -18,7 +18,7 @@ AppUpdatesURL={#URL}
 DefaultDirName={commonpf}\{#Name}
 DefaultGroupName={#Name}
 
-OutputDir=.\output
+OutputDir=.\release
 OutputBaseFileName=ezsetup
 
 LicenseFile=LICENSE
@@ -33,6 +33,7 @@ ChangesEnvironment=true
 [Files]
 Source: "output\ezstore.exe"; DestDir: "{app}/bin"; Flags: ignoreversion
 Source: "cmd\README.txt"; DestDir: "{app}"; Flags: ignoreversion
+Source: "cmd\update.ps1"; DestDir: "{app}"; Flags: ignoreversion
 
 
 ;------------------------------------------------------------------------------

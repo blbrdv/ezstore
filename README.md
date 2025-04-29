@@ -8,36 +8,50 @@ Download installer or portable version from
 
 ## Usage
 
-`.\ezstore.exe [OPTIONS] install <id>`
+```
+Easy install apps from MS Store
 
-where `id` is product identifier form MS store, e.g.
-[9NH2GPH4JZS4](https://apps.microsoft.com/store/detail/tiktok/9NH2GPH4JZS4).
+Usage:
+    ezstore install <id> [--version=<xyz>] [--locale=<cc-CC>] [--debug]
+    ezstore --help
 
-### Options
-  - `--version <value>`, `-v <value>` for product version (default: "latest")
-  - `--locale <value>`, `-l <value>` for product locale
-  - `--debug`, `-d` for debug output (default: false)
-  - `--help`, `-h` - show help
+Options:
+    -h --help      Show this screen.
+    -v --version   Sets the version of the product [default: latest].
+    -l --locale    Sets the locale name of the product [default: current value in the OS or en_US].
+    -d --debug     Sets the debug mode [default: false].
+
+Examples:
+    ezstore install 9nh2gph4jzs4
+    ezstore install 9nh2gph4jzs4 -v 1.0.3.0 --locale cs_CZ --debug
+```
 
 ## Development
 
 ### Requirements
 
-1. [Golang](https://go.dev/dl/) version `1.24` or later installed;
-2. [staticcheck](https://staticcheck.dev/) installed;
-3. [go-winres](https://github.com/tc-hib/go-winres) installed;
-4. [Inno Setup 6](https://jrsoftware.org/isinfo.php) installed and put in $PATH.
+[Golang](https://go.dev/dl/) version `1.24` or later must be installed
+
+#### Lint
+
+[staticcheck](https://staticcheck.dev/) must be installed
+
+#### Build 
+
+1. [go-winres](https://github.com/tc-hib/go-winres) must be installed
+2. [7-Zip](https://7-zip.org/) must be installed and put in $PATH
+3. [Inno Setup 6](https://jrsoftware.org/isinfo.php) must be installed and put in $PATH
 
 ### Automation
 
 Use `.\run.ps1 <task>`.
 
 Available tasks:
- - `clean`
- - `format`
- - `lint`
- - `test`
- - `build`
+ - `clean` - removes build directories and files
+ - `format` - fix codestyle
+ - `lint` - run analysis for code
+ - `test` - run unit tests
+ - `build` - build cli and compile installer
 
 ## License
 
