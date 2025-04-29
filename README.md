@@ -1,4 +1,8 @@
 # ![icon](/icons/icon16.png) ezstore
+![GitHub License](https://img.shields.io/github/license/blbrdv/ezstore)
+![GitHub Release](https://img.shields.io/github/v/release/blbrdv/ezstore)
+![GitHub Downloads (all assets, all releases)](https://img.shields.io/github/downloads/blbrdv/ezstore/total)
+
 Easy install apps from MS Store on Long-term Servicing Windows.
 
 ## Installation
