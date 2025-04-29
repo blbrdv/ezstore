@@ -57,3 +57,4 @@ go.work
 
 # compile output
 output/
+release/

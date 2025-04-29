@@ -16,7 +16,7 @@ $global:SysoFiles = @(
 # Utils
 #######
 
-function GetDuration {
+function Get-Duration {
 
     Param (
         [Parameter(Mandatory=$true,Position=0)]
@@ -139,6 +139,7 @@ function Remove-Winres-Files {
 function Clean {
 
     Exec "Remove-Item -Path 'output' -Recurse -Force -ErrorAction SilentlyContinue";
+    Exec "Remove-Item -Path 'release' -Recurse -Force -ErrorAction SilentlyContinue";
     Remove-Winres-Files;
 
 }
@@ -182,6 +183,7 @@ function Test {
 function Build {
 
     Check-If-Installed "go-winres" "go-winres";
+    Check-If-Installed "7-Zip" "7z";
     Check-If-Installed "Inno Setup" "iscc";
 
     $ProductVersion = Get-Product-Version;
@@ -195,6 +197,9 @@ function Build {
         }
 
         Exec "go build -o .\output\ezstore.exe .\cmd";
+
+        Exec "7z a -bso0 -bd -sse .\release\ezstore-portable.7z .\output\ezstore.exe .\cmd\README.txt .\cmd\update.ps1"
+
         Exec "iscc /Q 'setup.iss' /DPV='$ProductVersion' /DFV='$FileVersion'";
     }
     catch {
@@ -241,7 +246,7 @@ switch ( $Command ) {
 }
 
 $sw.Stop();
-$duration = GetDuration $sw.Elapsed;
+$duration = Get-Duration $sw.Elapsed;
 
 if ( $global:ExitCode -eq 0 ) {
     Write-Host "Finished $duration";
