@@ -16,15 +16,13 @@ func getProductBundle(url string) (*bundleData, error) {
 		return nil, err
 	}
 
+	url = fmt.Sprintf("https://%s%s?%s", uri.Host, uri.EscapedPath(), uri.Query().Encode())
 	res, err := client.
 		SetCommonHeader("Connection", "Keep-Alive").
 		SetCommonHeader("Accept", "*/*").
 		SetCommonHeader("User-Agent", "Microsoft-Delivery-Optimization/10.0").
 		R().
-		SetPathParam("host", uri.Host).
-		SetPathParam("path", uri.EscapedPath()).
-		SetPathParam("query", uri.Query().Encode()).
-		Head("https://{host}{path}?{query}")
+		Head(url)
 	if err != nil {
 		return nil, err
 	}
