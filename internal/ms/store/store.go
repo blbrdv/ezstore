@@ -16,7 +16,14 @@ func getProductBundle(url string) (*bundleData, error) {
 		return nil, err
 	}
 
-	url = fmt.Sprintf("https://%s%s?%s", uri.Host, uri.EscapedPath(), uri.Query().Encode())
+	query := uri.Query().Encode()
+	var queryStr string
+	if query == "" {
+		queryStr = query
+	} else {
+		queryStr = fmt.Sprintf("?%s", query)
+	}
+	url = fmt.Sprintf("https://%s%s%s", uri.Host, uri.EscapedPath(), queryStr)
 	res, err := client.
 		SetCommonHeader("Connection", "Keep-Alive").
 		SetCommonHeader("Accept", "*/*").
