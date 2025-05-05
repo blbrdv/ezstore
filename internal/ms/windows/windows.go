@@ -2,14 +2,14 @@ package windows
 
 import (
 	"fmt"
-	types "github.com/blbrdv/ezstore/internal"
+	"github.com/blbrdv/ezstore/internal/ms"
 	"github.com/pterm/pterm"
 	"os/exec"
 	"strings"
 )
 
 // Install package if its version higher that installed counterpart.
-func Install(file types.FileInfo) error {
+func Install(file ms.FileInfo) error {
 	cmd := exec.Command(
 		"powershell",
 		"-Command",
@@ -26,12 +26,12 @@ func Install(file types.FileInfo) error {
 
 	installedVersionStr := strings.Trim(string(result), "\n\r")
 
-	var installedVersion *types.Version
+	var installedVersion *ms.Version
 
 	if installedVersionStr == "" {
-		installedVersion, _ = types.NewVersion("0")
+		installedVersion, _ = ms.NewVersion("0")
 	} else {
-		installedVersion, err = types.NewVersion(installedVersionStr)
+		installedVersion, err = ms.NewVersion(installedVersionStr)
 		if err != nil {
 			return err
 		}
@@ -51,11 +51,11 @@ func Install(file types.FileInfo) error {
 	return nil
 }
 
-var defaultLocale = types.Locale{Language: "en", Country: "US"}
+var defaultLocale = ms.Locale{Language: "en", Country: "US"}
 
 // GetLocale returns current locale set in hosted OS.
 // If error occurred or returned value is empty, returns default locale.
-func GetLocale() *types.Locale {
+func GetLocale() *ms.Locale {
 	cmd := exec.Command("powershell", "Get-Culture | select -exp Name")
 	cultureName, err := cmd.Output()
 	if err != nil {
@@ -65,7 +65,7 @@ func GetLocale() *types.Locale {
 	localeStr := strings.TrimSpace(string(cultureName))
 	localeStr = strings.Trim(localeStr, "\r\n")
 
-	locale, err := types.NewLocale(localeStr)
+	locale, err := ms.NewLocale(localeStr)
 	if err != nil {
 		return &defaultLocale
 	}

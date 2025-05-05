@@ -1,4 +1,4 @@
-package msstore
+package store
 
 import (
 	"strings"

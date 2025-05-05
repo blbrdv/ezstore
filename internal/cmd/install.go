@@ -3,10 +3,10 @@ package cmd
 import (
 	"errors"
 	"fmt"
-	types "github.com/blbrdv/ezstore/internal"
 	"github.com/blbrdv/ezstore/internal/log"
-	"github.com/blbrdv/ezstore/internal/msstore"
-	"github.com/blbrdv/ezstore/internal/windows"
+	"github.com/blbrdv/ezstore/internal/ms"
+	"github.com/blbrdv/ezstore/internal/ms/store"
+	"github.com/blbrdv/ezstore/internal/ms/windows"
 	"github.com/pterm/pterm"
 	"github.com/urfave/cli/v3"
 	"golang.org/x/net/context"
@@ -19,15 +19,15 @@ import (
 // and then install it with its dependencies.
 func Install(_ context.Context, cmd *cli.Command) error {
 	var err error
-	var arch types.Architecture
+	var arch ms.Architecture
 
 	switch goarch := runtime.GOARCH; goarch {
 	case "amd64":
-		arch, err = types.NewArchitecture("x64")
+		arch, err = ms.NewArchitecture("x64")
 	case "amd64p32":
-		arch, err = types.NewArchitecture("x86")
+		arch, err = ms.NewArchitecture("x86")
 	case "arm", "arm64":
-		arch, err = types.NewArchitecture(goarch)
+		arch, err = ms.NewArchitecture(goarch)
 	default:
 		err = fmt.Errorf("%s architecture not supported", arch)
 	}
@@ -41,19 +41,19 @@ func Install(_ context.Context, cmd *cli.Command) error {
 	}
 
 	versionStr := cmd.String("version")
-	var version *types.Version
+	var version *ms.Version
 	if versionStr != "latest" {
-		version, err = types.NewVersion(versionStr)
+		version, err = ms.NewVersion(versionStr)
 		if err != nil {
 			return err
 		}
 	}
 
-	var locale *types.Locale
+	var locale *ms.Locale
 	if cmd.String("locale") == "" {
 		locale = windows.GetLocale()
 	} else {
-		locale, err = types.NewLocale(cmd.String("locale"))
+		locale, err = ms.NewLocale(cmd.String("locale"))
 		if err != nil {
 			return err
 		}
@@ -84,7 +84,7 @@ func Install(_ context.Context, cmd *cli.Command) error {
 
 	//defer removeDir(tmpPath)
 
-	files, err := msstore.Download(id, version, arch, locale, tmpPath)
+	files, err := store.Download(id, version, arch, locale, tmpPath)
 	if err != nil {
 		return err
 	}

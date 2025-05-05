@@ -1,4 +1,4 @@
-package internal
+package ms
 
 type FileInfo struct {
 	Path    string

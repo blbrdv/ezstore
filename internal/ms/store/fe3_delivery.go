@@ -1,4 +1,4 @@
-package msstore
+package store
 
 import (
 	"fmt"
@@ -13,7 +13,7 @@ import (
 
 	"github.com/antchfx/jsonquery"
 	"github.com/antchfx/xmlquery"
-	types "github.com/blbrdv/ezstore/internal"
+	"github.com/blbrdv/ezstore/internal/ms"
 	"github.com/pterm/pterm"
 )
 
@@ -51,7 +51,7 @@ func newBundleInfo(input string) (*bundleInfo, error) {
 type bundleData struct {
 	*bundleInfo
 
-	Version *types.Version
+	Version *ms.Version
 	Arch    string
 	Format  string
 	Url     string
@@ -65,7 +65,7 @@ func newBundleData(input string) (*bundleData, error) {
 	}
 
 	info := &bundleInfo{Name: matches[1], Id: matches[4]}
-	version, err := types.NewVersion(matches[2])
+	version, err := ms.NewVersion(matches[2])
 	if err != nil {
 		return nil, err
 	}
@@ -114,7 +114,7 @@ func (b *bundles) Append(bundle *bundleData) {
 	b.bundlesList = append(b.bundlesList, bundle)
 }
 
-func (b *bundles) GetSupported(arch types.Architecture) (*bundleData, error) {
+func (b *bundles) GetSupported(arch ms.Architecture) (*bundleData, error) {
 	for _, supported := range arch.CompatibleWith() {
 		for _, data := range b.bundlesList {
 			if data.Arch == supported.String() {
@@ -132,7 +132,7 @@ func (b *bundles) GetSupported(arch types.Architecture) (*bundleData, error) {
 	return nil, fmt.Errorf("%s architecture is not supported by this app", arch.String())
 }
 
-type bundlesByVersion map[types.Version]*bundles
+type bundlesByVersion map[ms.Version]*bundles
 
 type bundlesGroup struct {
 	bundlesByVersion
@@ -157,8 +157,8 @@ func (bg *bundlesGroup) Add(bundle *bundleData) {
 	}
 }
 
-func (bg *bundlesGroup) Get(version *types.Version, arch types.Architecture) (*bundleData, error) {
-	var searchVersion types.Version
+func (bg *bundlesGroup) Get(version *ms.Version, arch ms.Architecture) (*bundleData, error) {
+	var searchVersion ms.Version
 	if version == nil {
 		versions := toSlice(maps.Keys(bg.bundlesByVersion))
 		searchVersion = versions[0]
@@ -179,7 +179,7 @@ func (bg *bundlesGroup) Get(version *types.Version, arch types.Architecture) (*b
 	return list.GetSupported(arch)
 }
 
-func (bg *bundlesGroup) GetLatest(arch types.Architecture) (*bundleData, error) {
+func (bg *bundlesGroup) GetLatest(arch ms.Architecture) (*bundleData, error) {
 	return bg.Get(nil, arch)
 }
 
@@ -224,7 +224,7 @@ func getCookie() (string, error) {
 	return data.SelectElement("//EncryptedData").InnerText(), nil
 }
 
-func getWUID(id string, locale *types.Locale) (*bundleInfo, string, error) {
+func getWUID(id string, locale *ms.Locale) (*bundleInfo, string, error) {
 	url := fmt.Sprintf(
 		"%s%s?market=%s&languages=%s,%s,neutral",
 		wuidInfoURL,
@@ -403,7 +403,7 @@ func toSlice[T any](iter iter.Seq[T]) []T {
 
 // Download backage and its dependencies from MS Store by id, version and locale to destination directory
 // and returns array of backage and its dependencies paths.
-func Download(id string, version *types.Version, arch types.Architecture, locale *types.Locale, destinationPath string) ([]types.FileInfo, error) {
+func Download(id string, version *ms.Version, arch ms.Architecture, locale *ms.Locale, destinationPath string) ([]ms.FileInfo, error) {
 	var sp *pterm.SpinnerPrinter
 	var pb *pterm.ProgressbarPrinter
 
@@ -470,7 +470,7 @@ func Download(id string, version *types.Version, arch types.Architecture, locale
 	sp.Success("Product files fetched")
 
 	pb, _ = pterm.DefaultProgressbar.WithTotal(len(downloads.bundlesList)).WithTitle("Fetching product files info...").Start()
-	var result []types.FileInfo
+	var result []ms.FileInfo
 	for _, data := range downloads.bundlesList {
 		fullPath := path.Join(
 			destinationPath,
@@ -487,7 +487,7 @@ func Download(id string, version *types.Version, arch types.Architecture, locale
 			return nil, err
 		}
 
-		result = append(result, types.FileInfo{Path: fullPath, Name: data.Name, Version: data.Version})
+		result = append(result, ms.FileInfo{Path: fullPath, Name: data.Name, Version: data.Version})
 		pb.Increment()
 	}
 	//TODO remove progress bar when done
