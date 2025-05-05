@@ -8,16 +8,11 @@ import (
 )
 
 func getWUID(id string, locale *ms.Locale) (*bundleInfo, string, error) {
-	url := fmt.Sprintf(
-		"%s%s?market=%s&languages=%s,%s,neutral",
-		"https://displaycatalog.mp.microsoft.com/v7.0/products/",
-		id,
-		locale.Country,
-		locale.String(),
-		locale.Language,
-	)
-
-	resp, err := client.R().Get(url)
+	resp, err := client.R().
+		SetPathParam("id", id).
+		SetQueryParam("market", locale.Country).
+		SetQueryParam("languages", fmt.Sprintf("%s,%s,neutral", locale.String(), locale.Language)).
+		Get("https://displaycatalog.mp.microsoft.com/v7.0/products/{id}")
 	if err != nil {
 		return nil, "", err
 	}

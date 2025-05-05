@@ -4,9 +4,54 @@ import (
 	"fmt"
 	"github.com/blbrdv/ezstore/internal/ms"
 	"github.com/pterm/pterm"
+	net "net/url"
 	"os"
 	"path"
+	"regexp"
 )
+
+func getProductBundle(url string) (*bundleData, error) {
+	uri, err := net.Parse(url)
+	if err != nil {
+		return nil, err
+	}
+
+	res, err := client.
+		SetCommonHeader("Connection", "Keep-Alive").
+		SetCommonHeader("Accept", "*/*").
+		SetCommonHeader("User-Agent", "Microsoft-Delivery-Optimization/10.0").
+		R().
+		SetPathParam("host", uri.Host).
+		SetPathParam("path", uri.EscapedPath()).
+		SetPathParam("query", uri.Query().Encode()).
+		Head("https://{host}{path}?{query}")
+	if err != nil {
+		return nil, err
+	}
+	if res.StatusCode != 200 {
+		return nil, fmt.Errorf("requiest error: %s", res.Status)
+	}
+
+	header := res.Header.Get("Content-Disposition")
+	if header == "" {
+		return nil, fmt.Errorf("can not get file name")
+	}
+
+	fileNameRegexp := regexp.MustCompile(`filename=(\S+)`)
+	matches := fileNameRegexp.FindStringSubmatch(header)
+	if len(matches) != 2 {
+		return nil, fmt.Errorf("can not get file name")
+	}
+
+	data, err := newBundleData(matches[1])
+	if err != nil {
+		return nil, err
+	}
+
+	data.URL = url
+
+	return data, nil
+}
 
 // Download backage and its dependencies from MS Store by id, version and locale to destination directory
 // and returns array of backage and its dependencies paths.
