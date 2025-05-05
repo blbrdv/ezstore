@@ -7,10 +7,10 @@ import (
 	"github.com/blbrdv/ezstore/internal/ms"
 	"github.com/blbrdv/ezstore/internal/ms/store"
 	"github.com/blbrdv/ezstore/internal/ms/windows"
+	"github.com/blbrdv/ezstore/internal/utils"
 	"github.com/urfave/cli/v3"
 	"golang.org/x/net/context"
 	"os"
-	"path"
 	"runtime"
 )
 
@@ -64,7 +64,7 @@ func Install(_ context.Context, cmd *cli.Command) error {
 		}
 	}
 
-	tmpPath := path.Join(windows.TempDir, id)
+	tmpPath := utils.Join(windows.TempDir, id)
 
 	log.Debugf("Trace file: %s", log.TraceFile)
 	log.Debugf("Temp dir: %s", tmpPath)

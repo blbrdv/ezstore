@@ -3,21 +3,11 @@ package store
 import (
 	"fmt"
 	"github.com/blbrdv/ezstore/internal/ms"
-	"iter"
+	"github.com/blbrdv/ezstore/internal/utils"
 	"maps"
 	"regexp"
 	"strings"
 )
-
-func toSlice[T any](iter iter.Seq[T]) []T {
-	var result []T
-
-	for value := range iter {
-		result = append(result, value)
-	}
-
-	return result
-}
 
 type bundleInfo struct {
 	Name string
@@ -146,7 +136,7 @@ func (bg *bundlesGroup) Add(bundle *bundleData) {
 func (bg *bundlesGroup) Get(version *ms.Version, arch ms.Architecture) (*bundleData, error) {
 	var searchVersion ms.Version
 	if version == nil {
-		versions := toSlice(maps.Keys(bg.bundlesByVersion))
+		versions := utils.ToSlice(maps.Keys(bg.bundlesByVersion))
 		searchVersion = versions[0]
 		for _, key := range versions[1:] {
 			if key.Compare(&searchVersion) == 1 {

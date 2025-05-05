@@ -2,6 +2,7 @@ package log
 
 import (
 	"fmt"
+	"github.com/blbrdv/ezstore/internal/utils"
 	"github.com/gookit/color"
 	"os"
 	"path"
@@ -21,11 +22,13 @@ func getCurrentDir() string {
 	if err != nil {
 		panic(err)
 	}
-	return path.Dir(strings.Replace(exePath, "\\", "/", -1))
+
+	currentDir := path.Dir(strings.Replace(exePath, "\\", "/", -1))
+	return currentDir
 }
 
 var Level = Normal
-var TraceFile = path.Join(getCurrentDir(), fmt.Sprintf("%s.log", time.Now().Format("060102150405")))
+var TraceFile = utils.Join(getCurrentDir(), fmt.Sprintf("%s.log", time.Now().Format("060102150405")))
 
 var levels = map[string]int{
 	"q": Quiet,

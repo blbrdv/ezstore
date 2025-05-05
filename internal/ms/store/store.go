@@ -4,9 +4,9 @@ import (
 	"fmt"
 	"github.com/blbrdv/ezstore/internal/log"
 	"github.com/blbrdv/ezstore/internal/ms"
+	"github.com/blbrdv/ezstore/internal/utils"
 	net "net/url"
 	"os"
-	"path"
 	"regexp"
 )
 
@@ -119,7 +119,7 @@ func Download(id string, version *ms.Version, arch ms.Architecture, locale *ms.L
 	log.Debug("Fetching product files info...")
 	var result []ms.FileInfo
 	for _, data := range bundlesToDownload.bundlesList {
-		fullPath := path.Join(
+		fullPath := utils.Join(
 			destinationPath,
 			fmt.Sprintf("%s-%s.%s", data.Name, data.Version.String(), data.Format),
 		)

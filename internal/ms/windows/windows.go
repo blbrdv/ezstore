@@ -4,9 +4,9 @@ import (
 	"fmt"
 	"github.com/blbrdv/ezstore/internal/log"
 	"github.com/blbrdv/ezstore/internal/ms"
+	"github.com/blbrdv/ezstore/internal/utils"
 	"os"
 	"os/exec"
-	"path"
 	"strings"
 )
 
@@ -76,7 +76,7 @@ func GetLocale() *ms.Locale {
 }
 
 func prepareDir(dir string) string {
-	dir = path.Join(dir, "ezstore")
+	dir = utils.Join(dir, "ezstore")
 	err := os.MkdirAll(dir, 0666)
 	if err != nil {
 		panic(err)
