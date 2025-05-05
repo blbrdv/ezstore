@@ -1,94 +1,154 @@
 package msstore
 
 import (
-	"errors"
 	"fmt"
+	"github.com/blbrdv/ezstore/internal/log"
 	"github.com/pterm/pterm"
+	"io"
+	"os"
+	"path/filepath"
 	"strings"
+
 	"time"
 
-	"github.com/go-resty/resty/v2"
+	"github.com/imroc/req/v3"
 )
 
-type ptermLogger struct {
-	resty.Logger
+func getDumpFile() *os.File {
+	cache, _ := os.UserCacheDir()
+	filename := filepath.Join(cache, "ezstore", *log.GetLogFileName())
+	file, _ := os.OpenFile(filename, os.O_APPEND|os.O_WRONLY|os.O_CREATE, 0666)
+
+	return file
 }
 
-func (l ptermLogger) Errorf(format string, v ...interface{}) {
-	pterm.Error.Printfln(format, v...)
+var dumpFileName = getDumpFile()
+
+func traceRequest(req *req.Request) {
+	if req == nil {
+		return
+	}
+
+	defer func(file *os.File) {
+		_ = file.Close()
+	}(dumpFileName)
+
+	var sb strings.Builder
+
+	_, _ = fmt.Fprintf(&sb, "> %s %s\n", strings.ToUpper(req.Method), req.RawURL)
+
+	for key, values := range req.Headers {
+		for _, value := range values {
+			_, _ = fmt.Fprintf(&sb, "> %s: %s\n", key, value)
+		}
+	}
+
+	if req.Body != nil {
+		_, _ = fmt.Fprintln(&sb, "> Body:")
+		_, _ = fmt.Fprintf(&sb, "%s\n", req.Body)
+	}
+
+	_, _ = fmt.Fprint(&sb, "\n")
+
+	_, _ = dumpFileName.WriteString(sb.String())
 }
 
-func (l ptermLogger) Warnf(format string, v ...interface{}) {
-	pterm.Warning.Printfln(format, v...)
-}
+func traceError(err error) {
+	if err == nil {
+		return
+	}
 
-func (l ptermLogger) Debugf(format string, v ...interface{}) {
-	pterm.Debug.Printfln(format, v...)
-}
+	defer func(file *os.File) {
+		_ = file.Close()
+	}(dumpFileName)
 
-func http() *resty.Client {
-	return resty.
-		New().
-		SetLogger(ptermLogger{}).
-		SetRetryWaitTime(5*time.Second).
-		SetRetryMaxWaitTime(20*time.Second).
-		SetHeader("Content-Encoding", "Encoding.UTF8")
-}
+	var sb strings.Builder
 
-const maxAttempts = 5
+	text := err.Error()
 
-func formatString(data string) string {
-	rawData := strings.Split(data, ":")
-	rawDataLen := len(rawData)
-
-	if rawDataLen == 1 {
-		return data
+	if text == "" {
+		_, _ = fmt.Fprintln(&sb, "! (empty)")
 	} else {
-		return fmt.Sprintf("%s:%s", rawData[rawDataLen-2], rawData[rawDataLen-1])
+		_, _ = fmt.Fprintf(&sb, "! %s\n", text)
 	}
+
+	_, _ = fmt.Fprint(&sb, "\n")
+
+	_, _ = dumpFileName.WriteString(sb.String())
 }
 
-func formatError(data any) error {
-	switch dataType := data.(type) {
-	case string:
-		return errors.New(formatString(dataType))
-	case error:
-		return errors.New(formatString(dataType.Error()))
-	default:
-		return errors.New("unknown error")
+func traceResponse(res *req.Response) {
+	if res == nil || res.Response == nil {
+		return
 	}
-}
 
-// execute [resty.Request] retrying on panic 5 times.
-func execute(method string, url string, request *resty.Request) (*resty.Response, error) {
-	var result *resty.Response
-	var err error
+	defer func(file *os.File) {
+		_ = file.Close()
+	}(dumpFileName)
 
-	for attempt := 1; attempt <= maxAttempts; attempt += 1 {
-		func() {
-			defer func() {
-				if rec := recover(); rec != nil {
-					err = formatError(rec)
-				}
-			}()
+	var sb strings.Builder
 
-			result, err = request.Execute(method, url)
-		}()
+	status := res.Status
+	if status != "" {
+		_, _ = fmt.Fprintf(&sb, "< %s\n", status)
+	}
 
-		if err == nil {
-			return result, nil
-		}
-
-		err = formatError(err)
-
-		//goland:noinspection GoDfaNilDereference
-		pterm.Warning.Printfln("%s \"%s\": %s, Attempt %d", strings.ToUpper(method), url, err.Error(), attempt)
-
-		if attempt < maxAttempts {
-			duration, _ := time.ParseDuration(fmt.Sprintf("%ds", 5*attempt))
-			time.Sleep(duration)
+	if len(res.Header) > 0 {
+		for key, values := range res.Header {
+			for _, value := range values {
+				_, _ = fmt.Fprintf(&sb, "< %s: %s\n", key, value)
+			}
 		}
 	}
 
-	return nil, err
+	bodyRaw, _ := io.ReadAll(res.Body)
+	if len(bodyRaw) > 0 {
+		_, _ = fmt.Fprintln(&sb, "< Body:")
+
+		if body := string(bodyRaw); body == "" {
+			for _, data := range bodyRaw {
+				_, _ = fmt.Fprintf(&sb, "%b", data)
+			}
+		} else {
+			_, _ = fmt.Fprintf(&sb, "%s\n", body)
+		}
+	}
+
+	_, _ = fmt.Fprint(&sb, "\n")
+
+	_, _ = dumpFileName.WriteString(sb.String())
 }
+
+func getHTTPClient() *req.Client {
+	client := req.C().
+		SetCommonHeader("Content-Encoding", "Encoding.UTF8").
+		SetCommonRetryCount(5).
+		SetCommonRetryInterval(func(_ *req.Response, attempt int) time.Duration {
+			result, _ := time.ParseDuration(fmt.Sprintf("%ds", 5*attempt))
+			return result
+		}).
+		AddCommonRetryHook(func(_ *req.Response, err error) {
+			if err != nil {
+				pterm.Warning.Println(err.Error())
+			}
+		})
+
+	if log.IsTraceLevel() {
+		client = client.
+			OnError(func(_ *req.Client, req *req.Request, resp *req.Response, err error) {
+				traceRequest(req)
+				traceError(err)
+				traceResponse(resp)
+			}).
+			OnAfterResponse(func(_ *req.Client, resp *req.Response) error {
+				traceRequest(resp.Request)
+				traceError(resp.Err)
+				traceResponse(resp)
+				return nil
+			})
+	}
+
+	return client
+}
+
+var client = getHTTPClient()

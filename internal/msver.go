@@ -19,6 +19,10 @@ func NewVersion(input string) (*Version, error) {
 	semverRegexp := regexp.MustCompile(`^v?(\d+)(?:\.(\d+))?(?:\.(\d+))?(?:\.(\d+))?$`)
 	matches := semverRegexp.FindStringSubmatch(input)
 
+	if len(matches) == 0 {
+		return nil, fmt.Errorf("%s is not a valid version", input)
+	}
+
 	a, err := strconv.ParseInt(matches[1], 10, 64)
 	if err != nil {
 		return nil, err
@@ -57,22 +61,22 @@ func parse(input string) (int64, error) {
 }
 
 // String returns SemVer representation.
-func (v Version) String() string {
+func (v *Version) String() string {
 	return fmt.Sprintf("v%d.%d.%d.%d", v.Major, v.Minor, v.Build, v.Revision)
 }
 
 // Compare two versions.
-func (v Version) Compare(other *Version) int {
+func (v *Version) Compare(other *Version) int {
 	return recursiveCompare(v.Slice(), other.Slice())
 }
 
 // LessThan returns true if this [Version] less than other [Version].
-func (v Version) LessThan(other *Version) bool {
+func (v *Version) LessThan(other *Version) bool {
 	return v.Compare(other) < 0
 }
 
 // Slice converts [Version] to array of 4 numbers.
-func (v Version) Slice() []int64 {
+func (v *Version) Slice() []int64 {
 	return []int64{v.Major, v.Minor, v.Build, v.Revision}
 }
 

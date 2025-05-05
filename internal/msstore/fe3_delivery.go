@@ -2,16 +2,18 @@ package msstore
 
 import (
 	"fmt"
+	"github.com/imroc/req/v3"
+	"iter"
+	"maps"
 	net "net/url"
+	"os"
 	"path"
 	"regexp"
-	"sort"
 	"strings"
 
 	"github.com/antchfx/jsonquery"
 	"github.com/antchfx/xmlquery"
 	types "github.com/blbrdv/ezstore/internal"
-	"github.com/go-resty/resty/v2"
 	"github.com/pterm/pterm"
 )
 
@@ -27,93 +29,259 @@ type ProductInfo struct {
 	RevisionNumber string
 }
 
-func fe3Client() *resty.Client {
-	return http().
-		SetHeader("Content-Type", "application/soap+xml")
+func (p ProductInfo) String() string {
+	return fmt.Sprintf("[ \"%s\"; \"%s\" ]", p.UpdateID, p.RevisionNumber)
+}
+
+type bundleInfo struct {
+	Name string
+	Id   string
+}
+
+func newBundleInfo(input string) (*bundleInfo, error) {
+	bundleRegexp := regexp.MustCompile(`^([0-9a-zA-Z.-]+)_([a-z0-9]+)$`)
+	matches := bundleRegexp.FindStringSubmatch(input)
+	if len(matches) == 0 {
+		return nil, fmt.Errorf("%s is not valid bundle info", input)
+	}
+
+	return &bundleInfo{Name: matches[1], Id: matches[2]}, nil
+}
+
+type bundleData struct {
+	*bundleInfo
+
+	Version *types.Version
+	Arch    string
+	Format  string
+	Url     string
+}
+
+func newBundleData(input string) (*bundleData, error) {
+	bundleRegexp := regexp.MustCompile(`^([0-9a-zA-Z.-]+)_([\d\.]+)_([a-z0-9]+)_~?_([a-z0-9]+).([a-zA-Z]+)`)
+	matches := bundleRegexp.FindStringSubmatch(input)
+	if len(matches) == 0 {
+		return nil, fmt.Errorf("%s is not valid bundle data", input)
+	}
+
+	info := &bundleInfo{Name: matches[1], Id: matches[4]}
+	version, err := types.NewVersion(matches[2])
+	if err != nil {
+		return nil, err
+	}
+
+	return &bundleData{
+			bundleInfo: info,
+			Version:    version,
+			Arch:       strings.ToLower(matches[3]),
+			Format:     strings.ToLower(matches[5]),
+		},
+		nil
+}
+
+func (bd *bundleData) String() string {
+	return fmt.Sprintf(
+		"{ %s, Name: %s, Version: %s, Architecture: %s, Format: %s }",
+		bd.Id,
+		bd.Name,
+		bd.Version.String(),
+		bd.Arch,
+		bd.Format,
+	)
+}
+
+type bundlesList []*bundleData
+
+type bundles struct {
+	bundlesList
+}
+
+func newBundles(bundle *bundleData) *bundles {
+	return &bundles{bundlesList{bundle}}
+}
+
+func initBundles() *bundles {
+	return &bundles{bundlesList{}}
+}
+
+func (b *bundles) Append(bundle *bundleData) {
+	for _, value := range b.bundlesList {
+		if value.String() == bundle.String() {
+			return
+		}
+	}
+
+	b.bundlesList = append(b.bundlesList, bundle)
+}
+
+func (b *bundles) GetSupported(arch types.Architecture) (*bundleData, error) {
+	for _, supported := range arch.CompatibleWith() {
+		for _, data := range b.bundlesList {
+			if data.Arch == supported.String() {
+				return data, nil
+			}
+		}
+	}
+
+	for _, data := range b.bundlesList {
+		if data.Arch == "neutral" {
+			return data, nil
+		}
+	}
+
+	return nil, fmt.Errorf("%s architecture is not supported by this app", arch.String())
+}
+
+type bundlesByVersion map[types.Version]*bundles
+
+type bundlesGroup struct {
+	bundlesByVersion
+}
+
+func newBundlesGroup(bundle *bundleData) *bundlesGroup {
+	return &bundlesGroup{bundlesByVersion{*bundle.Version: newBundles(bundle)}}
+}
+
+func initBundlesGroup() *bundlesGroup {
+	return &bundlesGroup{bundlesByVersion{}}
+}
+
+func (bg *bundlesGroup) Add(bundle *bundleData) {
+	version := *bundle.Version
+	b := bg.bundlesByVersion[version]
+
+	if b == nil {
+		bg.bundlesByVersion[version] = newBundles(bundle)
+	} else {
+		b.Append(bundle)
+	}
+}
+
+func (bg *bundlesGroup) Get(version *types.Version, arch types.Architecture) (*bundleData, error) {
+	var searchVersion types.Version
+	if version == nil {
+		versions := toSlice(maps.Keys(bg.bundlesByVersion))
+		searchVersion = versions[0]
+		for _, key := range versions[1:] {
+			if key.Compare(&searchVersion) == 1 {
+				searchVersion = key
+			}
+		}
+	} else {
+		searchVersion = *version
+	}
+
+	list := bg.bundlesByVersion[searchVersion]
+	if list == nil {
+		return nil, fmt.Errorf("can not get bundle by version %s", searchVersion.String())
+	}
+
+	return list.GetSupported(arch)
+}
+
+func (bg *bundlesGroup) GetLatest(arch types.Architecture) (*bundleData, error) {
+	return bg.Get(nil, arch)
+}
+
+type bundlesById map[string]*bundlesGroup
+
+type bundlesMap struct {
+	bundlesById
+}
+
+func (bm *bundlesMap) Add(bundle *bundleData) {
+	group := bm.bundlesById[bundle.Id]
+
+	if group == nil {
+		bm.bundlesById[bundle.Id] = newBundlesGroup(bundle)
+	} else {
+		group.Add(bundle)
+	}
+}
+
+func initBundleMap() *bundlesMap {
+	return &bundlesMap{bundlesById{}}
+}
+
+func fe3Client() *req.Client {
+	return client.SetCommonHeader("Content-Type", "application/soap+xml")
 }
 
 func getCookie() (string, error) {
-	resp, err :=
-		execute("post", clientURL,
-			fe3Client().
-				R().
-				SetBody(getCookiePayload),
-		)
-
+	resp, err := fe3Client().R().SetBody(getCookiePayload).Post(clientURL)
 	if err != nil {
 		return "", err
 	}
-
-	if resp.IsError() {
-		return "", fmt.Errorf("server error: %s", resp.Error())
+	if resp.IsErrorState() {
+		return "", fmt.Errorf("server error: %s", resp.ErrorResult())
 	}
 
 	data, err := xmlquery.Parse(strings.NewReader(resp.String()))
-
 	if err != nil {
 		return "", err
 	}
 
-	return data.
-		SelectElement("//EncryptedData").
-		InnerText(), nil
+	return data.SelectElement("//EncryptedData").InnerText(), nil
 }
 
-func getWUID(id string, locale *types.Locale) (string, error) {
-	resp, err :=
-		execute(
-			"get",
-			fmt.Sprintf(
-				"%s%s?market=%s&languages=%s,%s,neutral",
-				wuidInfoURL,
-				id,
-				locale.Country,
-				locale.String(),
-				locale.Language,
-			),
-			fe3Client().R(),
-		)
+func getWUID(id string, locale *types.Locale) (*bundleInfo, string, error) {
+	url := fmt.Sprintf(
+		"%s%s?market=%s&languages=%s,%s,neutral",
+		wuidInfoURL,
+		id,
+		locale.Country,
+		locale.String(),
+		locale.Language,
+	)
 
+	resp, err := fe3Client().R().Get(url)
 	if err != nil {
-		return "", err
+		return nil, "", err
 	}
-
-	if resp.StatusCode() == 404 {
-		return "", fmt.Errorf(`product with id "%s" not found`, id)
+	if resp.StatusCode == 404 {
+		return nil, "", fmt.Errorf(`product with id "%s" not found`, id)
 	}
-
-	if resp.IsError() {
-		return "", fmt.Errorf("server error: %s", resp.Error())
+	if resp.IsErrorState() {
+		return nil, "", fmt.Errorf("server error: %s", resp.ErrorResult())
 	}
 
 	data, err := jsonquery.Parse(strings.NewReader(resp.String()))
-
 	if err != nil {
-		return "", err
+		return nil, "", err
 	}
 
-	wuid := jsonquery.
-		FindOne(data, "//WuCategoryId").
-		Value()
+	fulfillmentData := jsonquery.FindOne(data, "Product/DisplaySkuAvailabilities/*[1]/Sku/Properties/FulfillmentData")
+	if fulfillmentData == nil {
+		return nil, "", fmt.Errorf("can not find fulfillment data")
+	}
 
-	return fmt.Sprintf("%v", wuid), nil
+	wuid := fmt.Sprintf("%v", jsonquery.FindOne(fulfillmentData, "WuCategoryId").Value())
+	if wuid == "" {
+		return nil, "", fmt.Errorf("can not find WUID")
+	}
+
+	packageName := fmt.Sprintf("%v", jsonquery.FindOne(fulfillmentData, "PackageFamilyName").Value())
+	if packageName == "" {
+		return nil, "", fmt.Errorf("can not find package name")
+	}
+
+	info, err := newBundleInfo(packageName)
+	if err != nil {
+		return nil, "", err
+	}
+
+	return info, wuid, nil
 }
 
 func getProducts(cookie string, categoryIdentifier string) ([]ProductInfo, error) {
 	var list []ProductInfo
 
-	resp, err :=
-		execute("post", clientURL,
-			fe3Client().R().
-				SetBody(wuidRequest(msaToken, cookie, categoryIdentifier)),
-		)
-
+	resp, err := fe3Client().R().SetBody(wuidRequest(msaToken, cookie, categoryIdentifier)).Post(clientURL)
 	if err != nil {
 		return list, err
 	}
-
-	if resp.IsError() {
-		return list, fmt.Errorf("server error: %s", resp.Error())
+	if resp.IsErrorState() {
+		return list, fmt.Errorf("server error: %s", resp.ErrorResult())
 	}
 
 	data, err := xmlquery.Parse(strings.NewReader(resp.String()))
@@ -124,12 +292,22 @@ func getProducts(cookie string, categoryIdentifier string) ([]ProductInfo, error
 
 	undeformedXMLStr := strings.Replace(
 		strings.Replace(
-			strings.Replace(data.OutputXML(true), "&lt;", "<", -1),
-			"&gt;", ">", -1),
-		"&#34;", "\"", -1)
+			strings.Replace(
+				data.OutputXML(true),
+				"&lt;",
+				"<",
+				-1,
+			),
+			"&gt;",
+			">",
+			-1,
+		),
+		"&#34;",
+		"\"",
+		-1,
+	)
 
 	data, err = xmlquery.Parse(strings.NewReader(undeformedXMLStr))
-
 	if err != nil {
 		return list, err
 	}
@@ -146,183 +324,173 @@ func getProducts(cookie string, categoryIdentifier string) ([]ProductInfo, error
 	return list, nil
 }
 
-func getURL(info ProductInfo) (string, error) {
-	resp, err :=
-		execute("post", clientSecuredURL,
-			fe3Client().R().
-				SetBody(fe3FileURL(msaToken, info.UpdateID, info.RevisionNumber)),
-		)
+func getURL(info ProductInfo) ([]string, error) {
+	var result []string
 
+	resp, err := fe3Client().R().
+		SetBody(fe3FileURL(msaToken, info.UpdateID, info.RevisionNumber)).
+		Post(clientSecuredURL)
 	if err != nil {
-		return "", err
+		return result, err
 	}
-
-	if resp.IsError() {
-		return "", fmt.Errorf("server error: %s", resp.Error())
+	if resp.IsErrorState() {
+		return result, fmt.Errorf("server error: %s", resp.ErrorResult())
 	}
 
 	data, err := xmlquery.Parse(strings.NewReader(resp.String()))
-
 	if err != nil {
-		return "", err
+		return result, err
 	}
 
-	return data.SelectElement("//FileLocation/Url").InnerText(), nil
+	for _, node := range data.SelectElements("//FileLocation") {
+		result = append(result, node.SelectElement("Url").InnerText())
+	}
+
+	return result, nil
 }
 
-func getFileName(url string) (string, error) {
+func getFileData(url string) (*bundleData, error) {
 	uri, err := net.Parse(url)
-
 	if err != nil {
-		return "", err
+		return nil, err
 	}
 
 	url = fmt.Sprintf("http://%s%s?%s", uri.Host, uri.EscapedPath(), uri.Query().Encode())
 
-	name, err :=
-		execute("head", url,
-			http().R().
-				SetHeader("Connection", "Keep-Alive").
-				SetHeader("Accept", "*/*").
-				SetHeader("User-Agent", "Microsoft-Delivery-Optimization/10.0"),
-		)
-
+	res, err := client.
+		SetCommonHeader("Connection", "Keep-Alive").
+		SetCommonHeader("Accept", "*/*").
+		SetCommonHeader("User-Agent", "Microsoft-Delivery-Optimization/10.0").
+		R().
+		Head(url)
 	if err != nil {
-		return "", err
+		return nil, err
+	}
+	if res.StatusCode != 200 {
+		return nil, fmt.Errorf("requiest error: %s", res.Status)
 	}
 
-	header := name.Header().Get("Content-Disposition")
-	fileNameRegexp := regexp.MustCompile(`filename=(\S+)`)
+	header := res.Header.Get("Content-Disposition")
+	if header == "" {
+		return nil, fmt.Errorf("can not get file name")
+	}
 
-	return fileNameRegexp.FindStringSubmatch(header)[1], nil
+	fileNameRegexp := regexp.MustCompile(`filename=(\S+)`)
+	matches := fileNameRegexp.FindStringSubmatch(header)
+	if len(matches) != 2 {
+		return nil, fmt.Errorf("can not get file name")
+	}
+
+	data, err := newBundleData(matches[1])
+	if err != nil {
+		return nil, err
+	}
+
+	data.Url = url
+
+	return data, nil
+}
+
+func toSlice[T any](iter iter.Seq[T]) []T {
+	var result []T
+
+	for value := range iter {
+		result = append(result, value)
+	}
+
+	return result
 }
 
 // Download backage and its dependencies from MS Store by id, version and locale to destination directory
 // and returns array of backage and its dependencies paths.
-func Download(id string, version *types.Version, arch types.Architecture, locale *types.Locale, destinationPath string) ([]string, error) {
-	cookieSpinner, _ := pterm.DefaultSpinner.Start("Fetching cookie...")
+func Download(id string, version *types.Version, arch types.Architecture, locale *types.Locale, destinationPath string) ([]types.FileInfo, error) {
+	var sp *pterm.SpinnerPrinter
+	var pb *pterm.ProgressbarPrinter
+
+	sp, _ = pterm.DefaultSpinner.Start("Fetching cookie...")
 	cookie, err := getCookie()
 	if err != nil {
-		cookieSpinner.Fail(err.Error())
 		return nil, err
 	}
-	cookieSpinner.Success("Cookie fetched")
+	sp.Success("Cookie fetched")
 
-	WUIDSpinner, _ := pterm.DefaultSpinner.Start("Fetching product WUID...")
-	wuid, err := getWUID(id, locale)
+	sp, _ = pterm.DefaultSpinner.Start("Fetching product info...")
+	appInfo, wuid, err := getWUID(id, locale)
 	if err != nil {
-		WUIDSpinner.Fail(err.Error())
 		return nil, err
 	}
-	WUIDSpinner.Success("WUID fetched")
+	sp.Success("Product info fetched")
 
-	linksSpinner, _ := pterm.DefaultSpinner.Start("Fetching product links...")
+	sp, _ = pterm.DefaultSpinner.Start("Fetching product files...")
 	productInfos, err := getProducts(cookie, wuid)
 	if err != nil {
-		linksSpinner.Fail(err.Error())
 		return nil, err
 	}
 
-	var urls []string
+	appFiles := initBundlesGroup()
+	depFiles := initBundleMap()
 	for _, info := range productInfos {
 		productURL, err := getURL(info)
 		if err != nil {
-			linksSpinner.Fail(err.Error())
 			return nil, err
 		}
-		// we don't need .BlockMap files
-		if !strings.HasPrefix(productURL, "http://dl.delivery.mp.microsoft.com") {
-			urls = append(urls, productURL)
+
+		for _, url := range productURL {
+			fileData, err := getFileData(url)
+			if err != nil {
+				return nil, err
+			}
+
+			if fileData.Format == "blockmap" {
+				continue
+			}
+
+			if fileData.Id == appInfo.Id {
+				appFiles.Add(fileData)
+			} else {
+				depFiles.Add(fileData)
+			}
 		}
 	}
-	linksSpinner.Success("Product links fetched")
 
-	productsBar, _ := pterm.DefaultProgressbar.WithTotal(len(urls)).WithTitle("Fetching product files info...").Start()
-	bundleRegexp := regexp.MustCompile(`^([0-9a-zA-Z.-]+)_([\d\.]+)_([a-z0-9]+)_~?_[a-z0-9]+.([a-zA-Z]+)`)
-	var bundles Bundles
-	for _, productURL := range urls {
-		fileName, err := getFileName(productURL)
+	downloads := initBundles()
+	appFile, err := appFiles.Get(version, arch)
+	if err != nil {
+		return nil, err
+	}
+	downloads.Append(appFile)
+	for _, deps := range depFiles.bundlesById {
+		depFile, err := deps.GetLatest(arch)
 		if err != nil {
-			_, _ = productsBar.Stop()
 			return nil, err
 		}
 
-		bundleData := bundleRegexp.FindStringSubmatch(fileName)
-		v, err := types.NewVersion(bundleData[2])
-		if err != nil {
-			_, _ = productsBar.Stop()
-			return nil, err
-		}
-
-		newArch, err := types.NewArchitecture(bundleData[3])
-		if err == nil {
-			bundle := BundleData{Version: v, Name: bundleData[1], URL: productURL, Arch: newArch, Format: strings.ToLower(bundleData[4])}
-			bundles = append(bundles, bundle)
-		}
-		productsBar.Increment()
+		downloads.Append(depFile)
 	}
-	_, _ = productsBar.Stop()
+	sp.Success("Product files fetched")
 
-	var filteredBundles Bundles
-	for _, bundle := range bundles {
-		if bundle.Format == "appx" {
-			if bundle.Arch == arch {
-				found := false
-				for index, file := range filteredBundles {
-					if bundle.Name == file.Name {
-						if bundle.Version.Compare(file.Version) >= 0 {
-							filteredBundles[index] = bundle
-						}
-						found = true
-						break
-					}
-				}
-
-				if !found {
-					filteredBundles = append(filteredBundles, bundle)
-				}
-			}
-		} else {
-			found := false
-			for index, file := range filteredBundles {
-				if bundle.Name == file.Name {
-					if bundle.Version.Compare(file.Version) >= 0 {
-						filteredBundles[index] = bundle
-					}
-					found = true
-					break
-				}
-			}
-
-			if !found {
-				filteredBundles = append(filteredBundles, bundle)
-			}
-		}
-	}
-
-	sort.Slice(filteredBundles, func(i, j int) bool {
-		return filteredBundles[i].Format == "appx"
-	})
-
-	filesBar, _ := pterm.DefaultProgressbar.WithTotal(len(filteredBundles)).WithTitle("Downloading product files...").Start()
-	var result []string
-	for _, bundle := range filteredBundles {
+	pb, _ = pterm.DefaultProgressbar.WithTotal(len(downloads.bundlesList)).WithTitle("Fetching product files info...").Start()
+	var result []types.FileInfo
+	for _, data := range downloads.bundlesList {
 		fullPath := path.Join(
 			destinationPath,
-			fmt.Sprintf("%s-%s.%s", bundle.Name, bundle.Version.String(), bundle.Format),
+			fmt.Sprintf("%s-%s.%s", data.Name, data.Version.String(), data.Format),
 		)
 
-		_, err = execute("get", bundle.URL, http().R().SetOutput(fullPath))
-
+		file, err := os.OpenFile(fullPath, os.O_CREATE, 0666)
 		if err != nil {
-			_, _ = filesBar.Stop()
 			return nil, err
 		}
 
-		result = append(result, fullPath)
-		filesBar.Increment()
+		_, err = client.R().SetOutput(file).Get(data.Url)
+		if err != nil {
+			return nil, err
+		}
+
+		result = append(result, types.FileInfo{Path: fullPath, Name: data.Name, Version: data.Version})
+		pb.Increment()
 	}
-	_, _ = filesBar.Stop()
+	//TODO remove progress bar when done
 
 	return result, nil
 }

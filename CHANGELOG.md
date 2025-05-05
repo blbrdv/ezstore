@@ -5,6 +5,7 @@
 ### Fixed
 
 - Go dependency vulnerabilities
+- Bug ["this package is not compatible with the device"](https://github.com/blbrdv/ezstore/issues/12)
 
 ## [1.2.0] - 2024-02-16
 
