@@ -25,22 +25,22 @@ func NewVersion(input string) (*Version, error) {
 
 	a, err := strconv.ParseInt(matches[1], 10, 64)
 	if err != nil {
-		return nil, err
+		return nil, fmt.Errorf("can not convert \"%s\" to int64: %s", matches[1], err.Error())
 	}
 
 	b, err := parse(matches[2])
 	if err != nil {
-		return nil, err
+		return nil, fmt.Errorf("can not convert \"%s\" to int64: %s", matches[2], err.Error())
 	}
 
 	c, err := parse(matches[3])
 	if err != nil {
-		return nil, err
+		return nil, fmt.Errorf("can not convert \"%s\" to int64: %s", matches[3], err.Error())
 	}
 
 	d, err := parse(matches[4])
 	if err != nil {
-		return nil, err
+		return nil, fmt.Errorf("can not convert \"%s\" to int64: %s", matches[4], err.Error())
 	}
 
 	return &Version{a, b, c, d}, nil

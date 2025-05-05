@@ -13,7 +13,7 @@ import (
 func getProductBundle(url string) (*bundleData, error) {
 	uri, err := net.Parse(url)
 	if err != nil {
-		return nil, err
+		return nil, fmt.Errorf("fetching product bundle failed: can not parse url \"%s\": %s", url, err.Error())
 	}
 
 	query := uri.Query().Encode()
@@ -31,26 +31,26 @@ func getProductBundle(url string) (*bundleData, error) {
 		R().
 		Head(url)
 	if err != nil {
-		return nil, err
+		return nil, fmt.Errorf("fetching product bundle failed: HEAD %s: %s", url, err.Error())
 	}
 	if res.StatusCode != 200 {
-		return nil, fmt.Errorf("requiest error: %s", res.Status)
+		return nil, fmt.Errorf("fetching product bundle failed: HEAD %s: server responded with error: %s", url, res.Status)
 	}
 
 	header := res.Header.Get("Content-Disposition")
 	if header == "" {
-		return nil, fmt.Errorf("can not get file name")
+		return nil, fmt.Errorf("fetching product bundle failed: can not get file name: response header \"Content-Disposition\" is empty")
 	}
 
 	fileNameRegexp := regexp.MustCompile(`filename=(\S+)`)
 	matches := fileNameRegexp.FindStringSubmatch(header)
 	if len(matches) != 2 {
-		return nil, fmt.Errorf("can not get file name")
+		return nil, fmt.Errorf("fetching product bundle failed: can not get file name: response header \"Content-Disposition\" has invalid format: %s", header)
 	}
 
 	data, err := newBundleData(matches[1])
 	if err != nil {
-		return nil, err
+		return nil, fmt.Errorf("fetching product bundle failed: can not get file name: %s", err.Error())
 	}
 
 	data.URL = url
@@ -69,7 +69,7 @@ func Download(id string, version *ms.Version, arch ms.Architecture, locale *ms.L
 	log.Info("Cookie fetched")
 
 	log.Debug("Fetching product info...")
-	appIndo, wuid, err := getWUID(id, locale)
+	appIndo, wuid, err := getAppInfo(id, locale)
 	if err != nil {
 		return nil, err
 	}
@@ -133,13 +133,13 @@ func Download(id string, version *ms.Version, arch ms.Architecture, locale *ms.L
 
 		file, err := os.OpenFile(fullPath, os.O_CREATE, 0666)
 		if err != nil {
-			return nil, err
+			return nil, fmt.Errorf("can not download file: can not open file \"%s\": %s", fullPath, err.Error())
 		}
 
 		_, err = client.R().SetOutput(file).Get(data.URL)
 		_ = file.Close()
 		if err != nil {
-			return nil, err
+			return nil, fmt.Errorf("can not download file: GET %s: %s", data.URL, err.Error())
 		}
 
 		result = append(result, ms.FileInfo{Path: fullPath, Name: data.Name, Version: data.Version})

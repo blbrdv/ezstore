@@ -31,15 +31,15 @@ var xmlClient = getXMLClient()
 func getCookie() (string, error) {
 	resp, err := xmlClient.R().SetBody(getCookiePayload).Post(clientURL)
 	if err != nil {
-		return "", err
+		return "", fmt.Errorf("can not get cookie: POST %s: %s", clientURL, err.Error())
 	}
 	if resp.IsErrorState() {
-		return "", fmt.Errorf("server error: %s", resp.ErrorResult())
+		return "", fmt.Errorf("can not get cookie: POST %s: server returns error: %s", clientURL, resp.ErrorResult())
 	}
 
 	data, err := xmlquery.Parse(strings.NewReader(resp.String()))
 	if err != nil {
-		return "", err
+		return "", fmt.Errorf("can not get cookie: can not parse result: %s", err.Error())
 	}
 
 	return data.SelectElement("//EncryptedData").InnerText(), nil
@@ -50,15 +50,15 @@ func getProducts(cookie string, categoryIdentifier string) ([]productInfo, error
 
 	resp, err := xmlClient.R().SetBody(wuidRequest(msaToken, cookie, categoryIdentifier)).Post(clientURL)
 	if err != nil {
-		return list, err
+		return list, fmt.Errorf("can not get products files: POST %s: %s", clientURL, err.Error())
 	}
 	if resp.IsErrorState() {
-		return list, fmt.Errorf("server error: %s", resp.ErrorResult())
+		return list, fmt.Errorf("can not get products files: POST %s: server returns error: %s", clientURL, resp.ErrorResult())
 	}
 
 	data, err := xmlquery.Parse(strings.NewReader(resp.String()))
 	if err != nil {
-		return list, err
+		return list, fmt.Errorf("can not get products files: can not parse result: %s", err.Error())
 	}
 
 	undeformedXMLStr := strings.Replace(
@@ -80,7 +80,7 @@ func getProducts(cookie string, categoryIdentifier string) ([]productInfo, error
 
 	data, err = xmlquery.Parse(strings.NewReader(undeformedXMLStr))
 	if err != nil {
-		return list, err
+		return list, fmt.Errorf("can not get products files: can not parse result: %s", err.Error())
 	}
 
 	for _, element := range data.SelectElements("//SecuredFragment/../../UpdateIdentity") {
@@ -102,15 +102,15 @@ func getURL(info productInfo) ([]string, error) {
 		SetBody(fe3FileURL(msaToken, info.UpdateID, info.RevisionNumber)).
 		Post(clientSecuredURL)
 	if err != nil {
-		return result, err
+		return result, fmt.Errorf("can not get file url: POST %s: %s", clientSecuredURL, err.Error())
 	}
 	if resp.IsErrorState() {
-		return result, fmt.Errorf("server error: %s", resp.ErrorResult())
+		return result, fmt.Errorf("can not get file url: POST %s: server returns error: %s", clientSecuredURL, resp.ErrorResult())
 	}
 
 	data, err := xmlquery.Parse(strings.NewReader(resp.String()))
 	if err != nil {
-		return result, err
+		return result, fmt.Errorf("can not get file url: can not parse result: %s", err.Error())
 	}
 
 	for _, node := range data.SelectElements("//FileLocation") {

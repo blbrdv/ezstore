@@ -91,7 +91,7 @@ func main() {
 	}
 
 	if err := app.Run(context.Background(), os.Args); err != nil {
-		log.Error(err.Error())
+		log.Errorf("Finished with error: %s", err.Error())
 		os.Exit(1)
 	}
 }

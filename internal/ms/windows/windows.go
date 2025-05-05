@@ -23,7 +23,7 @@ func Install(file ms.FileInfo) error {
 
 	result, err := cmd.CombinedOutput()
 	if err != nil {
-		return err
+		return fmt.Errorf("can not install app %s: console command error: %s", file.Name, err.Error())
 	}
 
 	installedVersionStr := strings.Trim(string(result), "\n\r")
@@ -35,14 +35,14 @@ func Install(file ms.FileInfo) error {
 	} else {
 		installedVersion, err = ms.NewVersion(installedVersionStr)
 		if err != nil {
-			return err
+			return fmt.Errorf("can not install app %s: can not get installed version: %s", file.Name, err.Error())
 		}
 	}
 
 	if installedVersion.LessThan(file.Version) {
 		//cmd = exec.Command("powershell", "-NoProfile", "Add-AppxPackage", "-Path", file.Path)
 		//if err = cmd.Run(); err != nil {
-		//	return err
+		//	return fmt.Errorf("can not install app %s: console command error: %s", file.Name, err.Error())
 		//}
 
 		log.Infof("Package %s %s installed.", file.Name, file.Version.String())

@@ -15,7 +15,7 @@ import (
 func getTraceFile() *os.File {
 	file, err := os.OpenFile(log.TraceFile, os.O_APPEND|os.O_WRONLY|os.O_CREATE, 0666)
 	if err != nil {
-		panic(err)
+		panic(fmt.Sprintf("can not open trace file %s: %s", log.TraceFile, err.Error()))
 	}
 
 	return file

@@ -7,45 +7,47 @@ import (
 	"strings"
 )
 
-func getWUID(id string, locale *ms.Locale) (*bundleInfo, string, error) {
+const displaycatalogURL = "https://displaycatalog.mp.microsoft.com/v7.0/products/{id}"
+
+func getAppInfo(id string, locale *ms.Locale) (*bundleInfo, string, error) {
 	resp, err := client.R().
 		SetPathParam("id", id).
 		SetQueryParam("market", locale.Country).
 		SetQueryParam("languages", fmt.Sprintf("%s,%s,neutral", locale.String(), locale.Language)).
-		Get("https://displaycatalog.mp.microsoft.com/v7.0/products/{id}")
+		Get(displaycatalogURL)
 	if err != nil {
-		return nil, "", err
+		return nil, "", fmt.Errorf("can not get app info: GET %s: %s", displaycatalogURL, err.Error())
 	}
 	if resp.StatusCode == 404 {
-		return nil, "", fmt.Errorf(`product with id "%s" not found`, id)
+		return nil, "", fmt.Errorf(`product with id "%s" and locale "%s" not found`, id, locale.String())
 	}
 	if resp.IsErrorState() {
-		return nil, "", fmt.Errorf("server error: %s", resp.ErrorResult())
+		return nil, "", fmt.Errorf("can not get app info: GET %s: server returns error: %s", displaycatalogURL, resp.ErrorResult())
 	}
 
 	data, err := jsonquery.Parse(strings.NewReader(resp.String()))
 	if err != nil {
-		return nil, "", err
+		return nil, "", fmt.Errorf("can not get app info: can not parse result: %s", err.Error())
 	}
 
 	fulfillmentData := jsonquery.FindOne(data, "Product/DisplaySkuAvailabilities/*[1]/Sku/Properties/FulfillmentData")
 	if fulfillmentData == nil {
-		return nil, "", fmt.Errorf("can not find fulfillment data")
+		return nil, "", fmt.Errorf("can not get app info: can not find fulfillment data in response body")
 	}
 
 	wuid := fmt.Sprintf("%v", jsonquery.FindOne(fulfillmentData, "WuCategoryId").Value())
 	if wuid == "" {
-		return nil, "", fmt.Errorf("can not find WUID")
+		return nil, "", fmt.Errorf("can not get app info: can not find WUID in fulfillment data")
 	}
 
 	packageName := fmt.Sprintf("%v", jsonquery.FindOne(fulfillmentData, "PackageFamilyName").Value())
 	if packageName == "" {
-		return nil, "", fmt.Errorf("can not find package name")
+		return nil, "", fmt.Errorf("can not get app info: can not find package name in fulfillment data")
 	}
 
 	info, err := newBundleInfo(packageName)
 	if err != nil {
-		return nil, "", err
+		return nil, "", fmt.Errorf("can not get app info: can not get bundle info: %s", err.Error())
 	}
 
 	return info, wuid, nil
