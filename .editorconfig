@@ -19,5 +19,8 @@ indent_size = 4
 [*.md]
 trim_trailing_whitespace = false
 
+[*.xml]
+insert_final_newline = false
+
 [token.txt]
 insert_final_newline = false
