@@ -35,7 +35,7 @@ func (p ProductInfo) String() string {
 
 type bundleInfo struct {
 	Name string
-	Id   string
+	ID   string
 }
 
 func newBundleInfo(input string) (*bundleInfo, error) {
@@ -45,7 +45,7 @@ func newBundleInfo(input string) (*bundleInfo, error) {
 		return nil, fmt.Errorf("%s is not valid bundle info", input)
 	}
 
-	return &bundleInfo{Name: matches[1], Id: matches[2]}, nil
+	return &bundleInfo{Name: matches[1], ID: matches[2]}, nil
 }
 
 type bundleData struct {
@@ -54,7 +54,7 @@ type bundleData struct {
 	Version *ms.Version
 	Arch    string
 	Format  string
-	Url     string
+	URL     string
 }
 
 func newBundleData(input string) (*bundleData, error) {
@@ -64,7 +64,7 @@ func newBundleData(input string) (*bundleData, error) {
 		return nil, fmt.Errorf("%s is not valid bundle data", input)
 	}
 
-	info := &bundleInfo{Name: matches[1], Id: matches[4]}
+	info := &bundleInfo{Name: matches[1], ID: matches[4]}
 	version, err := ms.NewVersion(matches[2])
 	if err != nil {
 		return nil, err
@@ -82,7 +82,7 @@ func newBundleData(input string) (*bundleData, error) {
 func (bd *bundleData) String() string {
 	return fmt.Sprintf(
 		"{ %s, Name: %s, Version: %s, Architecture: %s, Format: %s }",
-		bd.Id,
+		bd.ID,
 		bd.Name,
 		bd.Version.String(),
 		bd.Arch,
@@ -183,24 +183,24 @@ func (bg *bundlesGroup) GetLatest(arch ms.Architecture) (*bundleData, error) {
 	return bg.Get(nil, arch)
 }
 
-type bundlesById map[string]*bundlesGroup
+type bundlesByID map[string]*bundlesGroup
 
 type bundlesMap struct {
-	bundlesById
+	bundlesByID
 }
 
 func (bm *bundlesMap) Add(bundle *bundleData) {
-	group := bm.bundlesById[bundle.Id]
+	group := bm.bundlesByID[bundle.ID]
 
 	if group == nil {
-		bm.bundlesById[bundle.Id] = newBundlesGroup(bundle)
+		bm.bundlesByID[bundle.ID] = newBundlesGroup(bundle)
 	} else {
 		group.Add(bundle)
 	}
 }
 
 func initBundleMap() *bundlesMap {
-	return &bundlesMap{bundlesById{}}
+	return &bundlesMap{bundlesByID{}}
 }
 
 func fe3Client() *req.Client {
@@ -386,7 +386,7 @@ func getFileData(url string) (*bundleData, error) {
 		return nil, err
 	}
 
-	data.Url = url
+	data.URL = url
 
 	return data, nil
 }
@@ -445,7 +445,7 @@ func Download(id string, version *ms.Version, arch ms.Architecture, locale *ms.L
 				continue
 			}
 
-			if fileData.Id == appInfo.Id {
+			if fileData.ID == appInfo.ID {
 				appFiles.Add(fileData)
 			} else {
 				depFiles.Add(fileData)
@@ -459,7 +459,7 @@ func Download(id string, version *ms.Version, arch ms.Architecture, locale *ms.L
 		return nil, err
 	}
 	downloads.Append(appFile)
-	for _, deps := range depFiles.bundlesById {
+	for _, deps := range depFiles.bundlesByID {
 		depFile, err := deps.GetLatest(arch)
 		if err != nil {
 			return nil, err
@@ -482,7 +482,7 @@ func Download(id string, version *ms.Version, arch ms.Architecture, locale *ms.L
 			return nil, err
 		}
 
-		_, err = client.R().SetOutput(file).Get(data.Url)
+		_, err = client.R().SetOutput(file).Get(data.URL)
 		if err != nil {
 			return nil, err
 		}
