@@ -3,10 +3,8 @@ package store
 import (
 	"fmt"
 	"github.com/blbrdv/ezstore/internal/log"
-	"github.com/pterm/pterm"
 	"io"
 	"os"
-	"path/filepath"
 	"strings"
 
 	"time"
@@ -14,24 +12,19 @@ import (
 	"github.com/imroc/req/v3"
 )
 
-func getDumpFile() *os.File {
-	cache, _ := os.UserCacheDir()
-	filename := filepath.Join(cache, "ezstore", *log.GetLogFileName())
-	file, _ := os.OpenFile(filename, os.O_APPEND|os.O_WRONLY|os.O_CREATE, 0666)
+func getTraceFile() *os.File {
+	file, err := os.OpenFile(log.TraceFile, os.O_APPEND|os.O_WRONLY|os.O_CREATE, 0666)
+	if err != nil {
+		panic(err)
+	}
 
 	return file
 }
 
-var dumpFileName = getDumpFile()
-
-func traceRequest(req *req.Request) {
+func traceRequest(traceFile *os.File, req *req.Request) {
 	if req == nil {
 		return
 	}
-
-	defer func(file *os.File) {
-		_ = file.Close()
-	}(dumpFileName)
 
 	var sb strings.Builder
 
@@ -50,17 +43,13 @@ func traceRequest(req *req.Request) {
 
 	_, _ = fmt.Fprint(&sb, "\n")
 
-	_, _ = dumpFileName.WriteString(sb.String())
+	_, _ = traceFile.WriteString(sb.String())
 }
 
-func traceError(err error) {
+func traceError(traceFile *os.File, err error) {
 	if err == nil {
 		return
 	}
-
-	defer func(file *os.File) {
-		_ = file.Close()
-	}(dumpFileName)
 
 	var sb strings.Builder
 
@@ -74,17 +63,13 @@ func traceError(err error) {
 
 	_, _ = fmt.Fprint(&sb, "\n")
 
-	_, _ = dumpFileName.WriteString(sb.String())
+	_, _ = traceFile.WriteString(sb.String())
 }
 
-func traceResponse(res *req.Response) {
+func traceResponse(traceFile *os.File, res *req.Response) {
 	if res == nil || res.Response == nil {
 		return
 	}
-
-	defer func(file *os.File) {
-		_ = file.Close()
-	}(dumpFileName)
 
 	var sb strings.Builder
 
@@ -116,7 +101,7 @@ func traceResponse(res *req.Response) {
 
 	_, _ = fmt.Fprint(&sb, "\n")
 
-	_, _ = dumpFileName.WriteString(sb.String())
+	_, _ = traceFile.WriteString(sb.String())
 }
 
 func getHTTPClient() *req.Client {
@@ -129,21 +114,23 @@ func getHTTPClient() *req.Client {
 		}).
 		AddCommonRetryHook(func(_ *req.Response, err error) {
 			if err != nil {
-				pterm.Warning.Println(err.Error())
+				log.Warning(err.Error())
 			}
 		})
 
-	if log.IsTraceLevel() {
+	if log.Level == log.Detailed {
+		file := getTraceFile()
+
 		client = client.
 			OnError(func(_ *req.Client, req *req.Request, resp *req.Response, err error) {
-				traceRequest(req)
-				traceError(err)
-				traceResponse(resp)
+				traceRequest(file, req)
+				traceError(file, err)
+				traceResponse(file, resp)
 			}).
 			OnAfterResponse(func(_ *req.Client, resp *req.Response) error {
-				traceRequest(resp.Request)
-				traceError(resp.Err)
-				traceResponse(resp)
+				traceRequest(file, resp.Request)
+				traceError(file, resp.Err)
+				traceResponse(file, resp)
 				return nil
 			})
 	}

@@ -2,8 +2,8 @@ package store
 
 import (
 	"fmt"
+	"github.com/blbrdv/ezstore/internal/log"
 	"github.com/blbrdv/ezstore/internal/ms"
-	"github.com/pterm/pterm"
 	net "net/url"
 	"os"
 	"path"
@@ -54,24 +54,21 @@ func getProductBundle(url string) (*bundleData, error) {
 // Download backage and its dependencies from MS Store by id, version and locale to destination directory
 // and returns array of backage and its dependencies paths.
 func Download(id string, version *ms.Version, arch ms.Architecture, locale *ms.Locale, destinationPath string) ([]ms.FileInfo, error) {
-	var sp *pterm.SpinnerPrinter
-	var pb *pterm.ProgressbarPrinter
-
-	sp, _ = pterm.DefaultSpinner.Start("Fetching cookie...")
+	log.Debug("Fetching cookie...")
 	cookie, err := getCookie()
 	if err != nil {
 		return nil, err
 	}
-	sp.Success("Cookie fetched")
+	log.Info("Cookie fetched")
 
-	sp, _ = pterm.DefaultSpinner.Start("Fetching product info...")
+	log.Debug("Fetching product info...")
 	appIndo, wuid, err := getWUID(id, locale)
 	if err != nil {
 		return nil, err
 	}
-	sp.Success("Product info fetched")
+	log.Info("Product info fetched")
 
-	sp, _ = pterm.DefaultSpinner.Start("Fetching product files...")
+	log.Debug("Fetching product files...")
 	productsInfo, err := getProducts(cookie, wuid)
 	if err != nil {
 		return nil, err
@@ -117,9 +114,9 @@ func Download(id string, version *ms.Version, arch ms.Architecture, locale *ms.L
 		return nil, err
 	}
 	bundlesToDownload.Append(appBundle)
-	sp.Success("Product files fetched")
+	log.Info("Product files fetched")
 
-	pb, _ = pterm.DefaultProgressbar.WithTotal(len(bundlesToDownload.bundlesList)).WithTitle("Fetching product files info...").Start()
+	log.Debug("Fetching product files info...")
 	var result []ms.FileInfo
 	for _, data := range bundlesToDownload.bundlesList {
 		fullPath := path.Join(
@@ -139,9 +136,8 @@ func Download(id string, version *ms.Version, arch ms.Architecture, locale *ms.L
 		}
 
 		result = append(result, ms.FileInfo{Path: fullPath, Name: data.Name, Version: data.Version})
-		pb.Increment()
 	}
-	//TODO remove progress bar when done
+	log.Info("Product files info fetched")
 
 	return result, nil
 }

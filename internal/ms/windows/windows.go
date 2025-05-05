@@ -2,9 +2,11 @@ package windows
 
 import (
 	"fmt"
+	"github.com/blbrdv/ezstore/internal/log"
 	"github.com/blbrdv/ezstore/internal/ms"
-	"github.com/pterm/pterm"
+	"os"
 	"os/exec"
+	"path"
 	"strings"
 )
 
@@ -38,14 +40,14 @@ func Install(file ms.FileInfo) error {
 	}
 
 	if installedVersion.LessThan(file.Version) {
-		cmd = exec.Command("powershell", "-NoProfile", "Add-AppxPackage", "-Path", file.Path)
-		if err = cmd.Run(); err != nil {
-			return err
-		}
+		//cmd = exec.Command("powershell", "-NoProfile", "Add-AppxPackage", "-Path", file.Path)
+		//if err = cmd.Run(); err != nil {
+		//	return err
+		//}
 
-		pterm.Info.Printfln("Package %s %s installed.", file.Name, file.Version.String())
+		log.Infof("Package %s %s installed.", file.Name, file.Version.String())
 	} else {
-		pterm.Info.Printfln("Package %s %s already installed. Skipping.", file.Name, installedVersion)
+		log.Infof("Package %s %s already installed. Skipping.", file.Name, installedVersion)
 	}
 
 	return nil
@@ -72,3 +74,28 @@ func GetLocale() *ms.Locale {
 
 	return locale
 }
+
+func prepareDir(dir string) string {
+	dir = path.Join(dir, "ezstore")
+	err := os.MkdirAll(dir, 0666)
+	if err != nil {
+		panic(err)
+	}
+	return dir
+}
+
+func getTempDir() string {
+	dir := os.TempDir()
+	if dir != "" {
+		return prepareDir(dir)
+	}
+
+	dir, err := os.UserCacheDir()
+	if err != nil {
+		panic(err)
+	}
+
+	return prepareDir(dir)
+}
+
+var TempDir = getTempDir()

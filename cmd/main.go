@@ -6,7 +6,7 @@ import (
 	"errors"
 	"fmt"
 	"github.com/blbrdv/ezstore/internal/cmd"
-	"github.com/pterm/pterm"
+	"github.com/blbrdv/ezstore/internal/log"
 	"github.com/urfave/cli/v3"
 	"github.com/ztrue/tracerr"
 	"io"
@@ -21,14 +21,19 @@ func main() {
 	defer func() {
 		rec := recover()
 		if rec != nil {
-			pterm.Error.Println(rec)
 			switch err := rec.(type) {
 			case error:
+				log.Errorf("Panic: %s", err.Error())
+
 				terr := tracerr.Wrap(err)
 				terr = tracerr.CustomError(err, terr.StackTrace()[2:])
 				stacktrace := strings.Split(tracerr.Sprint(terr), "\n")[1:]
 
 				fmt.Println(strings.Join(stacktrace, "\n"))
+			case string:
+				log.Errorf("Panic: %s", err)
+			default:
+				log.Error("Panic: unknown error")
 			}
 		}
 		os.Exit(1)
@@ -50,6 +55,10 @@ func main() {
 					},
 				},
 				Flags: []cli.Flag{
+					&cli.StringFlag{
+						Name:  "verbosity",
+						Value: "n",
+					},
 					&cli.StringFlag{
 						Name:    "version",
 						Aliases: []string{"v"},
@@ -82,7 +91,7 @@ func main() {
 	}
 
 	if err := app.Run(context.Background(), os.Args); err != nil {
-		pterm.Error.Println(err.Error())
+		log.Error(err.Error())
 		os.Exit(1)
 	}
 }

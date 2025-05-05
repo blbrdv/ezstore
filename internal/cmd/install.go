@@ -7,11 +7,10 @@ import (
 	"github.com/blbrdv/ezstore/internal/ms"
 	"github.com/blbrdv/ezstore/internal/ms/store"
 	"github.com/blbrdv/ezstore/internal/ms/windows"
-	"github.com/pterm/pterm"
 	"github.com/urfave/cli/v3"
 	"golang.org/x/net/context"
 	"os"
-	"path/filepath"
+	"path"
 	"runtime"
 )
 
@@ -34,6 +33,12 @@ func Install(_ context.Context, cmd *cli.Command) error {
 	if err != nil {
 		return err
 	}
+
+	verbosity, err := log.NewLevel(cmd.String("verbosity"))
+	if err != nil {
+		return err
+	}
+	log.Level = verbosity
 
 	id := cmd.StringArg("id")
 	if id == "" {
@@ -59,30 +64,20 @@ func Install(_ context.Context, cmd *cli.Command) error {
 		}
 	}
 
-	if log.IsTraceLevel() {
-		pterm.EnableDebugMessages()
-		pterm.Debug.Printfln("Trace file: %s", *log.GetLogFileName())
-	} else {
-		if cmd.Bool("debug") {
-			pterm.EnableDebugMessages()
-		}
+	tmpPath := path.Join(windows.TempDir, id)
+
+	log.Debugf("Trace file: %s", log.TraceFile)
+	log.Debugf("Temp dir: %s", tmpPath)
+
+	err = os.RemoveAll(tmpPath)
+	if err != nil {
+		return err
 	}
-
-	pterm.Debug.Println(fmt.Sprintf("id           = %s", id))
-	pterm.Debug.Println(fmt.Sprintf("version      = %s", versionStr))
-	pterm.Debug.Println(fmt.Sprintf("locale       = %s", locale))
-	pterm.Debug.Println(fmt.Sprintf("architecture = %s", arch))
-
-	cache, _ := os.UserCacheDir()
-	tmpPath := filepath.Join(cache, "ezstore", id)
-	removeDir(tmpPath)
 
 	err = os.MkdirAll(tmpPath, 0666)
 	if err != nil {
-		panic(err)
+		return err
 	}
-
-	//defer removeDir(tmpPath)
 
 	files, err := store.Download(id, version, arch, locale, tmpPath)
 	if err != nil {
@@ -96,14 +91,12 @@ func Install(_ context.Context, cmd *cli.Command) error {
 		}
 	}
 
-	pterm.Success.Println("Done!")
+	//err = os.RemoveAll(tmpPath)
+	//if err != nil {
+	//	return err
+	//}
+
+	log.Info("Done!")
 
 	return nil
-}
-
-func removeDir(path string) {
-	err := os.RemoveAll(path)
-	if err != nil {
-		panic(err)
-	}
 }
