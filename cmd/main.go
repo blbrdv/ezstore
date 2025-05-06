@@ -35,8 +35,8 @@ func main() {
 			default:
 				log.Error("Panic: unknown error")
 			}
+			os.Exit(1)
 		}
-		os.Exit(1)
 	}()
 
 	app := &cli.Command{
@@ -83,7 +83,6 @@ func main() {
 
 	cli.HelpPrinter = func(_ io.Writer, _ string, _ interface{}) {
 		fmt.Print(help)
-		os.Exit(0) // for some reason after printing help cli returns code 1
 	}
 
 	if err := app.Run(context.Background(), os.Args); err != nil {
