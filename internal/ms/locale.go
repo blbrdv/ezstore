@@ -5,7 +5,7 @@ import (
 	"regexp"
 )
 
-const pattern = `^(?P<lang>[a-z][a-z][a-z]?)(?:-(?:\d\d\d|[A-Z][a-z]+))?(?:-(?P<country>[A-Z][A-Z]))?(?:_\w+|-(?:[a-z]+|\d+))?$`
+const pattern = `^(?P<lang>[a-z][a-z][a-z]?)(?:-(?:\d\d\d|[A-Z][a-z]+))?(?:[_-](?P<country>[A-Z][A-Z]))?(?:_\w+|-(?:[a-z]+|\d+))?$`
 
 // Locale represents ISO 639-1 language tag and optional ISO 3166-1 country code.
 type Locale struct {
