@@ -96,7 +96,7 @@ func Install(_ context.Context, cmd *cli.Command) error {
 	//	return fmt.Errorf("can not remove dir \"%s\" and its content: %s", tmpPath, err.Error())
 	//}
 
-	log.Info("Done!")
+	log.Success("Done!")
 
 	return nil
 }
