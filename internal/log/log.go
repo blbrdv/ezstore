@@ -10,15 +10,18 @@ import (
 	"time"
 )
 
+//goland:noinspection GoNameStartsWithPackageName
+type LogLevel int
+
 const (
 	// Quiet - no output at all
-	Quiet = 1
+	Quiet LogLevel = iota + 1
 	// Minimal - only SUCCESS and ERROR logs
-	Minimal = 2
+	Minimal
 	// Normal - same as Minimal plus INFO and WARNING logs
-	Normal = 3
+	Normal
 	// Detailed - same as Normal plus DEBUG logs and tracing net errors to log file
-	Detailed = 4
+	Detailed
 )
 
 func getCurrentDir() string {
@@ -37,7 +40,7 @@ var Level = Normal
 // TraceFile contains path to log file for http package. Can be not exists.
 var TraceFile = utils.Join(getCurrentDir(), fmt.Sprintf("%s.log", time.Now().Format("060102150405")))
 
-var levels = map[string]int{
+var levels = map[string]LogLevel{
 	"q": Quiet,
 	"m": Minimal,
 	"n": Normal,
@@ -51,7 +54,7 @@ var yellow = color.Style{color.FgYellow, color.OpBold}
 var red = color.Style{color.FgRed, color.OpBold}
 
 // NewLevel returns log level based on its string representation. Returns error if input string format is invalid.
-func NewLevel(input string) (int, error) {
+func NewLevel(input string) (LogLevel, error) {
 	result := levels[input]
 	if result == 0 {
 		return 0, fmt.Errorf("%s is invalid log level", input)
