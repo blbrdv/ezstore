@@ -17,6 +17,8 @@ import (
 //go:embed README.txt
 var help string
 
+var version = "undefined"
+
 func main() {
 	defer func() {
 		rec := recover()
@@ -44,6 +46,7 @@ func main() {
 		EnableShellCompletion: true,
 		Writer:                cmd.DebugWriter{},
 		ErrWriter:             cmd.ErrorWriter{},
+		Version:               version,
 		Commands: []*cli.Command{
 			{
 				Name:   "install",
@@ -60,9 +63,8 @@ func main() {
 						Value: "n",
 					},
 					&cli.StringFlag{
-						Name:    "version",
-						Aliases: []string{"v"},
-						Value:   "latest",
+						Name:  "ver",
+						Value: "latest",
 						Validator: func(s string) error {
 							if s == "" {
 								return errors.New("value must be not empty")
@@ -72,9 +74,8 @@ func main() {
 						ValidateDefaults: false,
 					},
 					&cli.StringFlag{
-						Name:    "locale",
-						Aliases: []string{"l"},
-						Value:   "",
+						Name:  "locale",
+						Value: "",
 					},
 				},
 			},
@@ -83,6 +84,10 @@ func main() {
 
 	cli.HelpPrinter = func(_ io.Writer, _ string, _ interface{}) {
 		fmt.Print(help)
+	}
+
+	cli.VersionPrinter = func(cmd *cli.Command) {
+		fmt.Printf("%s v%s\n", cmd.Root().Name, cmd.Root().Version)
 	}
 
 	if err := app.Run(context.Background(), os.Args); err != nil {

@@ -45,7 +45,7 @@ func Install(_ context.Context, cmd *cli.Command) error {
 		return errors.New("id must be set")
 	}
 
-	versionStr := cmd.String("version")
+	versionStr := cmd.String("ver")
 	var version *ms.Version
 	if versionStr != "latest" {
 		version, err = ms.NewVersion(versionStr)

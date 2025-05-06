@@ -3,11 +3,13 @@ Easy install apps from MS Store
 Usage:
     ezstore install <id> [options]
     ezstore --help
+    ezstore --version
 
 Options:
-    -h --help      Show this screen.
-    -v --version   Sets the version of the product [default: latest].
-    -l --locale    Sets the locale name of the product [default: current value in the OS or en_US].
+    -h --help      Print this text.
+    -v --version   Print app version.
+    --ver          Sets the version of the product [default: latest].
+    --locale       Sets the locale name of the product [default: current value in the OS or en_US].
     --verbosity    Sets verbosity level [default: n].
                    Available log levels:
                      * q - quiet, no output at all
