@@ -40,10 +40,11 @@ func Install(file ms.FileInfo) error {
 	}
 
 	if installedVersion.LessThan(file.Version) {
-		//cmd = exec.Command("powershell", "-NoProfile", "Add-AppxPackage", "-Path", file.Path)
-		//if err = cmd.Run(); err != nil {
-		//	return fmt.Errorf("can not install app %s: console command error: %s", file.Name, err.Error())
-		//}
+		cmd = exec.Command("powershell", "-NoProfile", "Add-AppxPackage", "-Path", file.Path)
+		if err = cmd.Run(); err != nil {
+			output, _ := cmd.CombinedOutput()
+			return fmt.Errorf("can not install app %s: console command error: %s\n%s", file.Name, err.Error(), output)
+		}
 
 		log.Infof("Package %s %s installed.", file.Name, file.Version.String())
 	} else {

@@ -91,10 +91,10 @@ func Install(_ context.Context, cmd *cli.Command) error {
 		}
 	}
 
-	//err = os.RemoveAll(tmpPath)
-	//if err != nil {
-	//	return fmt.Errorf("can not remove dir \"%s\" and its content: %s", tmpPath, err.Error())
-	//}
+	err = os.RemoveAll(tmpPath)
+	if err != nil {
+		return fmt.Errorf("can not remove dir \"%s\" and its content: %s", tmpPath, err.Error())
+	}
 
 	log.Success("Done!")
 
