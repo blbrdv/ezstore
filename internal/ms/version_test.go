@@ -1,6 +1,7 @@
 package ms_test
 
 import (
+	"fmt"
 	"testing"
 
 	. "github.com/blbrdv/ezstore/internal/ms"
@@ -32,6 +33,32 @@ func TestVersion(t *testing.T) {
 
 			if actualStr != expectedStr {
 				t.Fatalf(`Incorrect Version, expected: "%s", actual: "%s"`, expectedStr, actualStr)
+			}
+		})
+	}
+}
+
+var invalidVersionData = []struct {
+	Name  string
+	Value string
+}{
+	{"TestEmptyInput", ""},
+	{"TestTooManyNumbers", "1.2.3.4.5"},
+	{"TestInvalidFormat", "foo bar 123"},
+	{"TestInvalidInput", "vNotAVersion"},
+}
+
+func TestInvalidVersion(t *testing.T) {
+	for _, data := range invalidVersionData {
+		t.Run(data.Name, func(t *testing.T) {
+			expected := fmt.Sprintf("\"%s\" is not a valid version", data.Value)
+			result, err := NewVersion(data.Value)
+
+			if err == nil {
+				t.Fatalf(`Function must return error "%s", but return result "%s"`, expected, result.String())
+			}
+			if err.Error() != expected {
+				t.Fatalf(`Incorrect error message, expected "%s", actual "%s"`, expected, err.Error())
 			}
 		})
 	}
