@@ -10,11 +10,15 @@ import (
 const displaycatalogURL = "https://displaycatalog.mp.microsoft.com/v7.0/products"
 
 func getAppInfo(id string, locale *ms.Locale) (*bundleInfo, string, error) {
-	url := fmt.Sprintf("%s/%s", displaycatalogURL, id)
-	resp, err := client.R().
-		SetQueryParam("market", locale.Country).
-		SetQueryParam("languages", fmt.Sprintf("%s,%s,neutral", locale.String(), locale.Language)).
-		Get(url)
+	url := fmt.Sprintf(
+		"%s/%s?market=%s&languages=%s,%s,neutral",
+		displaycatalogURL,
+		id,
+		locale.Country,
+		locale.String(),
+		locale.Language,
+	)
+	resp, err := client.R().Get(url)
 	if err != nil {
 		return nil, "", fmt.Errorf("can not get app info: GET %s: %s", url, err.Error())
 	}
