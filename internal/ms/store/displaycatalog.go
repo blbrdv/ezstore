@@ -22,7 +22,7 @@ func getAppInfo(id string, locale *ms.Locale) (*bundleInfo, string, error) {
 		return nil, "", fmt.Errorf(`product with id "%s" and locale "%s" not found`, id, locale.String())
 	}
 	if resp.IsErrorState() {
-		return nil, "", fmt.Errorf("can not get app info: GET %s: server returns error: %s", url, resp.ErrorResult())
+		return nil, "", fmt.Errorf("can not get app info: GET %s: server returns error: %s", url, resp.Status)
 	}
 
 	data, err := jsonquery.Parse(strings.NewReader(resp.String()))

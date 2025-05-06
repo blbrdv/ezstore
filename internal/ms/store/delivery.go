@@ -34,7 +34,7 @@ func getCookie() (string, error) {
 		return "", fmt.Errorf("can not get cookie: POST %s: %s", clientURL, err.Error())
 	}
 	if resp.IsErrorState() {
-		return "", fmt.Errorf("can not get cookie: POST %s: server returns error: %s", clientURL, resp.ErrorResult())
+		return "", fmt.Errorf("can not get cookie: POST %s: server returns error: %s", clientURL, resp.Status)
 	}
 
 	data, err := xmlquery.Parse(strings.NewReader(resp.String()))
@@ -53,7 +53,7 @@ func getProducts(cookie string, categoryIdentifier string) ([]productInfo, error
 		return list, fmt.Errorf("can not get products files: POST %s: %s", clientURL, err.Error())
 	}
 	if resp.IsErrorState() {
-		return list, fmt.Errorf("can not get products files: POST %s: server returns error: %s", clientURL, resp.ErrorResult())
+		return list, fmt.Errorf("can not get products files: POST %s: server returns error: %s", clientURL, resp.Status)
 	}
 
 	data, err := xmlquery.Parse(strings.NewReader(resp.String()))
@@ -105,7 +105,7 @@ func getURL(info productInfo) ([]string, error) {
 		return result, fmt.Errorf("can not get file url: POST %s: %s", clientSecuredURL, err.Error())
 	}
 	if resp.IsErrorState() {
-		return result, fmt.Errorf("can not get file url: POST %s: server returns error: %s", clientSecuredURL, resp.ErrorResult())
+		return result, fmt.Errorf("can not get file url: POST %s: server returns error: %s", clientSecuredURL, resp.Status)
 	}
 
 	data, err := xmlquery.Parse(strings.NewReader(resp.String()))
