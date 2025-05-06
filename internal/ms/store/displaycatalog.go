@@ -7,22 +7,22 @@ import (
 	"strings"
 )
 
-const displaycatalogURL = "https://displaycatalog.mp.microsoft.com/v7.0/products/{id}"
+const displaycatalogURL = "https://displaycatalog.mp.microsoft.com/v7.0/products"
 
 func getAppInfo(id string, locale *ms.Locale) (*bundleInfo, string, error) {
+	url := fmt.Sprintf("%s/%s", displaycatalogURL, id)
 	resp, err := client.R().
-		SetPathParam("id", id).
 		SetQueryParam("market", locale.Country).
 		SetQueryParam("languages", fmt.Sprintf("%s,%s,neutral", locale.String(), locale.Language)).
-		Get(displaycatalogURL)
+		Get(url)
 	if err != nil {
-		return nil, "", fmt.Errorf("can not get app info: GET %s: %s", displaycatalogURL, err.Error())
+		return nil, "", fmt.Errorf("can not get app info: GET %s: %s", url, err.Error())
 	}
 	if resp.StatusCode == 404 {
 		return nil, "", fmt.Errorf(`product with id "%s" and locale "%s" not found`, id, locale.String())
 	}
 	if resp.IsErrorState() {
-		return nil, "", fmt.Errorf("can not get app info: GET %s: server returns error: %s", displaycatalogURL, resp.ErrorResult())
+		return nil, "", fmt.Errorf("can not get app info: GET %s: server returns error: %s", url, resp.ErrorResult())
 	}
 
 	data, err := jsonquery.Parse(strings.NewReader(resp.String()))
