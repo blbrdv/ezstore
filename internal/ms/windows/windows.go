@@ -76,11 +76,11 @@ func GetLocale() *ms.Locale {
 	return locale
 }
 
-func prepareDir(dir string) string {
-	dir = utils.Join(dir, "ezstore")
+func prepareDir(elem ...string) string {
+	dir := utils.Join(append(elem, "ezstore")...)
 	err := os.MkdirAll(dir, 0660)
 	if err != nil {
-		panic(err)
+		panic(fmt.Errorf("can not create directory \"%s\": %s", dir, err.Error()))
 	}
 	return dir
 }
@@ -96,7 +96,7 @@ func getTempDir() string {
 		panic(err)
 	}
 
-	return prepareDir(dir)
+	return prepareDir(dir, "Temp")
 }
 
 // TempDir contains path to directory for temporary files. Can be not exists.
