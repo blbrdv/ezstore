@@ -60,7 +60,7 @@ func getProductBundle(url string) (*bundleData, error) {
 
 // Download backage and its dependencies from MS Store by id, version and locale to destination directory
 // and returns array of backage and its dependencies paths.
-func Download(id string, version *ms.Version, arch ms.Architecture, locale *ms.Locale, destinationPath string) ([]ms.FileInfo, error) {
+func Download(id string, version *ms.Version, locale *ms.Locale, destinationPath string) ([]ms.FileInfo, error) {
 	log.Debug("Fetching cookie...")
 	cookie, err := getCookie()
 	if err != nil {
@@ -109,14 +109,14 @@ func Download(id string, version *ms.Version, arch ms.Architecture, locale *ms.L
 
 	bundlesToDownload := initBundles()
 	for _, deps := range depBundles.bundlesByID {
-		depBundle, err := deps.GetLatest(arch)
+		depBundle, err := deps.GetLatest()
 		if err != nil {
 			return nil, err
 		}
 
 		bundlesToDownload.Append(depBundle)
 	}
-	appBundle, err := appBundles.Get(version, arch)
+	appBundle, err := appBundles.Get(version)
 	if err != nil {
 		return nil, err
 	}

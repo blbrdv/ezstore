@@ -90,8 +90,8 @@ func (b *bundles) Append(bundle *bundleData) {
 	b.bundlesList = append(b.bundlesList, bundle)
 }
 
-func (b *bundles) GetSupported(arch ms.Architecture) (*bundleData, error) {
-	for _, supported := range arch.CompatibleWith() {
+func (b *bundles) GetSupported() (*bundleData, error) {
+	for _, supported := range ms.Arch.CompatibleWith() {
 		for _, data := range b.bundlesList {
 			if data.Arch == supported.String() {
 				return data, nil
@@ -105,7 +105,7 @@ func (b *bundles) GetSupported(arch ms.Architecture) (*bundleData, error) {
 		}
 	}
 
-	return nil, fmt.Errorf("\"%s\" architecture is not supported by this app", arch.String())
+	return nil, fmt.Errorf("\"%s\" architecture is not supported by this app", ms.Arch.String())
 }
 
 type bundlesByVersion map[ms.Version]*bundles
@@ -133,7 +133,7 @@ func (bg *bundlesGroup) Add(bundle *bundleData) {
 	}
 }
 
-func (bg *bundlesGroup) Get(version *ms.Version, arch ms.Architecture) (*bundleData, error) {
+func (bg *bundlesGroup) Get(version *ms.Version) (*bundleData, error) {
 	var searchVersion ms.Version
 	if version == nil {
 		versions := utils.ToSlice(maps.Keys(bg.bundlesByVersion))
@@ -152,11 +152,11 @@ func (bg *bundlesGroup) Get(version *ms.Version, arch ms.Architecture) (*bundleD
 		return nil, fmt.Errorf("can not get bundle by version \"%s\"", searchVersion.String())
 	}
 
-	return list.GetSupported(arch)
+	return list.GetSupported()
 }
 
-func (bg *bundlesGroup) GetLatest(arch ms.Architecture) (*bundleData, error) {
-	return bg.Get(nil, arch)
+func (bg *bundlesGroup) GetLatest() (*bundleData, error) {
+	return bg.Get(nil)
 }
 
 type bundlesByID map[string]*bundlesGroup

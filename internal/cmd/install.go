@@ -11,29 +11,11 @@ import (
 	"github.com/urfave/cli/v3"
 	"golang.org/x/net/context"
 	"os"
-	"runtime"
 )
 
 // Install download package with its dependencies from MS Store by id, version, locale and architecture,
 // and then install it all.
 func Install(_ context.Context, cmd *cli.Command) error {
-	var err error
-	var arch ms.Architecture
-
-	switch goarch := runtime.GOARCH; goarch {
-	case "amd64":
-		arch, err = ms.NewArchitecture("x64")
-	case "amd64p32":
-		arch, err = ms.NewArchitecture("x86")
-	case "arm", "arm64":
-		arch, err = ms.NewArchitecture(goarch)
-	default:
-		err = fmt.Errorf("%s architecture not supported", arch)
-	}
-	if err != nil {
-		return err
-	}
-
 	verbosity, err := log.NewLevel(cmd.String("verbosity"))
 	if err != nil {
 		return err
@@ -79,7 +61,7 @@ func Install(_ context.Context, cmd *cli.Command) error {
 		return fmt.Errorf("can not create dir \"%s\": %s", tmpPath, err.Error())
 	}
 
-	files, err := store.Download(id, version, arch, locale, tmpPath)
+	files, err := store.Download(id, version, locale, tmpPath)
 	if err != nil {
 		return err
 	}
