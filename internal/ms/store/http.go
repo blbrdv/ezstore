@@ -105,36 +105,35 @@ func traceResponse(traceFile *os.File, res *req.Response) {
 }
 
 func getHTTPClient() *req.Client {
-	client := req.C().
+	return req.C().
 		SetCommonHeader("Content-Encoding", "Encoding.UTF8").
 		SetCommonRetryCount(5).
 		SetCommonRetryInterval(func(_ *req.Response, attempt int) time.Duration {
 			result, _ := time.ParseDuration(fmt.Sprintf("%ds", 5*attempt))
 			return result
 		}).
-		AddCommonRetryHook(func(_ *req.Response, err error) {
+		AddCommonRetryHook(func(resp *req.Response, err error) {
 			if err != nil {
+				if log.Level == log.Detailed {
+					file := getTraceFile()
+					traceRequest(file, resp.Request)
+					traceError(file, resp.Err)
+					traceResponse(file, resp)
+					_ = file.Close()
+				}
+
 				log.Warning(err.Error())
 			}
-		})
-
-	if log.Level == log.Detailed {
-		client = client.
-			OnError(func(_ *req.Client, req *req.Request, resp *req.Response, err error) {
+		}).
+		OnError(func(_ *req.Client, req *req.Request, resp *req.Response, err error) {
+			if log.Level == log.Detailed {
 				file := getTraceFile()
 				traceRequest(file, req)
 				traceError(file, err)
 				traceResponse(file, resp)
-			}).
-			AddCommonRetryHook(func(resp *req.Response, err error) {
-				file := getTraceFile()
-				traceRequest(file, resp.Request)
-				traceError(file, resp.Err)
-				traceResponse(file, resp)
-			})
-	}
-
-	return client
+				_ = file.Close()
+			}
+		})
 }
 
 var client = getHTTPClient()
