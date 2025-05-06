@@ -1,7 +1,7 @@
 Param (
     [Parameter(Mandatory=$true,Position=0)]
     [ValidateNotNullOrEmpty()]
-    [ValidateSet('clean','format','lint','test','check','build')]
+    [ValidateSet('clean','format','lint','test','check','build','rebuild')]
     [string]$Command
 )
 
@@ -234,6 +234,11 @@ try {
             Format;
             Lint;
             Test;
+            break;
+        }
+        'rebuild' {
+            Clean;
+            Build;
             break;
         }
     }

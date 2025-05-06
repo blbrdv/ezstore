@@ -62,6 +62,7 @@ Available tasks:
 - `test` - run unit tests
 - `check` - everything above
 - `build` - build cli and compile installer
+- `rebuild` - run clean and build tasks
 
 ## License
 
