@@ -119,19 +119,18 @@ func getHTTPClient() *req.Client {
 		})
 
 	if log.Level == log.Detailed {
-		file := getTraceFile()
-
 		client = client.
 			OnError(func(_ *req.Client, req *req.Request, resp *req.Response, err error) {
+				file := getTraceFile()
 				traceRequest(file, req)
 				traceError(file, err)
 				traceResponse(file, resp)
 			}).
-			OnAfterResponse(func(_ *req.Client, resp *req.Response) error {
+			AddCommonRetryHook(func(resp *req.Response, err error) {
+				file := getTraceFile()
 				traceRequest(file, resp.Request)
 				traceError(file, resp.Err)
 				traceResponse(file, resp)
-				return nil
 			})
 	}
 
