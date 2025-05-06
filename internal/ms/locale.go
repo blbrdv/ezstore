@@ -28,7 +28,7 @@ func NewLocale(input string) (*Locale, error) {
 	localeRegexp := regexp.MustCompile(pattern)
 	matches := localeRegexp.FindStringSubmatch(input)
 	if matches == nil {
-		return nil, fmt.Errorf("%s is not a valid locale", input)
+		return nil, fmt.Errorf("\"%s\" is not a valid locale", input)
 	}
 
 	return &Locale{

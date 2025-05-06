@@ -57,5 +57,5 @@ func NewArchitecture(input string) (Architecture, error) {
 		}
 	}
 
-	return -1, fmt.Errorf("%s is unknown architecture", input)
+	return -1, fmt.Errorf("\"%s\" is unknown architecture", input)
 }

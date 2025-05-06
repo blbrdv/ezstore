@@ -18,7 +18,7 @@ func newBundleInfo(input string) (*bundleInfo, error) {
 	bundleRegexp := regexp.MustCompile(`^([0-9a-zA-Z.-]+)_([a-z0-9]+)$`)
 	matches := bundleRegexp.FindStringSubmatch(input)
 	if len(matches) == 0 {
-		return nil, fmt.Errorf("%s is not valid bundle info", input)
+		return nil, fmt.Errorf("\"%s\" is not valid bundle info", input)
 	}
 
 	return &bundleInfo{Name: matches[1], ID: matches[2]}, nil
@@ -37,7 +37,7 @@ func newBundleData(input string) (*bundleData, error) {
 	bundleRegexp := regexp.MustCompile(`^([0-9a-zA-Z.-]+)_([\d.]+)_([a-z0-9]+)_~?_([a-z0-9]+).([a-zA-Z]+)`)
 	matches := bundleRegexp.FindStringSubmatch(input)
 	if len(matches) == 0 {
-		return nil, fmt.Errorf("%s is not valid bundle data", input)
+		return nil, fmt.Errorf("\"%s\" is not valid bundle data", input)
 	}
 
 	info := &bundleInfo{Name: matches[1], ID: matches[4]}
@@ -105,7 +105,7 @@ func (b *bundles) GetSupported(arch ms.Architecture) (*bundleData, error) {
 		}
 	}
 
-	return nil, fmt.Errorf("%s architecture is not supported by this app", arch.String())
+	return nil, fmt.Errorf("\"%s\" architecture is not supported by this app", arch.String())
 }
 
 type bundlesByVersion map[ms.Version]*bundles
@@ -149,7 +149,7 @@ func (bg *bundlesGroup) Get(version *ms.Version, arch ms.Architecture) (*bundleD
 
 	list := bg.bundlesByVersion[searchVersion]
 	if list == nil {
-		return nil, fmt.Errorf("can not get bundle by version %s", searchVersion.String())
+		return nil, fmt.Errorf("can not get bundle by version \"%s\"", searchVersion.String())
 	}
 
 	return list.GetSupported(arch)

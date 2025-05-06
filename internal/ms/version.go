@@ -20,7 +20,7 @@ func NewVersion(input string) (*Version, error) {
 	matches := semverRegexp.FindStringSubmatch(input)
 
 	if len(matches) == 0 {
-		return nil, fmt.Errorf("%s is not a valid version", input)
+		return nil, fmt.Errorf("\"%s\" is not a valid version", input)
 	}
 
 	a, err := strconv.ParseInt(matches[1], 10, 64)
