@@ -6,6 +6,7 @@
 
 - Proper logging based on log level
 - Script for automatic update check and download
+- Version flag for printing app version
 
 ### Fixed
 
