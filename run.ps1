@@ -1,7 +1,7 @@
 Param (
     [Parameter(Mandatory=$true,Position=0)]
     [ValidateNotNullOrEmpty()]
-    [ValidateSet('clean','format','lint','test','build')]
+    [ValidateSet('clean','format','lint','test','check','build')]
     [string]$Command
 )
 
@@ -241,6 +241,26 @@ switch ( $Command ) {
     }
     'build' {
         Build;
+        break;
+    }
+    # TODO: there must be another way to handle flow
+    'check' {
+        Clean;
+        if ( $global:ExitCode -ne 0 ) {
+            break;
+        }
+
+        Format;
+        if ( $global:ExitCode -ne 0 ) {
+            break;
+        }
+
+        Lint;
+        if ( $global:ExitCode -ne 0 ) {
+            break;
+        }
+
+        Test;
         break;
     }
 }
