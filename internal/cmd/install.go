@@ -14,8 +14,8 @@ import (
 	"runtime"
 )
 
-// Install download package with its dependencies from MS Store by id and version,
-// and then install it with its dependencies.
+// Install download package with its dependencies from MS Store by id, version, locale and architecture,
+// and then install it all.
 func Install(_ context.Context, cmd *cli.Command) error {
 	var err error
 	var arch ms.Architecture

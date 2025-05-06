@@ -11,9 +11,13 @@ import (
 )
 
 const (
-	Quiet    = 1
-	Minimal  = 2
-	Normal   = 3
+	// Quiet - no output at all
+	Quiet = 1
+	// Minimal - only SUCCESS and ERROR logs
+	Minimal = 2
+	// Normal - same as Minimal plus INFO and WARNING logs
+	Normal = 3
+	// Detailed - same as Normal plus DEBUG logs and tracing net errors to log file
 	Detailed = 4
 )
 
@@ -27,7 +31,10 @@ func getCurrentDir() string {
 	return currentDir
 }
 
+// Level contains current app logging level.
 var Level = Normal
+
+// TraceFile contains path to log file for http package. Can be not exists.
 var TraceFile = utils.Join(getCurrentDir(), fmt.Sprintf("%s.log", time.Now().Format("060102150405")))
 
 var levels = map[string]int{
@@ -37,12 +44,13 @@ var levels = map[string]int{
 	"d": Detailed,
 }
 
-var Gray = color.Style{color.FgGray, color.OpBold}
-var Blue = color.Style{color.FgBlue, color.OpBold}
-var Green = color.Style{color.FgGreen, color.OpBold}
-var Yellow = color.Style{color.FgYellow, color.OpBold}
-var Red = color.Style{color.FgRed, color.OpBold}
+var gray = color.Style{color.FgGray, color.OpBold}
+var blue = color.Style{color.FgBlue, color.OpBold}
+var green = color.Style{color.FgGreen, color.OpBold}
+var yellow = color.Style{color.FgYellow, color.OpBold}
+var red = color.Style{color.FgRed, color.OpBold}
 
+// NewLevel returns log level based on its string representation. Returns error if input string format is invalid.
 func NewLevel(input string) (int, error) {
 	result := levels[input]
 	if result == 0 {
@@ -51,52 +59,54 @@ func NewLevel(input string) (int, error) {
 	return result, nil
 }
 
+// Debug print input text to os.Stdout with "[DEB]" mark and appended new line when log level is Detailed.
 func Debug(value string) {
 	if Level == Detailed {
-		_, _ = fmt.Fprintln(os.Stdout, Gray.Render("[DEB]"), value)
+		_, _ = fmt.Fprintln(os.Stdout, gray.Render("[DEB]"), value)
 	}
 }
 
+// Debugf format and print input text to os.Stdout with "[DEB]" mark and appended new line when log level is Detailed.
 func Debugf(format string, values ...any) {
 	Debug(fmt.Sprintf(format, values...))
 }
 
+// Info print input text to os.Stdout with "[INF]" mark and appended new line when log level is Normal or above.
 func Info(value string) {
 	if Level >= Normal {
-		_, _ = fmt.Fprintln(os.Stdout, Blue.Render("[INF]"), value)
+		_, _ = fmt.Fprintln(os.Stdout, blue.Render("[INF]"), value)
 	}
 }
 
+// Infof format and print input text to os.Stdout with "[INF]" mark and appended new line when log level is Normal or
+// above.
 func Infof(format string, values ...any) {
 	Info(fmt.Sprintf(format, values...))
 }
 
+// Warning print input text to os.Stderr with "[WRN]" mark and appended new line when log level is Normal or above.
 func Warning(value string) {
 	if Level >= Normal {
-		_, _ = fmt.Fprintln(os.Stderr, Yellow.Render("[WRN]"), value)
+		_, _ = fmt.Fprintln(os.Stderr, yellow.Render("[WRN]"), value)
 	}
 }
 
-func Warningf(format string, values ...any) {
-	Warning(fmt.Sprintf(format, values...))
-}
-
+// Success print input text to os.Stdout with "[SCC]" mark and appended new line when log level is Minimal or above.
 func Success(value string) {
 	if Level >= Minimal {
-		_, _ = fmt.Fprintln(os.Stdout, Green.Render("[SCC]"), value)
+		_, _ = fmt.Fprintln(os.Stdout, green.Render("[SCC]"), value)
 	}
 }
 
-func Successf(format string, values ...any) {
-	Success(fmt.Sprintf(format, values...))
-}
-
+// Error print input text to os.Stderr with "[ERR]" mark and appended new line when log level is Minimal or above.
 func Error(value string) {
 	if Level >= Minimal {
-		_, _ = fmt.Fprintln(os.Stderr, Red.Render("[ERR]"), value)
+		_, _ = fmt.Fprintln(os.Stderr, red.Render("[ERR]"), value)
 	}
 }
 
+// Errorf format and print input text to os.Stderr with "[ERR]" mark and appended new line when log level is Minimal or
+// above.
 func Errorf(format string, values ...any) {
 	Error(fmt.Sprintf(format, values...))
 }

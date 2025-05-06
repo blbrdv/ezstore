@@ -98,4 +98,5 @@ func getTempDir() string {
 	return prepareDir(dir)
 }
 
+// TempDir contains path to directory for temporary files. Can be not exists.
 var TempDir = getTempDir()
