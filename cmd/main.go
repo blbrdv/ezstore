@@ -76,11 +76,6 @@ func main() {
 						Aliases: []string{"l"},
 						Value:   "",
 					},
-					&cli.BoolFlag{
-						Name:    "debug",
-						Aliases: []string{"d"},
-						Value:   false,
-					},
 				},
 			},
 		},
