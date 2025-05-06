@@ -136,7 +136,7 @@ var incorrectLocaleData = []struct {
 func TestInvalidLocale(t *testing.T) {
 	for _, data := range incorrectLocaleData {
 		t.Run(data.Name, func(t *testing.T) {
-			expected := fmt.Sprintf("%s is not a valid locale", data.Value)
+			expected := fmt.Sprintf("\"%s\" is not a valid locale", data.Value)
 			result, err := NewLocale(data.Value)
 
 			if err == nil {
