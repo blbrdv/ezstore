@@ -131,7 +131,7 @@ func Download(id string, version *ms.Version, arch ms.Architecture, locale *ms.L
 			fmt.Sprintf("%s-%s.%s", data.Name, data.Version.String(), data.Format),
 		)
 
-		file, err := os.OpenFile(fullPath, os.O_CREATE, 0666)
+		file, err := os.OpenFile(fullPath, os.O_CREATE, 0660)
 		if err != nil {
 			return nil, fmt.Errorf("can not download file: can not open file \"%s\": %s", fullPath, err.Error())
 		}

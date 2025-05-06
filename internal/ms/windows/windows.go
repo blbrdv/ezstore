@@ -77,7 +77,7 @@ func GetLocale() *ms.Locale {
 
 func prepareDir(dir string) string {
 	dir = utils.Join(dir, "ezstore")
-	err := os.MkdirAll(dir, 0666)
+	err := os.MkdirAll(dir, 0660)
 	if err != nil {
 		panic(err)
 	}

@@ -74,7 +74,7 @@ func Install(_ context.Context, cmd *cli.Command) error {
 		return fmt.Errorf("can not remove dir \"%s\" and its content: %s", tmpPath, err.Error())
 	}
 
-	err = os.MkdirAll(tmpPath, 0666)
+	err = os.MkdirAll(tmpPath, 0660)
 	if err != nil {
 		return fmt.Errorf("can not create dir \"%s\": %s", tmpPath, err.Error())
 	}
