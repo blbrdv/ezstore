@@ -9,26 +9,26 @@ import (
 type Architecture int
 
 const (
-	amd64 Architecture = iota + 1
-	i386
-	arm64
-	arm
+	Amd64 Architecture = iota + 1
+	I386
+	Arm64
+	Arm
 )
 
 var names = map[string]Architecture{
-	"amd64": amd64, // goarch
-	"x64":   amd64, // ms
-	"386":   i386,  // goarch
-	"x86":   i386,  // ms
-	"arm64": arm64, // goarch, ms
-	"arm":   arm,   // goarch, ms
+	"x64":   Amd64, // ms
+	"amd64": Amd64, // goarch
+	"x86":   I386,  // ms
+	"386":   I386,  // goarch
+	"arm64": Arm64, // goarch, ms
+	"arm":   Arm,   // goarch, ms
 }
 
 var compatibilities = map[Architecture][]string{
-	amd64: {"x64", "x86", "neutral"},
-	i386:  {"x86", "neutral"},
-	arm64: {"arm64", "arm", "neutral"},
-	arm:   {"arm", "neutral"},
+	Amd64: {"x64", "x86", "neutral"},
+	I386:  {"x86", "neutral"},
+	Arm64: {"arm64", "arm", "neutral"},
+	Arm:   {"arm", "neutral"},
 }
 
 // String returns corresponding MS Store and Windows OS literal.
