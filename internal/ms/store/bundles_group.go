@@ -32,7 +32,7 @@ func (bg *bundlesGroup) Add(bundle *bundleData) {
 	}
 }
 
-func (bg *bundlesGroup) Get(version *ms.Version) (*bundleData, error) {
+func (bg *bundlesGroup) Get(version *ms.Version, arch ms.Architecture) (*bundleData, error) {
 	var searchVersion ms.Version
 	if version == nil {
 		versions := utils.ToSlice(maps.Keys(bg.values))
@@ -51,9 +51,9 @@ func (bg *bundlesGroup) Get(version *ms.Version) (*bundleData, error) {
 		return nil, fmt.Errorf("can not get bundle by version \"%s\"", searchVersion.String())
 	}
 
-	return list.GetSupported()
+	return list.GetSupported(arch)
 }
 
-func (bg *bundlesGroup) GetLatest() (*bundleData, error) {
-	return bg.Get(nil)
+func (bg *bundlesGroup) GetLatest(arch ms.Architecture) (*bundleData, error) {
+	return bg.Get(nil, arch)
 }

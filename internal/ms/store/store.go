@@ -109,14 +109,14 @@ func Download(id string, version *ms.Version, locale *ms.Locale, destinationPath
 
 	bundlesToDownload := initBundlesList()
 	for _, deps := range depBundles.values {
-		depBundle, err := deps.GetLatest()
+		depBundle, err := deps.GetLatest(ms.Arch)
 		if err != nil {
 			return nil, err
 		}
 
 		bundlesToDownload.Append(depBundle)
 	}
-	appBundle, err := appBundles.Get(version)
+	appBundle, err := appBundles.Get(version, ms.Arch)
 	if err != nil {
 		return nil, err
 	}
