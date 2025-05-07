@@ -47,11 +47,11 @@ func TestFE3FileUrl(t *testing.T) {
 }
 
 func TestWUIDRequest(t *testing.T) {
-	expectedTycketType := "aaaaa"
+	expectedTicketType := "aaaaa"
 	expectedCookie := "bbbbb"
 	expectedCategoryIdentifier := "ccccc"
 
-	xml := strings.NewReader(wuidRequest(expectedTycketType, expectedCookie, expectedCategoryIdentifier))
+	xml := strings.NewReader(wuidRequest(expectedTicketType, expectedCookie, expectedCategoryIdentifier))
 
 	doc, err := xmlquery.Parse(xml)
 	if err != nil {
@@ -63,8 +63,8 @@ func TestWUIDRequest(t *testing.T) {
 	actualTicketType := root.
 		SelectElement("//s:Header/o:Security/wuws:WindowsUpdateTicketsToken/TicketType").
 		InnerText()
-	if actualTicketType != expectedTycketType {
-		t.Fatalf(`Incorrect TycketType, expected: "%s", actual: "%s"`, expectedTycketType, actualTicketType)
+	if actualTicketType != expectedTicketType {
+		t.Fatalf(`Incorrect TycketType, expected: "%s", actual: "%s"`, expectedTicketType, actualTicketType)
 	}
 
 	syncUpdates := root.
