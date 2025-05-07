@@ -82,7 +82,7 @@ func Download(id string, version *ms.Version, locale *ms.Locale, destinationPath
 	}
 
 	appBundles := initBundlesGroup()
-	depBundles := initBundleMap()
+	depBundles := initBundlesMap()
 	for _, info := range productsInfo {
 		productURLs, err := getURL(info)
 		if err != nil {
@@ -107,8 +107,8 @@ func Download(id string, version *ms.Version, locale *ms.Locale, destinationPath
 		}
 	}
 
-	bundlesToDownload := initBundles()
-	for _, deps := range depBundles.bundlesByID {
+	bundlesToDownload := initBundlesList()
+	for _, deps := range depBundles.values {
 		depBundle, err := deps.GetLatest()
 		if err != nil {
 			return nil, err
@@ -125,7 +125,7 @@ func Download(id string, version *ms.Version, locale *ms.Locale, destinationPath
 
 	log.Debug("Fetching product files info...")
 	var result []ms.FileInfo
-	for _, data := range bundlesToDownload.bundlesList {
+	for _, data := range bundlesToDownload.values {
 		fullPath := utils.Join(
 			destinationPath,
 			fmt.Sprintf("%s-%s.%s", data.Name, data.Version.String(), data.Format),
