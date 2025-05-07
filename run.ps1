@@ -156,12 +156,16 @@ function Format {
 
     $Result = & {gofmt -l $Files};
 
-    if ( $Result -ne "" ) {
-        foreach ($File in $Result.split(" ")) {
-            Write-Host $File;
+    if ( $Result -ne $null ) {
+        $Result = $Result.Trim();
+
+        if ( $Result -ne "" ) {
+            foreach ($File in $Result.split(" ")) {
+                Write-Host $File;
+            }
+            $global:LASTEXITCODE = 1;
+            throw "Format exited with code $global:LASTEXITCODE";
         }
-        $global:LASTEXITCODE = 1;
-        throw "Format exited with code $global:LASTEXITCODE";
     }
 
 }
