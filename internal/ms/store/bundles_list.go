@@ -29,20 +29,14 @@ func (b *bundlesList) Append(bundle *bundleData) {
 	b.values = append(b.values, bundle)
 }
 
-func (b *bundlesList) GetSupported() (*bundleData, error) { // TODO move
-	for _, supported := range ms.Arch.CompatibleWith() {
+func (b *bundlesList) GetSupported(arch ms.Architecture) (*bundleData, error) {
+	for _, supported := range arch.CompatibleWith() {
 		for _, data := range b.values {
-			if data.Arch == supported.String() {
+			if data.Arch == supported {
 				return data, nil
 			}
 		}
 	}
 
-	for _, data := range b.values { // TODO combine slices
-		if data.Arch == "neutral" {
-			return data, nil
-		}
-	}
-
-	return nil, fmt.Errorf("\"%s\" architecture is not supported by this app", ms.Arch.String())
+	return nil, fmt.Errorf("\"%s\" architecture is not supported by this app", arch.String())
 }
