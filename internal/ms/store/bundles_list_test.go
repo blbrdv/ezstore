@@ -72,7 +72,7 @@ func TestBundlesListGetSupportedX64(t *testing.T) {
 	bundle3, _ := newBundleData("SomeApp.Some-Name123_1.2.3.4_x64_~_f1o2o3b4a5r6.BlockMap")
 	bundle4, _ := newBundleData("SomeApp.Some-Name123_1.2.3.4_x86_~_f1o2o3b4a5r6.BlockMap")
 	bundle5, _ := newBundleData("SomeApp.Some-Name123_1.2.3.4_neutral_~_f1o2o3b4a5r6.BlockMap")
-	list := initBundlesList()
+	list := &bundlesList{values: bundlesArray{}}
 
 	list.Append(bundle1)
 	list.Append(bundle2)
@@ -97,7 +97,7 @@ func TestBundlesListGetSupportedX86(t *testing.T) {
 	bundle2, _ := newBundleData("SomeApp.Some-Name123_1.2.3.4_arm_~_f1o2o3b4a5r6.BlockMap")
 	bundle3, _ := newBundleData("SomeApp.Some-Name123_1.2.3.4_x86_~_f1o2o3b4a5r6.BlockMap")
 	bundle4, _ := newBundleData("SomeApp.Some-Name123_1.2.3.4_neutral_~_f1o2o3b4a5r6.BlockMap")
-	list := initBundlesList()
+	list := &bundlesList{values: bundlesArray{}}
 
 	list.Append(bundle1)
 	list.Append(bundle2)
@@ -120,7 +120,7 @@ func TestBundlesListGetSupportedNeutral(t *testing.T) {
 	bundle1, _ := newBundleData("SomeApp.Some-Name123_1.2.3.4_arm64_~_f1o2o3b4a5r6.BlockMap")
 	bundle2, _ := newBundleData("SomeApp.Some-Name123_1.2.3.4_arm_~_f1o2o3b4a5r6.BlockMap")
 	bundle3, _ := newBundleData("SomeApp.Some-Name123_1.2.3.4_neutral_~_f1o2o3b4a5r6.BlockMap")
-	list := initBundlesList()
+	list := &bundlesList{values: bundlesArray{}}
 
 	list.Append(bundle1)
 	list.Append(bundle2)
