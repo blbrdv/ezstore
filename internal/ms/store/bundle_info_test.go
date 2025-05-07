@@ -10,7 +10,7 @@ func TestBundleInfo(t *testing.T) {
 	actual, err := newBundleInfo("SomeApp.Some-Name123_f1o2o3b4a5r6")
 
 	if err != nil {
-		t.Fatalf(`Can not parse bundle info`)
+		t.Fatalf(`Can not parse bundle info: %s`, err.Error())
 	}
 
 	expectedStr := expected.String()

@@ -55,7 +55,7 @@ func TestLocaleLangOnlyWithNoise(t *testing.T) {
 			actual, err := NewLocale(data.Raw)
 
 			if err != nil {
-				t.Fatalf(`Can not parse locale`)
+				t.Fatalf(`Can not parse locale: %s`, err.Error())
 			}
 
 			expectedStr := expected.String()
@@ -100,7 +100,7 @@ func TestLocaleLangWithCountry(t *testing.T) {
 			actual, err := NewLocale(data.Raw)
 
 			if err != nil {
-				t.Fatalf(`Can not parse locale`)
+				t.Fatalf(`Can not parse locale: %s`, err.Error())
 			}
 
 			expectedStr := expected.String()

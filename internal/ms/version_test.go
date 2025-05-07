@@ -25,7 +25,7 @@ func TestVersion(t *testing.T) {
 			actual, err := NewVersion(data.Raw)
 
 			if err != nil {
-				t.Fatalf(`Can not parse version`)
+				t.Fatalf(`Can not parse version: %s`, err.Error())
 			}
 
 			expectedStr := expected.String()

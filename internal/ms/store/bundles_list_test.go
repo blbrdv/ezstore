@@ -82,7 +82,7 @@ func TestBundlesListGetSupportedX64(t *testing.T) {
 
 	result, err := list.GetSupported(arch)
 	if err != nil {
-		t.Fatalf(`Can not get supported architecture`)
+		t.Fatalf(`Can not get supported architecture: %s`, err.Error())
 	}
 
 	if result.Arch != expected {
@@ -106,7 +106,7 @@ func TestBundlesListGetSupportedX86(t *testing.T) {
 
 	result, err := list.GetSupported(arch)
 	if err != nil {
-		t.Fatalf(`Can not get supported architecture`)
+		t.Fatalf(`Can not get supported architecture: %s`, err.Error())
 	}
 
 	if result.Arch != expected {
@@ -128,7 +128,7 @@ func TestBundlesListGetSupportedNeutral(t *testing.T) {
 
 	result, err := list.GetSupported(arch)
 	if err != nil {
-		t.Fatalf(`Can not get supported architecture`)
+		t.Fatalf(`Can not get supported architecture: %s`, err.Error())
 	}
 
 	if result.Arch != expected {
