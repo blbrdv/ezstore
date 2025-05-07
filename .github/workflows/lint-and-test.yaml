@@ -2,6 +2,10 @@ name: Lint and test
 
 on:
   pull_request:
+    paths-ignore:
+      - '.vscode/**'
+      - '.idea/**'
+      - 'icons/**'
 
 jobs:
   lint-and-test:
