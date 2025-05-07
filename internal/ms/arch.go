@@ -16,17 +16,19 @@ const (
 )
 
 var names = map[string]Architecture{
-	"amd64": amd64,
-	"386":   i386,
-	"arm64": arm64,
-	"arm":   arm,
+	"amd64": amd64, // goarch
+	"x64":   amd64, // ms
+	"386":   i386,  // goarch
+	"x86":   i386,  // ms
+	"arm64": arm64, // goarch, ms
+	"arm":   arm,   // goarch, ms
 }
 
-var compatibilities = map[Architecture][]Architecture{
-	amd64: {amd64, i386},
-	i386:  {i386},
-	arm64: {arm64, arm},
-	arm:   {arm},
+var compatibilities = map[Architecture][]string{
+	amd64: {"x64", "x86", "neutral"},
+	i386:  {"x86", "neutral"},
+	arm64: {"arm64", "arm", "neutral"},
+	arm:   {"arm", "neutral"},
 }
 
 // String returns corresponding MS Store and Windows OS literal.
@@ -41,7 +43,7 @@ func (a Architecture) String() string {
 }
 
 // CompatibleWith returns a list of architectures with whom this architecture is compatible with.
-func (a Architecture) CompatibleWith() []Architecture {
+func (a Architecture) CompatibleWith() []string {
 	return compatibilities[a]
 }
 
