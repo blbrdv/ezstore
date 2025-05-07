@@ -24,7 +24,7 @@ func TestNewBundlesGroup(t *testing.T) {
 	value := list.values[0]
 
 	if bundle.String() != value.String() {
-		t.Fatalf("Bundle group must contain bundle equal to provided one")
+		t.Fatal("Bundle group must contain bundle equal to provided one")
 	}
 }
 
@@ -56,7 +56,7 @@ func TestBundlesGroupAdd(t *testing.T) {
 	value := list.values[0]
 
 	if bundle.String() != value.String() {
-		t.Fatalf("Bundle group must contain bundle equal to appended one")
+		t.Fatal("Bundle group must contain bundle equal to appended one")
 	}
 }
 
@@ -82,7 +82,7 @@ func TestBundlesGroupAddDuplicate(t *testing.T) {
 	value := list.values[0]
 
 	if bundle1.String() != value.String() {
-		t.Fatalf("Bundle group must contain bundle equal to added first")
+		t.Fatal("Bundle group must contain bundle equal to added first")
 	}
 }
 
@@ -121,7 +121,7 @@ func TestBundlesGroupAddMultipleVersions(t *testing.T) {
 	value2 := list2.values[0]
 
 	if value1.String() == value2.String() {
-		t.Fatalf("Bundle group must contain two different bundle data with different versions")
+		t.Fatal("Bundle group must contain two different bundle data with different versions")
 	}
 }
 

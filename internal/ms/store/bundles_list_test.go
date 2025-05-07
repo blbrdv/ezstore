@@ -16,7 +16,7 @@ func TestNewBundlesList(t *testing.T) {
 	value := list.values[0]
 
 	if bundle.String() != value.String() {
-		t.Fatalf("Bundle list must contain bundle equal to provided one")
+		t.Fatal("Bundle list must contain bundle equal to provided one")
 	}
 }
 
@@ -41,7 +41,7 @@ func TestBundlesListAppend(t *testing.T) {
 	value := list.values[0]
 
 	if bundle.String() != value.String() {
-		t.Fatalf("Bundle list must contain bundle equal to appended one")
+		t.Fatal("Bundle list must contain bundle equal to appended one")
 	}
 }
 
@@ -60,7 +60,7 @@ func TestBundlesListAppendDuplicate(t *testing.T) {
 	value := list.values[0]
 
 	if bundle1.String() != value.String() {
-		t.Fatalf("Bundle list must contain bundle equal to appended first")
+		t.Fatal("Bundle list must contain bundle equal to appended first")
 	}
 }
 

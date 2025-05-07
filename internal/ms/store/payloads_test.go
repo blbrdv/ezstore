@@ -16,7 +16,7 @@ func TestFE3FileUrl(t *testing.T) {
 
 	doc, err := xmlquery.Parse(xml)
 	if err != nil {
-		t.Fatalf(`Can not parse XML file`)
+		t.Fatalf(`Can not parse XML file: %s`, err.Error())
 	}
 
 	root := xmlquery.FindOne(doc, "//s:Envelope")
@@ -55,7 +55,7 @@ func TestWUIDRequest(t *testing.T) {
 
 	doc, err := xmlquery.Parse(xml)
 	if err != nil {
-		t.Fatalf(`Can not parse XML file`)
+		t.Fatalf(`Can not parse XML file: %s`, err.Error())
 	}
 
 	root := xmlquery.FindOne(doc, "//s:Envelope")

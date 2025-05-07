@@ -18,7 +18,7 @@ func TestBundleData(t *testing.T) {
 	actual, err := newBundleData("SomeApp.Some-Name123_1.2.3.4_X86_~_f1o2o3b4a5r6.BlockMap")
 
 	if err != nil {
-		t.Fatalf(`Can not parse bundle data`)
+		t.Fatalf(`Can not parse bundle data: %s`, err.Error())
 	}
 
 	expectedStr := expected.String()

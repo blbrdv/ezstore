@@ -39,7 +39,7 @@ func TestBundlesMapAdd(t *testing.T) {
 	value := list.values[0]
 
 	if bundle.String() != value.String() {
-		t.Fatalf("Bundle map must contain bundle equal to provided one")
+		t.Fatal("Bundle map must contain bundle equal to provided one")
 	}
 }
 
@@ -71,7 +71,7 @@ func TestBundlesMapAddDuplicate(t *testing.T) {
 	value := list.values[0]
 
 	if bundle1.String() != value.String() {
-		t.Fatalf("Bundle map must contain bundle equal to added first")
+		t.Fatal("Bundle map must contain bundle equal to added first")
 	}
 }
 
@@ -123,7 +123,7 @@ func TestBundlesMapAddMultipleVersions(t *testing.T) {
 	value2 := list2.values[0]
 
 	if value1.String() == value2.String() {
-		t.Fatalf("Bundle map must contain two different bundle data with different versions")
+		t.Fatal("Bundle map must contain two different bundle data with different versions")
 	}
 }
 
@@ -176,6 +176,6 @@ func TestBundlesMapAddMultipleIDs(t *testing.T) {
 	value2 := list2.values[0]
 
 	if value1.String() == value2.String() {
-		t.Fatalf("Bundle map must contain two different bundle data with different versions")
+		t.Fatal("Bundle map must contain two different bundle data with different versions")
 	}
 }
