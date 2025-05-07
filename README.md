@@ -59,10 +59,10 @@ Use `.\run.ps1 <task>`.
 
 Available tasks:
 - `clean` - removes build directories and files
-- `format` - check if format needed
 - `lint` - run analysis for code
 - `test` - run unit tests
 - `check` - everything above
+- `format` - format go files
 - `build` - build cli and compile installer
 - `rebuild` - run clean and build tasks
 
