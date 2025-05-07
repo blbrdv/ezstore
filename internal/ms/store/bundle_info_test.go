@@ -2,6 +2,7 @@ package store
 
 import (
 	"fmt"
+	"github.com/google/go-cmp/cmp"
 	"testing"
 )
 
@@ -13,17 +14,15 @@ func TestBundleInfo(t *testing.T) {
 		t.Fatalf(`Can not parse bundle info: %s`, err.Error())
 	}
 
+	if !expected.Equal(actual) {
+		t.Fatalf("Incorrect bundle info.\n%s", cmp.Diff(expected, actual))
+	}
+
 	expectedStr := expected.String()
 	actualStr := actual.String()
 
-	if actualStr != expectedStr {
+	if expectedStr != actualStr {
 		t.Fatalf(`Incorrect bundle info, expected: "%s", actual: "%s"`, expectedStr, actualStr)
-	}
-	if actual.Name != expected.Name {
-		t.Fatalf(`Incorrect bundle info, expected name: "%s", actual: "%s"`, expected.Name, actual.Name)
-	}
-	if actual.ID != expected.ID {
-		t.Fatalf(`Incorrect bundle info, expected ID: "%s", actual: "%s"`, expected.ID, actual.ID)
 	}
 }
 

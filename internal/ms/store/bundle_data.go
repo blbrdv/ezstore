@@ -38,7 +38,28 @@ func newBundleData(input string) (*bundleData, error) {
 		nil
 }
 
+func (bd *bundleData) Equal(other *bundleData) bool {
+	if bd == other {
+		return true
+	}
+	if bd == nil {
+		return false
+	}
+	if other == nil {
+		return false
+	}
+
+	return bd.bundleInfo.Equal(other.bundleInfo) &&
+		bd.Version.Equal(other.Version) &&
+		bd.Arch == other.Arch &&
+		bd.Format == other.Format
+}
+
 func (bd *bundleData) String() string {
+	if bd == nil {
+		return "<nil>"
+	}
+
 	return fmt.Sprintf(
 		"{ Name: %s, ID: %s, Version: %s, Architecture: %s, Format: %s }",
 		bd.Name,

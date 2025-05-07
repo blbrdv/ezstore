@@ -7,6 +7,7 @@ toolchain go1.24.2
 require (
 	github.com/antchfx/jsonquery v1.3.6
 	github.com/antchfx/xmlquery v1.4.4
+	github.com/google/go-cmp v0.7.0
 	github.com/gookit/color v1.5.4
 	github.com/imroc/req/v3 v3.51.0
 	github.com/urfave/cli/v3 v3.3.1

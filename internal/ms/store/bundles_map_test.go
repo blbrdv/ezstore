@@ -2,6 +2,7 @@ package store
 
 import (
 	"github.com/blbrdv/ezstore/internal/ms"
+	"github.com/google/go-cmp/cmp"
 	"testing"
 )
 
@@ -15,10 +16,10 @@ func TestInitBundlesMap(t *testing.T) {
 
 func TestBundlesMapAdd(t *testing.T) {
 	version, _ := ms.NewVersion("v1.2.3.4")
-	bundle, _ := newBundleData("SomeApp.Some-Name123_1.2.3.4_X86_~_f1o2o3b4a5r6.BlockMap")
+	expected, _ := newBundleData("SomeApp.Some-Name123_1.2.3.4_X86_~_f1o2o3b4a5r6.BlockMap")
 	bundles := &bundlesMap{values: bundlesByID{}}
 
-	bundles.Add(bundle)
+	bundles.Add(expected)
 
 	if len(bundles.values) != 1 {
 		t.Fatal("Bundle map must contain 1 bundle group")
@@ -36,10 +37,10 @@ func TestBundlesMapAdd(t *testing.T) {
 		t.Fatal("Bundle map must contain bandle group with bundle list with 1 bundle")
 	}
 
-	value := list.values[0]
+	actual := list.values[0]
 
-	if bundle.String() != value.String() {
-		t.Fatal("Bundle map must contain bundle equal to provided one")
+	if !expected.Equal(actual) {
+		t.Fatalf("Bundle map must contain bundle equal to provided one.\n%s", cmp.Diff(expected, actual))
 	}
 }
 
@@ -68,10 +69,10 @@ func TestBundlesMapAddDuplicate(t *testing.T) {
 		t.Fatal("Bundle map must contain bundle list with 1 bundle")
 	}
 
-	value := list.values[0]
+	actual := list.values[0]
 
-	if bundle1.String() != value.String() {
-		t.Fatal("Bundle map must contain bundle equal to added first")
+	if !bundle1.Equal(actual) {
+		t.Fatalf("Bundle map must contain bundle equal to added first.\n%s", cmp.Diff(bundle1, actual))
 	}
 }
 
@@ -122,7 +123,7 @@ func TestBundlesMapAddMultipleVersions(t *testing.T) {
 	value1 := list1.values[0]
 	value2 := list2.values[0]
 
-	if value1.String() == value2.String() {
+	if value1.Equal(value2) {
 		t.Fatal("Bundle map must contain two different bundle data with different versions")
 	}
 }
@@ -175,7 +176,7 @@ func TestBundlesMapAddMultipleIDs(t *testing.T) {
 	value1 := list1.values[0]
 	value2 := list2.values[0]
 
-	if value1.String() == value2.String() {
+	if value1.Equal(value2) {
 		t.Fatal("Bundle map must contain two different bundle data with different versions")
 	}
 }

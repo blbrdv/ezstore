@@ -2,6 +2,7 @@ package ms_test
 
 import (
 	"fmt"
+	"github.com/google/go-cmp/cmp"
 	"testing"
 
 	. "github.com/blbrdv/ezstore/internal/ms"
@@ -28,11 +29,15 @@ func TestVersion(t *testing.T) {
 				t.Fatalf(`Can not parse version: %s`, err.Error())
 			}
 
+			if !expected.Equal(actual) {
+				t.Fatalf("Incorrect Version.\n%s", cmp.Diff(expected, actual))
+			}
+
 			expectedStr := expected.String()
 			actualStr := actual.String()
 
 			if actualStr != expectedStr {
-				t.Fatalf(`Incorrect Version, expected: "%s", actual: "%s"`, expectedStr, actualStr)
+				t.Fatalf(`Incorrect Version string, expected: "%s", actual: "%s"`, expectedStr, actualStr)
 			}
 		})
 	}

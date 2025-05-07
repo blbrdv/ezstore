@@ -2,6 +2,7 @@ package ms_test
 
 import (
 	"fmt"
+	"github.com/google/go-cmp/cmp"
 	"testing"
 
 	. "github.com/blbrdv/ezstore/internal/ms"
@@ -20,18 +21,22 @@ var langOnlyData = []struct {
 func TestLocaleLangOnly(t *testing.T) {
 	for _, data := range langOnlyData {
 		t.Run(data.Name, func(t *testing.T) {
-			expected := Locale{Language: data.Raw}
+			expected := &Locale{Language: data.Raw}
 			actual, err := NewLocale(data.Raw)
 
 			if err != nil {
 				t.Fatalf(`Can not parse locale: %s`, err.Error())
 			}
 
-			expectedStr := expected.String()
+			if !expected.Equal(actual) {
+				t.Fatalf("Incorrect Locale.\n%s", cmp.Diff(expected, actual))
+			}
+
+			expectedStr := data.Raw
 			actualStr := actual.String()
 
-			if actualStr != expectedStr {
-				t.Fatalf(`Incorrect Locale, expected: "%s", actual: "%s"`, expectedStr, actualStr)
+			if expectedStr != actualStr {
+				t.Fatalf(`Incorrect Locale string, expected: "%s", actual: "%s"`, expectedStr, actualStr)
 			}
 		})
 	}
@@ -58,14 +63,15 @@ func TestLocaleLangOnlyWithNoise(t *testing.T) {
 				t.Fatalf(`Can not parse locale: %s`, err.Error())
 			}
 
-			expectedStr := expected.String()
+			if !expected.Equal(actual) {
+				t.Fatalf("Incorrect Locale.\n%s", cmp.Diff(expected, actual))
+			}
+
+			expectedStr := data.Language
 			actualStr := actual.String()
 
-			if actualStr != expectedStr {
-				t.Fatalf(`Incorrect Locale, expected: "%s", actual: "%s"`, expectedStr, actualStr)
-			}
-			if actualStr != data.Language {
-				t.Fatalf(`Incorrect Locale, expected: "%s", actual: "%s"`, data.Language, actualStr)
+			if expectedStr != actualStr {
+				t.Fatalf(`Incorrect Locale string, expected: "%s", actual: "%s"`, expectedStr, actualStr)
 			}
 		})
 	}
@@ -103,17 +109,15 @@ func TestLocaleLangWithCountry(t *testing.T) {
 				t.Fatalf(`Can not parse locale: %s`, err.Error())
 			}
 
-			expectedStr := expected.String()
+			if !expected.Equal(actual) {
+				t.Fatalf("Incorrect Locale.\n%s", cmp.Diff(expected, actual))
+			}
+
+			expectedStr := fmt.Sprintf("%s-%s", data.Language, data.Country)
 			actualStr := actual.String()
 
-			if actualStr != expectedStr {
-				t.Fatalf(`Incorrect Locale, expected: "%s", actual: "%s"`, expectedStr, actualStr)
-			}
-			if actual.Language != data.Language {
-				t.Fatalf(`Incorrect Locale, expected language: "%s", actual: "%s"`, data.Language, actual.Language)
-			}
-			if actual.Country != data.Country {
-				t.Fatalf(`Incorrect Locale, expected country: "%s", actual: "%s"`, data.Country, actual.Country)
+			if expectedStr != actualStr {
+				t.Fatalf(`Incorrect Locale string, expected: "%s", actual: "%s"`, expectedStr, actualStr)
 			}
 		})
 	}

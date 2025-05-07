@@ -3,13 +3,14 @@ package store
 import (
 	"fmt"
 	"github.com/blbrdv/ezstore/internal/ms"
+	"github.com/google/go-cmp/cmp"
 	"testing"
 )
 
 func TestNewBundlesGroup(t *testing.T) {
 	version, _ := ms.NewVersion("1.2.3.4")
-	bundle, _ := newBundleData("SomeApp.Some-Name123_1.2.3.4_X86_~_f1o2o3b4a5r6.BlockMap")
-	group := newBundlesGroup(bundle)
+	expected, _ := newBundleData("SomeApp.Some-Name123_1.2.3.4_X86_~_f1o2o3b4a5r6.BlockMap")
+	group := newBundlesGroup(expected)
 
 	if len(group.values) != 1 {
 		t.Fatal("Bundle group must contain 1 bundle list")
@@ -21,10 +22,10 @@ func TestNewBundlesGroup(t *testing.T) {
 		t.Fatal("Bundle group must contain bundle list with 1 bundle")
 	}
 
-	value := list.values[0]
+	actual := list.values[0]
 
-	if bundle.String() != value.String() {
-		t.Fatal("Bundle group must contain bundle equal to provided one")
+	if !expected.Equal(actual) {
+		t.Fatalf("Bundle group must contain bundle equal to provided one.\n%s", cmp.Diff(expected, actual))
 	}
 }
 
@@ -38,10 +39,10 @@ func TestInitBundlesGroup(t *testing.T) {
 
 func TestBundlesGroupAdd(t *testing.T) {
 	version, _ := ms.NewVersion("1.2.3.4")
-	bundle, _ := newBundleData("SomeApp.Some-Name123_1.2.3.4_X86_~_f1o2o3b4a5r6.BlockMap")
+	expected, _ := newBundleData("SomeApp.Some-Name123_1.2.3.4_X86_~_f1o2o3b4a5r6.BlockMap")
 	group := &bundlesGroup{values: bundlesByVersion{}}
 
-	group.Add(bundle)
+	group.Add(expected)
 
 	if len(group.values) != 1 {
 		t.Fatal("Bundle group must contain 1 bundle list")
@@ -53,10 +54,10 @@ func TestBundlesGroupAdd(t *testing.T) {
 		t.Fatal("Bundle group must contain bundle list with 1 bundle")
 	}
 
-	value := list.values[0]
+	actual := list.values[0]
 
-	if bundle.String() != value.String() {
-		t.Fatal("Bundle group must contain bundle equal to appended one")
+	if !expected.Equal(actual) {
+		t.Fatalf("Bundle group must contain bundle equal to appended one.\n%s", cmp.Diff(expected, actual))
 	}
 }
 
@@ -81,8 +82,8 @@ func TestBundlesGroupAddDuplicate(t *testing.T) {
 
 	value := list.values[0]
 
-	if bundle1.String() != value.String() {
-		t.Fatal("Bundle group must contain bundle equal to added first")
+	if !bundle1.Equal(value) {
+		t.Fatalf("Bundle group must contain bundle equal to added first.\n%s", cmp.Diff(bundle1, value))
 	}
 }
 
@@ -120,7 +121,7 @@ func TestBundlesGroupAddMultipleVersions(t *testing.T) {
 	value1 := list1.values[0]
 	value2 := list2.values[0]
 
-	if value1.String() == value2.String() {
+	if value1.Equal(value2) {
 		t.Fatal("Bundle group must contain two different bundle data with different versions")
 	}
 }
@@ -143,8 +144,8 @@ func TestBundlesGroupGet(t *testing.T) {
 		t.Fatalf("Can not get bundle by version: %s", err.Error())
 	}
 
-	if actual.String() == bundle3.String() {
-		t.Fatal("Bundle must be equal to third added bundle")
+	if !bundle3.Equal(actual) {
+		t.Fatalf("Bundle must be equal to third added bundle.\n%s", cmp.Diff(bundle3, actual))
 	}
 }
 
@@ -188,7 +189,7 @@ func TestBundlesGroupGetLatest(t *testing.T) {
 		t.Fatalf("Can not get bundle with latest version: %s", err.Error())
 	}
 
-	if actual.String() == bundle2.String() {
-		t.Fatal("Bundle must be equal to third added bundle")
+	if !bundle1.Equal(actual) {
+		t.Fatalf("Bundle must be equal to second added bundle.\n%s", cmp.Diff(bundle1, actual))
 	}
 }

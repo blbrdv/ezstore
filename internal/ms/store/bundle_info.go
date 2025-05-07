@@ -20,6 +20,24 @@ func newBundleInfo(input string) (*bundleInfo, error) {
 	return &bundleInfo{Name: matches[1], ID: matches[2]}, nil
 }
 
+func (bi *bundleInfo) Equal(other *bundleInfo) bool {
+	if bi == other {
+		return true
+	}
+	if bi == nil {
+		return false
+	}
+	if other == nil {
+		return false
+	}
+
+	return bi.Name == other.Name && bi.ID == other.ID
+}
+
 func (bi *bundleInfo) String() string {
+	if bi == nil {
+		return "<nil>"
+	}
+
 	return fmt.Sprintf("{ Name: %s, ID: %s }", bi.Name, bi.ID)
 }

@@ -3,6 +3,7 @@ package store
 import (
 	"fmt"
 	"github.com/blbrdv/ezstore/internal/ms"
+	"github.com/google/go-cmp/cmp"
 	"testing"
 )
 
@@ -21,26 +22,15 @@ func TestBundleData(t *testing.T) {
 		t.Fatalf(`Can not parse bundle data: %s`, err.Error())
 	}
 
+	if !expected.Equal(actual) {
+		t.Fatalf("Incorrect bundle data.\n%s", cmp.Diff(expected, actual))
+	}
+
 	expectedStr := expected.String()
 	actualStr := actual.String()
 
-	if actualStr != expectedStr {
+	if expectedStr != actualStr {
 		t.Fatalf(`Incorrect bundle data, expected: "%s", actual: "%s"`, expectedStr, actualStr)
-	}
-	if actual.Name != expected.Name {
-		t.Fatalf(`Incorrect bundle data, expected name: "%s", actual: "%s"`, expected.Name, actual.Name)
-	}
-	if actual.ID != expected.ID {
-		t.Fatalf(`Incorrect bundle data, expected ID: "%s", actual: "%s"`, expected.ID, actual.ID)
-	}
-	if actual.Version.String() != expected.Version.String() {
-		t.Fatalf(`Incorrect bundle data, expected version: "%s", actual: "%s"`, expected.Version.String(), actual.Version.String())
-	}
-	if actual.Arch != expected.Arch {
-		t.Fatalf(`Incorrect bundle data, expected architecture: "%s", actual: "%s"`, expected.Arch, actual.Arch)
-	}
-	if actual.Format != expected.Format {
-		t.Fatalf(`Incorrect bundle data, expected format: "%s", actual: "%s"`, expected.Format, actual.Format)
 	}
 }
 

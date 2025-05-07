@@ -2,21 +2,22 @@ package store
 
 import (
 	"github.com/blbrdv/ezstore/internal/ms"
+	"github.com/google/go-cmp/cmp"
 	"testing"
 )
 
 func TestNewBundlesList(t *testing.T) {
-	bundle, _ := newBundleData("SomeApp.Some-Name123_1.2.3.4_X86_~_f1o2o3b4a5r6.BlockMap")
-	list := newBundlesList(bundle)
+	expected, _ := newBundleData("SomeApp.Some-Name123_1.2.3.4_X86_~_f1o2o3b4a5r6.BlockMap")
+	list := newBundlesList(expected)
 
 	if len(list.values) != 1 {
 		t.Fatal("Bundle list must contain 1 bundle")
 	}
 
-	value := list.values[0]
+	actual := list.values[0]
 
-	if bundle.String() != value.String() {
-		t.Fatal("Bundle list must contain bundle equal to provided one")
+	if !expected.Equal(actual) {
+		t.Fatalf("Bundle list must contain bundle equal to provided one.\n%s", cmp.Diff(expected, actual))
 	}
 }
 
@@ -29,19 +30,19 @@ func TestInitBundlesList(t *testing.T) {
 }
 
 func TestBundlesListAppend(t *testing.T) {
-	bundle, _ := newBundleData("SomeApp.Some-Name123_1.2.3.4_X86_~_f1o2o3b4a5r6.BlockMap")
+	expected, _ := newBundleData("SomeApp.Some-Name123_1.2.3.4_X86_~_f1o2o3b4a5r6.BlockMap")
 	list := &bundlesList{values: bundlesArray{}}
 
-	list.Append(bundle)
+	list.Append(expected)
 
 	if len(list.values) != 1 {
 		t.Fatal("Bundle list must contain 1 bundle")
 	}
 
-	value := list.values[0]
+	actual := list.values[0]
 
-	if bundle.String() != value.String() {
-		t.Fatal("Bundle list must contain bundle equal to appended one")
+	if !expected.Equal(actual) {
+		t.Fatalf("Bundle list must contain bundle equal to appended one.\n%s", cmp.Diff(expected, actual))
 	}
 }
 
@@ -59,8 +60,8 @@ func TestBundlesListAppendDuplicate(t *testing.T) {
 
 	value := list.values[0]
 
-	if bundle1.String() != value.String() {
-		t.Fatal("Bundle list must contain bundle equal to appended first")
+	if !bundle1.Equal(value) {
+		t.Fatalf("Bundle list must contain bundle equal to appended first.\n%s", cmp.Diff(bundle1, value))
 	}
 }
 
