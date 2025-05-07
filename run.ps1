@@ -150,7 +150,19 @@ function Clean {
 
 function Format {
 
-    Exec "go fmt .\...";
+    Write-Host " > Format";
+    $Location = (Get-Location | %{$_.Path}) + "\";
+    $Files = Get-Childitem –Path . -Include *.go -Recurse -ErrorAction SilentlyContinue | %{$_.FullName.Replace($Location,'')};
+
+    $Result = & {gofmt -l $Files};
+
+    if ( $Result -ne "" ) {
+        foreach ($File in $Result.split(" ")) {
+            Write-Host $File;
+        }
+        $global:LASTEXITCODE = 1;
+        throw "Format exited with code $global:LASTEXITCODE";
+    }
 
 }
 

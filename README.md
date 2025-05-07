@@ -59,7 +59,7 @@ Use `.\run.ps1 <task>`.
 
 Available tasks:
 - `clean` - removes build directories and files
-- `format` - fix codestyle
+- `format` - check if format needed
 - `lint` - run analysis for code
 - `test` - run unit tests
 - `check` - everything above
