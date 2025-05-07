@@ -24,11 +24,6 @@ jobs:
         go install "github.com/tc-hib/go-winres@latest"
         echo "$(go env GOPATH)/bin/go-winres" | Out-File -FilePath $env:GITHUB_PATH -Encoding utf8 -Append
 
-    - name: Setup 7z@latest
-      run: |
-        Invoke-WebRequest -Uri https://7-zip.org/a/7zr.exe -OutFile .\7z.exe
-        Join-Path ((Get-Location).Path) "7z.exe" | Out-File -FilePath $env:GITHUB_PATH -Encoding utf8 -Append
-
     - uses: pwall2222/inno-setup-download@v0.0.8
 
     - name: Build project
