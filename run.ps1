@@ -68,17 +68,7 @@ function Check-If-Installed {
 
 function Get-Product-Version {
 
-    $Version =
-        Select-String -LiteralPath "CHANGELOG.md" -Pattern "## \[([\d\.]+)\] - \d\d\d\d-\d\d-\d\d"
-        | Select-Object -Index 0
-        | %{$_.Matches.Groups[1].Value};
-
-    if ( $Version -eq "" ) {
-        Write-Host "Can not get version from CHANGELOG.md file...";
-        exit 1;
-    }
-
-    return $Version;
+    return (git describe --tags --abbrev=0).Replace("v", "");
 
 }
 
