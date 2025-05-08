@@ -1,28 +1,28 @@
 package cmd
 
 import (
-	"github.com/pterm/pterm"
+	"github.com/blbrdv/ezstore/internal/log"
 	"io"
 )
 
-// DebugWriter is a wrapper around pterm.Debug.Writer.
+// DebugWriter is a wrapper around log package.
 type DebugWriter struct {
 	io.Writer
 }
 
-// Write provided bytes array to pterm.Debug.
+// Write writes provided bytes array to os.Stdout.
 func (w DebugWriter) Write(p []byte) (n int, err error) {
-	pterm.Debug.Print(string(p))
+	log.Debug(string(p))
 	return len(p) - 1, nil
 }
 
-// ErrorWriter is a wrapper around pterm.Error.Writer.
+// ErrorWriter is a wrapper around log package.
 type ErrorWriter struct {
 	io.Writer
 }
 
-// Write provided bytes array to pterm.Error.
+// Write writes provided bytes array to os.Stderr.
 func (w ErrorWriter) Write(p []byte) (n int, err error) {
-	pterm.Error.Print(string(p))
+	log.Error(string(p))
 	return len(p) - 1, nil
 }

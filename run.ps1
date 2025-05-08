@@ -1,11 +1,9 @@
 Param (
     [Parameter(Mandatory=$true,Position=0)]
     [ValidateNotNullOrEmpty()]
-    [ValidateSet('clean','format','lint','test','build')]
+    [ValidateSet('clean','format','lint','test','check','build','rebuild')]
     [string]$Command
 )
-
-$global:ExitCode = 0;
 
 $global:SysoFiles = @(
     "rsrc_windows_386.syso",
@@ -70,17 +68,7 @@ function Check-If-Installed {
 
 function Get-Product-Version {
 
-    $Version =
-        Select-String -LiteralPath "CHANGELOG.md" -Pattern "## \[([\d\.]+)\] - \d\d\d\d-\d\d-\d\d"
-        | Select-Object -Index 0
-        | %{$_.Matches.Groups[1].Value};
-
-    if ( $Version -eq "" ) {
-        Write-Host "Can not get version from CHANGELOG.md file...";
-        exit 1;
-    }
-
-    return $Version;
+    return (git describe --tags --abbrev=0).Replace("v", "");
 
 }
 
@@ -116,10 +104,16 @@ function Exec {
     Write-Host " > ${TaskName}: $Command";
 
     $global:LASTEXITCODE = 0;
-    Invoke-Expression "${Command}";
+    try {
+        Invoke-Expression "${Command}";
+    }
+    catch {
+        Write-Host "Invalid command ${Command}"
+        $global:LASTEXITCODE = 1;
+    }
 
-    if ( $LASTEXITCODE -ne 0 ) {
-        throw "Command exited with code $LASTEXITCODE";
+    if ( $global:LASTEXITCODE -ne 0 ) {
+        throw "Command exited with code $global:LASTEXITCODE";
     }
 
 }
@@ -146,12 +140,7 @@ function Clean {
 
 function Format {
 
-    try {
-        Exec "go fmt .\...";
-    }
-    catch {
-        $global:ExitCode = $lastexitcode;
-    }
+    Exec "go fmt .\...";
 
 }
 
@@ -159,24 +148,14 @@ function Lint {
 
     Check-If-Installed "Staticcheck" "staticcheck";
 
-    try {
-        Exec "go vet .\...";
-        Exec "staticcheck .\...";
-    }
-    catch {
-        $global:ExitCode = $lastexitcode;
-    }
+    Exec "go vet .\...";
+    Exec "staticcheck .\...";
 
 }
 
 function Test {
 
-    try {
-        Exec "go test .\internal\...";
-    }
-    catch {
-        $global:ExitCode = $lastexitcode;
-    }
+    Exec "go test .\internal\...";
 
 }
 
@@ -189,25 +168,19 @@ function Build {
     $ProductVersion = Get-Product-Version;
     $FileVersion = Get-File-Version $ProductVersion;
 
-    try {
-        Exec "go-winres make --in .\winres.json --product-version $ProductVersion --file-version $FileVersion";
+    Exec "go-winres make --in .\winres.json --product-version $ProductVersion --file-version $FileVersion";
 
-        foreach ($File in $global:SysoFiles) {
-            Exec "Move-Item -Path $File -Destination .\cmd\$File -Force -ErrorAction SilentlyContinue";
-        }
-
-        Exec "go build -o .\output\ezstore.exe .\cmd";
-
-        Exec "7z a -bso0 -bd -sse .\release\ezstore-portable.7z .\output\ezstore.exe .\cmd\README.txt .\cmd\update.ps1"
-
-        Exec "iscc /Q 'setup.iss' /DPV='$ProductVersion' /DFV='$FileVersion'";
+    foreach ($File in $global:SysoFiles) {
+        Exec "Move-Item -Path $File -Destination .\cmd\$File -Force -ErrorAction SilentlyContinue";
     }
-    catch {
-        $global:ExitCode = $lastexitcode;
-    }
-    finally {
-        Remove-Winres-Files;
-    }
+
+    Exec "go build -ldflags='-X main.version=$ProductVersion' -o .\output\ezstore.exe .\cmd";
+
+    Exec "7z a -bso0 -bd -sse .\release\ezstore-portable.7z .\output\ezstore.exe .\cmd\README.txt .\cmd\update.ps1"
+
+    Exec "iscc /Q 'setup.iss' /DPV='$ProductVersion' /DFV='$FileVersion'";
+
+    Remove-Winres-Files;
 
 }
 
@@ -222,37 +195,55 @@ Write-Host "Starting...";
 $sw = [System.Diagnostics.Stopwatch]::New();
 $sw.Start();
 
-switch ( $Command ) {
-    'clean' {
-        Clean;
-        break;
+$ExitCode = 0;
+
+try {
+    switch ( $Command ) {
+        'clean' {
+            Clean;
+            break;
+        }
+        'format' {
+            Format;
+            break;
+        }
+        'lint' {
+            Lint;
+            break;
+        }
+        'test' {
+            Test;
+            break;
+        }
+        'build' {
+            Build;
+            break;
+        }
+        'check' {
+            Clean;
+            Lint;
+            Test;
+            break;
+        }
+        'rebuild' {
+            Clean;
+            Build;
+            break;
+        }
     }
-    'format' {
-        Format;
-        break;
-    }
-    'lint' {
-        Lint;
-        break;
-    }
-    'test' {
-        Test;
-        break;
-    }
-    'build' {
-        Build;
-        break;
-    }
+}
+catch {
+    $ExitCode = $global:LASTEXITCODE;
 }
 
 $sw.Stop();
 $duration = Get-Duration $sw.Elapsed;
 
-if ( $global:ExitCode -eq 0 ) {
+if ( $ExitCode -eq 0 ) {
     Write-Host "Finished $duration";
 }
 else {
-    Write-Host "Failed with code $global:ExitCode $duration";
+    Write-Host "Failed with code $ExitCode $duration";
 }
 
-exit $global:ExitCode;
+exit $ExitCode;

@@ -1,10 +1,21 @@
 # Changelog
 
-## [1.2.1] - 2025-04-27
+## [1.3.0] - 2025-05-11
+
+### Added
+
+- Proper logging based on log level
+- Script for automatic update check and download
+- Version flag for printing app version
 
 ### Fixed
 
 - Go dependency vulnerabilities
+- Bug ["this package is not compatible with the device"](https://github.com/blbrdv/ezstore/issues/12)
+- Downloading app with provided version, locale and architecture
+- Inconsistent file fetching from MS Store API
+- Unclear error messages
+- CLI help output
 
 ## [1.2.0] - 2024-02-16
 
@@ -48,7 +59,7 @@
 
 Initial release.
 
-[1.2.1]: https://github.com/blbrdv/ezstore/releases/tag/v1.2.1
+[1.3.0]: https://github.com/blbrdv/ezstore/releases/tag/v1.3.0
 [1.2.0]: https://github.com/blbrdv/ezstore/releases/tag/v1.2.0
 [1.1.1]: https://github.com/blbrdv/ezstore/releases/tag/v1.1.1
 [1.1.0]: https://github.com/blbrdv/ezstore/releases/tag/v1.1.0
