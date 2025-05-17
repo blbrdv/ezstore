@@ -9,7 +9,30 @@ import (
 
 const displaycatalogURL = "https://displaycatalog.mp.microsoft.com/v7.0/products"
 
-func getAppInfo(id string, locale *ms.Locale) (*bundleInfo, string, error) {
+func canRedeem(skuAvailability *jsonquery.Node) (bool, error) {
+	availabilities := jsonquery.FindOne(skuAvailability, "Availabilities")
+	if availabilities == nil {
+		return false, fmt.Errorf("can not get app info: can not get sku availabilities")
+	}
+
+	for _, availability := range availabilities.ChildNodes() {
+		actions := jsonquery.FindOne(availability, "Actions")
+		if actions == nil {
+			return false, fmt.Errorf("can not get app info: can not get actions from sku availability")
+		}
+
+		for _, action := range actions.ChildNodes() {
+			value := strings.ToLower(fmt.Sprintf("%v", action.Value()))
+			if value == "redeem" {
+				return true, nil
+			}
+		}
+	}
+
+	return false, nil
+}
+
+func getAppInfo(id string, locale *ms.Locale) (*apps, string, error) {
 	url := fmt.Sprintf(
 		"%s/%s?market=%s&languages=%s,%s,neutral",
 		displaycatalogURL,
@@ -34,25 +57,76 @@ func getAppInfo(id string, locale *ms.Locale) (*bundleInfo, string, error) {
 		return nil, "", fmt.Errorf("can not get app info: can not parse result: %s", err.Error())
 	}
 
-	fulfillmentData := jsonquery.FindOne(data, "Product/DisplaySkuAvailabilities/*[1]/Sku/Properties/FulfillmentData")
-	if fulfillmentData == nil {
-		return nil, "", fmt.Errorf("can not get app info: can not find fulfillment data in response body")
+	skusAvailabilities := jsonquery.FindOne(data, "Product/DisplaySkuAvailabilities")
+	if skusAvailabilities == nil {
+		return nil, "", fmt.Errorf("can not get app info: can not find availabilities data in response body")
+	}
+	if len(skusAvailabilities.ChildNodes()) == 0 {
+		return nil, "", fmt.Errorf("can not get app info: no availabilities for this app")
 	}
 
-	wuid := fmt.Sprintf("%v", jsonquery.FindOne(fulfillmentData, "WuCategoryId").Value())
-	if wuid == "" {
-		return nil, "", fmt.Errorf("can not get app info: can not find WUID in fulfillment data")
+	var packages []*jsonquery.Node
+	for _, availability := range skusAvailabilities.ChildNodes() {
+		redeemable, err := canRedeem(availability)
+		if err != nil {
+			return nil, "", err
+		}
+
+		if redeemable {
+			skuPackages := jsonquery.FindOne(availability, "Sku/Properties/Packages")
+			if skuPackages == nil {
+				return nil, "", fmt.Errorf("can not get app info: can not get sku packages")
+			}
+
+			for _, skuPackage := range skuPackages.ChildNodes() {
+				platformDeps := jsonquery.FindOne(skuPackage, "PlatformDependencies").ChildNodes()
+				for _, platform := range platformDeps {
+					identity := jsonquery.FindOne(platform, "PlatformName")
+					if identity != nil {
+						value := strings.ToLower(fmt.Sprintf("%v", identity.Value()))
+						if value == "windows.desktop" || value == "windows.universal" {
+							packages = append(packages, skuPackage)
+						}
+					}
+				}
+			}
+		}
 	}
 
-	packageName := fmt.Sprintf("%v", jsonquery.FindOne(fulfillmentData, "PackageFamilyName").Value())
-	if packageName == "" {
-		return nil, "", fmt.Errorf("can not get app info: can not find package name in fulfillment data")
+	if len(packages) == 0 {
+		return nil, "", fmt.Errorf("can not get app info: no available packages found")
 	}
 
-	info, err := newBundleInfo(packageName)
-	if err != nil {
-		return nil, "", fmt.Errorf("can not get app info: can not get bundle info: %s", err.Error())
+	apps := newApps()
+	wuid := ""
+	for _, pkg := range packages {
+		fullName := jsonquery.FindOne(pkg, "PackageFullName")
+		if fullName == nil {
+			return nil, "", fmt.Errorf("can not get app info: can not get full name")
+		}
+
+		app, err := newApp(fmt.Sprintf("%v", fullName.Value()))
+		if err != nil {
+			return nil, "", err
+		}
+
+		deps := jsonquery.FindOne(pkg, "FrameworkDependencies").ChildNodes()
+		for _, dep := range deps {
+			name := jsonquery.FindOne(dep, "PackageIdentity")
+			app.Add(fmt.Sprintf("%v", name.Value()))
+		}
+
+		apps.Add(app)
+
+		if wuid == "" {
+			value := fmt.Sprintf("%v", jsonquery.FindOne(pkg, "FulfillmentData/WuCategoryId").Value())
+			if value == "" {
+				return nil, "", fmt.Errorf("can not get app info: can not find WUID in fulfillment data")
+			}
+
+			wuid = value
+		}
 	}
 
-	return info, wuid, nil
+	return apps, wuid, nil
 }

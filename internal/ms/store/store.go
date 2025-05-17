@@ -10,10 +10,20 @@ import (
 	"regexp"
 )
 
-func getProductBundle(url string) (*bundleData, error) {
+// TODO: retry with new client on 421 Misdirect
+// reason:
+// https://www.fastly.com/documentation/guides/concepts/errors/#error-421-misdirected-request
+// and
+// https://serverfault.com/a/938265
+//
+//func do(getClient func () *req.Client, method string, url string) (*req.Response, error) {
+//
+//}
+
+func getProductName(url string) (string, error) {
 	uri, err := net.Parse(url)
 	if err != nil {
-		return nil, fmt.Errorf("fetching product bundle failed: can not parse url \"%s\": %s", url, err.Error())
+		return "", fmt.Errorf("fetching product name failed: can not parse url \"%s\": %s", url, err.Error())
 	}
 
 	query := uri.Query().Encode()
@@ -31,31 +41,24 @@ func getProductBundle(url string) (*bundleData, error) {
 		R().
 		Head(url)
 	if err != nil {
-		return nil, fmt.Errorf("fetching product bundle failed: HEAD %s: %s", url, err.Error())
+		return "", fmt.Errorf("fetching product name failed: HEAD %s: %s", url, err.Error())
 	}
 	if res.StatusCode != 200 {
-		return nil, fmt.Errorf("fetching product bundle failed: HEAD %s: server responded with error: %s", url, res.Status)
+		return "", fmt.Errorf("fetching product name failed: HEAD %s: server responded with error: %s", url, res.Status)
 	}
 
 	header := res.Header.Get("Content-Disposition")
 	if header == "" {
-		return nil, fmt.Errorf("fetching product bundle failed: can not get file name: response header \"Content-Disposition\" is empty")
+		return "", fmt.Errorf("fetching product name failed: can not get file name: response header \"Content-Disposition\" is empty")
 	}
 
 	fileNameRegexp := regexp.MustCompile(`filename=(\S+)`)
 	matches := fileNameRegexp.FindStringSubmatch(header)
 	if len(matches) != 2 {
-		return nil, fmt.Errorf("fetching product bundle failed: can not get file name: response header \"Content-Disposition\" has invalid format: %s", header)
+		return "", fmt.Errorf("fetching product name failed: can not get file name: response header \"Content-Disposition\" has invalid format: %s", header)
 	}
 
-	data, err := newBundleData(matches[1])
-	if err != nil {
-		return nil, fmt.Errorf("fetching product bundle failed: can not get file name: %s", err.Error())
-	}
-
-	data.URL = url
-
-	return data, nil
+	return matches[1], nil
 }
 
 // Download backage and its dependencies from MS Store by id, version and locale to destination directory
@@ -64,68 +67,79 @@ func Download(id string, version *ms.Version, locale *ms.Locale, destinationPath
 	log.Debug("Fetching cookie...")
 	cookie, err := getCookie()
 	if err != nil {
-		return nil, err
+		return nil, fmt.Errorf("can not fetch cookie: %s", err.Error())
 	}
 	log.Info("Cookie fetched")
 
 	log.Debug("Fetching product info...")
-	appIndo, wuid, err := getAppInfo(id, locale)
+	apps, wuid, err := getAppInfo(id, locale)
 	if err != nil {
-		return nil, err
+		return nil, fmt.Errorf("can not fetch product info: %s", err.Error())
 	}
 	log.Info("Product info fetched")
 
 	log.Debug("Fetching product files...")
 	productsInfo, err := getProducts(cookie, wuid)
 	if err != nil {
-		return nil, err
+		return nil, fmt.Errorf("can not fetch file: %s", err.Error())
 	}
 
-	appBundles := initBundlesGroup()
-	depBundles := initBundlesMap()
+	bundles := newBundles()
 	for _, info := range productsInfo {
 		productURLs, err := getURL(info)
 		if err != nil {
-			return nil, err
+			return nil, fmt.Errorf("can not fetch file: %s", err.Error())
 		}
 
 		for _, url := range productURLs {
-			productBundle, err := getProductBundle(url)
+			bundleName, err := getProductName(url)
 			if err != nil {
-				return nil, err
+				return nil, fmt.Errorf("can not fetch file: %s", err.Error())
 			}
 
-			if productBundle.Format == "blockmap" {
+			bundle, err := newBundle(bundleName, url)
+			if err != nil {
+				return nil, fmt.Errorf("can not fetch file: %s", err.Error())
+			}
+
+			if bundle.Format == "blockmap" {
 				continue
 			}
 
-			if productBundle.ID == appIndo.ID {
-				appBundles.Add(productBundle)
-			} else {
-				depBundles.Add(productBundle)
-			}
+			bundles.Add(bundle)
 		}
 	}
 
-	bundlesToDownload := initBundlesList()
-	for _, deps := range depBundles.values {
-		depBundle, err := deps.GetLatest(ms.Arch)
+	files := newFiles()
+	for _, app := range apps.Values() {
+		appBundle, err := bundles.GetAppBundle(app)
 		if err != nil {
-			return nil, err
+			return nil, fmt.Errorf("can not fetch file: %s", err.Error())
 		}
 
-		bundlesToDownload.Append(depBundle)
+		file := newFile(appBundle)
+
+		for _, dep := range app.Dependencies() {
+			depBundle, err := bundles.GetDependency(dep)
+			if err != nil {
+				return nil, fmt.Errorf("can not fetch file: %s", err.Error())
+			}
+			file.Add(depBundle)
+		}
+		files.Add(file)
 	}
-	appBundle, err := appBundles.Get(version, ms.Arch)
+
+	appFile, err := files.Get(version, ms.Arch)
 	if err != nil {
-		return nil, err
+		return nil, fmt.Errorf("can not fetch file: %s", err.Error())
 	}
-	bundlesToDownload.Append(appBundle)
+
+	bundlesToDownload := appFile.Bundles()
 	log.Info("Product files fetched")
 
-	log.Debug("Fetching product files info...")
+	log.Debug("Download product files...")
 	var result []ms.FileInfo
-	for _, data := range bundlesToDownload.values {
+	for _, data := range bundlesToDownload {
 		fullPath := utils.Join(
 			destinationPath,
 			fmt.Sprintf("%s-%s.%s", data.Name, data.Version.String(), data.Format),
@@ -144,7 +158,7 @@ func Download(id string, version *ms.Version, locale *ms.Locale, destinationPath
 
 		result = append(result, ms.FileInfo{Path: fullPath, Name: data.Name, Version: data.Version})
 	}
-	log.Info("Product files info fetched")
+	log.Info("Product files downloaded")
 
 	return result, nil
 }
