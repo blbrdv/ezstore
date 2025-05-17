@@ -94,6 +94,12 @@ func Warning(value string) {
 	}
 }
 
+// Warningf format and print input text to os.Stderr with "[WRN]" mark and appended new line when log level is Normal
+// or above.
+func Warningf(format string, values ...any) {
+	Warning(fmt.Sprintf(format, values...))
+}
+
 // Success print input text to os.Stdout with "[SCC]" mark and appended new line when log level is Minimal or above.
 func Success(value string) {
 	if Level >= Minimal {
