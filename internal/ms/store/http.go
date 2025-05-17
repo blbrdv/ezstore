@@ -73,7 +73,7 @@ func traceResponse(traceFile *os.File, res *req.Response) {
 
 	var sb strings.Builder
 
-	status := res.Status
+	status := res.GetStatus()
 	if status != "" {
 		_, _ = fmt.Fprintf(&sb, "< %s\n", status)
 	}
@@ -104,6 +104,16 @@ func traceResponse(traceFile *os.File, res *req.Response) {
 	_, _ = traceFile.WriteString(sb.String())
 }
 
+func either(e1 error, e2 error) error {
+	if e1 != nil {
+		return e1
+	} else if e2 != nil {
+		return e2
+	} else {
+		return nil
+	}
+}
+
 func getHTTPClient() *req.Client {
 	return req.C().
 		SetCommonHeader("Content-Encoding", "Encoding.UTF8").
@@ -112,24 +122,28 @@ func getHTTPClient() *req.Client {
 			result, _ := time.ParseDuration(fmt.Sprintf("%ds", 5*attempt))
 			return result
 		}).
-		AddCommonRetryHook(func(resp *req.Response, err error) {
-			if err != nil {
-				if log.Level == log.Detailed {
-					file := getTraceFile()
-					traceRequest(file, resp.Request)
-					traceError(file, resp.Err)
-					traceResponse(file, resp)
-					_ = file.Close()
-				}
+		SetCommonRetryHook(func(resp *req.Response, err error) {
+			underlyingErr := either(err, resp.Err)
+			if log.Level == log.Detailed {
+				file := getTraceFile()
+				traceRequest(file, resp.Request)
+				traceError(file, underlyingErr)
+				traceResponse(file, resp)
+				_ = file.Close()
+			}
 
-				log.Warning(err.Error())
+			if underlyingErr == nil {
+				log.Warningf("%s %s: %s", strings.ToUpper(resp.Request.Method), resp.Request.RawURL, resp.GetStatus())
+			} else {
+				log.Warning(underlyingErr.Error())
 			}
 		}).
 		OnError(func(_ *req.Client, req *req.Request, resp *req.Response, err error) {
 			if log.Level == log.Detailed {
+				underlyingErr := either(err, resp.Err)
 				file := getTraceFile()
 				traceRequest(file, req)
-				traceError(file, err)
+				traceError(file, underlyingErr)
 				traceResponse(file, resp)
 				_ = file.Close()
 			}
