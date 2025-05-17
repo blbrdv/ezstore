@@ -3,6 +3,7 @@ package store
 import (
 	"fmt"
 	"io"
+	"reflect"
 	"strings"
 )
 
@@ -13,31 +14,53 @@ func fprint(w io.Writer, a ...any) {
 	}
 }
 
-func toString(value interface{}) string {
-	switch v := value.(type) {
-	case string:
-		return v
-	case fmt.Stringer:
-		return v.String()
-	default:
-		panic(fmt.Errorf("invalid value type: %T", value))
+func PrettyString(slice any) string {
+	val := reflect.ValueOf(slice)
+	if val.Kind() != reflect.Slice {
+		panic(fmt.Errorf("expected slice, got %T", slice))
 	}
-}
 
-func PrettyString[T interface{}](slice []T) string {
-	var sb strings.Builder
+	elemType := val.Type().Elem()
+	if elemType.Kind() == reflect.Ptr && elemType.Elem().Kind() == reflect.Struct {
+		stringerType := reflect.TypeOf((*fmt.Stringer)(nil)).Elem()
+		if elemType.Implements(stringerType) {
+			var sb strings.Builder
 
-	fprint(&sb, "[")
+			fprint(&sb, "[")
 
-	length := len(slice) - 1
-	for i := 0; i <= length; i++ {
-		fprint(&sb, toString(slice[i]))
-		if i < length {
-			fprint(&sb, ", ")
+			length := val.Len() - 1
+			for i := 0; i <= length; i++ {
+				v := val.Index(i).Interface().(fmt.Stringer)
+				fprint(&sb, v.String())
+				if i < length {
+					fprint(&sb, ", ")
+				}
+			}
+
+			fprint(&sb, "]")
+
+			return sb.String()
 		}
 	}
 
-	fprint(&sb, "]")
+	switch s := slice.(type) {
+	case []string:
+		var sb strings.Builder
 
-	return sb.String()
+		fprint(&sb, "[")
+
+		length := len(s) - 1
+		for i := 0; i <= length; i++ {
+			fprint(&sb, s[i])
+			if i < length {
+				fprint(&sb, ", ")
+			}
+		}
+
+		fprint(&sb, "]")
+
+		return sb.String()
+	default:
+		panic(fmt.Errorf("invalid slice type: %T", slice))
+	}
 }
