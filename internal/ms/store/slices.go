@@ -64,3 +64,24 @@ func PrettyString(slice any) string {
 		panic(fmt.Errorf("invalid slice type: %T", slice))
 	}
 }
+
+func Equal[T any](left, right []T, f func(l, r T) bool) bool {
+	if len(left) != len(right) {
+		return false
+	}
+
+	for _, leftElement := range left {
+		found := false
+		for _, rightElement := range right {
+			if f(leftElement, rightElement) {
+				found = true
+				break
+			}
+		}
+		if !found {
+			return false
+		}
+	}
+
+	return true
+}

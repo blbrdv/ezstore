@@ -28,22 +28,10 @@ func (f *file) Bundles() []*bundle {
 }
 
 func (f *file) Equal(other *file) bool {
-	if !f.bundle.Equal(other.bundle) {
-		return false
-	}
-
-	otherLength := len(other.Dependencies())
-	if len(f.Dependencies()) != otherLength {
-		return false
-	}
-
-	for i := 0; i < otherLength; i++ {
-		if !f.Dependencies()[i].Equal(other.Dependencies()[i]) {
-			return false
-		}
-	}
-
-	return true
+	return f.bundle.Equal(other.bundle) &&
+		Equal(f.Dependencies(), other.Dependencies(), func(l, r *bundle) bool {
+			return l.Equal(r)
+		})
 }
 
 func newFile(bundle *bundle) *file {

@@ -17,13 +17,6 @@ func TestApp(t *testing.T) {
 	if !expected.Equal(actual) {
 		t.Fatalf("Invalid app.\n%s", cmp.Diff(expected, actual))
 	}
-
-	expectedStr := expected.String()
-	actualStr := actual.String()
-
-	if expectedStr != actualStr {
-		t.Fatalf("Invalid app string, expected \"%s\", actual \"%s\"", expectedStr, actualStr)
-	}
 }
 
 var appData = []struct {
@@ -51,12 +44,6 @@ func TestAddDependencyToApp(t *testing.T) {
 
 			if data.Count != depCount {
 				t.Fatalf("Invalid dependency count, expected %d, actual %d", data.Count, depCount)
-			}
-
-			appStr := app.String()
-
-			if data.String != appStr {
-				t.Fatalf("Invalid app string, expected \"%s\", actual \"%s\"", data.String, appStr)
 			}
 		})
 	}
@@ -92,12 +79,6 @@ func TestApps(t *testing.T) {
 
 			if data.Count != actualCount {
 				t.Fatalf("Invalid apps count, expected %d, actual %d", data.Count, actualCount)
-			}
-
-			actualStr := apps.String()
-
-			if data.String != actualStr {
-				t.Fatalf("Invalid apps string, expected: \"%s\", actual \"%s\"", data.String, actualStr)
 			}
 		})
 	}

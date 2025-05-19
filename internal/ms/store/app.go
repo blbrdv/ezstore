@@ -19,22 +19,10 @@ func (a *app) Dependencies() []string {
 }
 
 func (a *app) Equal(other *app) bool {
-	if !a.pkg.Equal(other.pkg) {
-		return false
-	}
-
-	otherLength := len(other.Dependencies())
-	if len(a.Dependencies()) != otherLength {
-		return false
-	}
-
-	for i := 0; i < otherLength; i++ {
-		if a.Dependencies()[i] != other.Dependencies()[i] {
-			return false
-		}
-	}
-
-	return true
+	return a.pkg.Equal(other.pkg) &&
+		Equal(a.Dependencies(), other.Dependencies(), func(l, r string) bool {
+			return l == r
+		})
 }
 
 func (a *app) String() string {

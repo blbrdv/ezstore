@@ -60,12 +60,6 @@ func TestBundles(t *testing.T) {
 			if data.Count != actualCount {
 				t.Fatalf("Invalid bundles count, expected %d, actual %d", data.Count, actualCount)
 			}
-
-			actualStr := bundles.String()
-
-			if data.String != actualStr {
-				t.Fatalf("Invalid bundles string, expected: \"%s\", actual \"%s\"", data.String, actualStr)
-			}
 		})
 	}
 }

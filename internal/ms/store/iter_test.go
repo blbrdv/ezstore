@@ -1,6 +1,7 @@
 package store
 
 import (
+	"github.com/google/go-cmp/cmp"
 	"maps"
 	"testing"
 )
@@ -15,9 +16,9 @@ func TestToSlice(t *testing.T) {
 		t.Fatalf(`Slices length not equal, expected: %d elements, actual: %d elements`, len(expected), len(actual))
 	}
 
-	for i := 0; i < len(actual); i++ {
-		if expected[i] != actual[i] {
-			t.Fatalf(`Slices elements not equal, expected: "%s", actual: "%s", index %d`, expected[i], actual[i], i)
-		}
+	if !Equal(expected, actual, func(l, r string) bool {
+		return l == r
+	}) {
+		t.Fatalf("Slices elements not equal\n%s", cmp.Diff(expected, actual))
 	}
 }
