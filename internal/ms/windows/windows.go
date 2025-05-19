@@ -1,6 +1,7 @@
 package windows
 
 import (
+	"bytes"
 	"fmt"
 	"github.com/blbrdv/ezstore/internal/log"
 	"github.com/blbrdv/ezstore/internal/ms"
@@ -40,10 +41,15 @@ func Install(file ms.FileInfo) error {
 	}
 
 	if installedVersion.LessThan(file.Version) {
+		buf := new(bytes.Buffer)
 		cmd = exec.Command("powershell", "-NoProfile", "Add-AppxPackage", "-Path", file.Path)
+		cmd.Stderr = buf
 		if err = cmd.Run(); err != nil {
-			output, _ := cmd.CombinedOutput()
-			return fmt.Errorf("can not install app %s: console command error: %s\n%s", file.Name, err.Error(), output)
+			output := buf.String()
+			if output != "" {
+				output = fmt.Sprintf("\n%s", output)
+			}
+			return fmt.Errorf("can not install app %s: console command error: %s%s", file.Name, err.Error(), output)
 		}
 
 		log.Infof("Package %s %s installed.", file.Name, file.Version.String())
