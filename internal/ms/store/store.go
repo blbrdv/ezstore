@@ -5,35 +5,11 @@ import (
 	"github.com/blbrdv/ezstore/internal/log"
 	"github.com/blbrdv/ezstore/internal/ms"
 	"github.com/blbrdv/ezstore/internal/utils"
-	net "net/url"
 	"os"
 	"regexp"
 )
 
-// TODO: retry with new client on 421 Misdirect
-// reason:
-// https://www.fastly.com/documentation/guides/concepts/errors/#error-421-misdirected-request
-// and
-// https://serverfault.com/a/938265
-//
-//func do(getClient func () *req.Client, method string, url string) (*req.Response, error) {
-//
-//}
-
 func getProductName(url string) (string, error) {
-	uri, err := net.Parse(url)
-	if err != nil {
-		return "", fmt.Errorf("fetching product name failed: can not parse url \"%s\": %s", url, err.Error())
-	}
-
-	query := uri.Query().Encode()
-	var queryStr string
-	if query == "" {
-		queryStr = query
-	} else {
-		queryStr = fmt.Sprintf("?%s", query)
-	}
-	url = fmt.Sprintf("https://%s%s%s", uri.Host, uri.EscapedPath(), queryStr)
 	res, err := client.
 		SetCommonHeader("Connection", "Keep-Alive").
 		SetCommonHeader("Accept", "*/*").
