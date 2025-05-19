@@ -1,4 +1,4 @@
-name: Lint and test
+name: Check and test
 
 on:
   pull_request:
@@ -8,10 +8,10 @@ on:
       - 'icons/**'
 
 jobs:
-  lint-and-test:
+  check-and-test:
     runs-on: windows-latest
 
-    name: Lint and test project
+    name: Check and test project
 
     steps:
       - uses: actions/checkout@v4
@@ -26,8 +26,8 @@ jobs:
           go install "honnef.co/go/tools/cmd/staticcheck@latest"
           echo "$(go env GOPATH)/bin/staticcheck" | Out-File -FilePath $env:GITHUB_PATH -Encoding utf8 -Append
 
-      - name: Lint project
-        run: .\run.ps1 lint
+      - name: Check project
+        run: .\run.ps1 check
 
       - name: Run unit tests
         run: .\run.ps1 test
