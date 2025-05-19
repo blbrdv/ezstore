@@ -111,13 +111,8 @@ function Exec {
     Write-Host " > ${TaskName}: $Name";
 
     $global:LASTEXITCODE = 0;
-    try {
-        & $Command;
-    }
-    catch {
-        Write-Host "Invalid command ${Command}"
-        $global:LASTEXITCODE = 1;
-    }
+
+    & $Command;
 
     if ( $global:LASTEXITCODE -ne 0 ) {
         throw "Command exited with code $global:LASTEXITCODE";
@@ -162,8 +157,8 @@ function Check {
     Exec "Checking codestyle" { staticcheck .\... };
     Exec "Checking format" {
             $Location = (Get-Location | %{$_.Path}) + "\";
-            $Files = Get-Childitem –Path . -Include *.go -Recurse -ErrorAction SilentlyContinue `
-                | %{$_.FullName.Replace($Location,'')};
+            $Files = Get-Childitem –Path . -Include *.go -Recurse -ErrorAction SilentlyContinue |
+                %{$_.FullName.Replace($Location,'')};
             $Result = gofmt -l $Files;
 
             if ($null -ne $Result -And ($Result | Measure-Object -Line | %{$_.Lines} -gt 0)) {
