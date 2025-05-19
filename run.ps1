@@ -162,7 +162,7 @@ function Check {
     Exec "Checking codestyle" { staticcheck .\... };
     Exec "Checking format" {
             $Location = (Get-Location | %{$_.Path}) + "\";
-            $Files = Get-Childitem –Path . -Include *.go -Recurse -ErrorAction SilentlyContinue
+            $Files = Get-Childitem –Path . -Include *.go -Recurse -ErrorAction SilentlyContinue `
                 | %{$_.FullName.Replace($Location,'')};
             $Result = gofmt -l $Files;
 
