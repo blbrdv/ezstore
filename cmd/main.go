@@ -5,13 +5,14 @@ import (
 	_ "embed"
 	"errors"
 	"fmt"
+	"io"
+	"os"
+	"strings"
+
 	"github.com/blbrdv/ezstore/internal/cmd"
 	"github.com/blbrdv/ezstore/internal/log"
 	"github.com/urfave/cli/v3"
 	"github.com/ztrue/tracerr"
-	"io"
-	"os"
-	"strings"
 )
 
 //go:embed README.txt
