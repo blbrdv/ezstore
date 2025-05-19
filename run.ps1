@@ -1,7 +1,7 @@
 Param (
     [Parameter(Mandatory=$true,Position=0)]
     [ValidateNotNullOrEmpty()]
-    [ValidateSet('clean','format','lint','test','check','build','rebuild')]
+    [ValidateSet('clean','format','check','test','build','rebuild')]
     [string]$Command
 )
 
@@ -88,7 +88,7 @@ function Get-File-Version {
 
     $LastTag = git describe --tags --abbrev=0;
 
-    $Count = Invoke-Expression "git log $LastTag..HEAD --oneline"  | Measure-Object -Line | %{$_.Lines};
+    $Count = Invoke-Expression "git log $LastTag..HEAD --oneline" | Measure-Object -Line | %{$_.Lines};
 
     if ( $Count -ne "" ) {
         $Value = $Count;
@@ -133,7 +133,7 @@ function Remove-Winres-Files {
 
     foreach ($File in $global:SysoFiles) {
         $Path = ".\cmd\$File";
-        Exec "Removing $Path" { & Remove-Item -Path $Path -Force -ErrorAction SilentlyContinue };
+        Exec "Removing $Path" { Remove-Item -Path $Path -Force -ErrorAction SilentlyContinue };
     }
 
 }
@@ -141,7 +141,7 @@ function Remove-Winres-Files {
 function Clean {
 
     foreach ($Dir in $global:BuildDirs) {
-        Exec "Removing $Dir" { & Remove-Item -Path $Dir -Recurse -Force -ErrorAction SilentlyContinue };
+        Exec "Removing $Dir" { Remove-Item -Path $Dir -Recurse -Force -ErrorAction SilentlyContinue };
     }
 
     Remove-Winres-Files;
@@ -150,22 +150,34 @@ function Clean {
 
 function Format {
 
-    Exec "Formatting go files" { & go fmt .\... };
+    Exec "Formatting go files" { go fmt .\... };
 
 }
 
-function Lint {
+function Check {
 
     Check-If-Installed "Staticcheck" "staticcheck";
 
-    Exec "Checking issues" { & go vet .\... };
-    Exec "Checking codestyle" { & staticcheck .\... };
+    Exec "Checking issues" { go vet .\... };
+    Exec "Checking codestyle" { staticcheck .\... };
+    Exec "Checking format" {
+            $Location = (Get-Location | %{$_.Path}) + "\";
+            $Files = Get-Childitem –Path . -Include *.go -Recurse -ErrorAction SilentlyContinue
+                | %{$_.FullName.Replace($Location,'')};
+            $Result = gofmt -l $Files;
+
+            if ($null -ne $Result -And ($Result | Measure-Object -Line | %{$_.Lines} > 0)) {
+                Write-Host "Code need formatting:";
+                Write-Host $Result;
+                $global:LASTEXITCODE = 1;
+            }
+        }
 
 }
 
 function Test {
 
-    Exec "Running tests" { & go test .\internal\... };
+    Exec "Running tests" { go test .\internal\... };
 
 }
 
@@ -180,18 +192,24 @@ function Build {
 
     Write-Host "Building project version $ProductVersion ($FileVersion)";
 
-    Exec "Embedding resources" { & go-winres make --in ".\winres.json" --product-version $ProductVersion --file-version $FileVersion };
+    Exec "Embedding resources" {
+            go-winres make --in ".\winres.json" --product-version $ProductVersion --file-version $FileVersion
+        };
 
     foreach ($File in $global:SysoFiles) {
         $Target = ".\cmd\$File";
-        Exec "Moving $File to $Target" { & Move-Item -Path $File -Destination $Target -Force -ErrorAction SilentlyContinue };
+        Exec "Moving $File to $Target" {
+                Move-Item -Path $File -Destination $Target -Force -ErrorAction SilentlyContinue
+            };
     }
 
-    Exec "Compiling exe" { & go build -ldflags='-X main.version=$ProductVersion' -o ".\output\ezstore.exe" ".\cmd" };
+    Exec "Compiling exe" { go build -ldflags='-X main.version=$ProductVersion' -o ".\output\ezstore.exe" ".\cmd" };
 
-    Exec "Archiving files" { & 7z a -bso0 -bd -sse ".\release\ezstore-portable.7z" ".\output\ezstore.exe" ".\cmd\README.txt" ".\cmd\update.ps1" };
+    Exec "Archiving files" {
+            7z a -bso0 -bd -sse ".\release\ezstore-portable.7z" ".\output\ezstore.exe" ".\cmd\README.txt" ".\cmd\update.ps1"
+        };
 
-    Exec "Compiling installer" { & iscc /Q "setup.iss" /DPV=$ProductVersion /DFV=$FileVersion };
+    Exec "Compiling installer" { iscc /Q "setup.iss" /DPV=$ProductVersion /DFV=$FileVersion };
 
     Remove-Winres-Files;
 
@@ -220,8 +238,8 @@ try {
             Format;
             break;
         }
-        'lint' {
-            Lint;
+        'check' {
+            Check;
             break;
         }
         'test' {
@@ -230,12 +248,6 @@ try {
         }
         'build' {
             Build;
-            break;
-        }
-        'check' {
-            Clean;
-            Lint;
-            Test;
             break;
         }
         'rebuild' {
