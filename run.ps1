@@ -166,9 +166,10 @@ function Check {
                 | %{$_.FullName.Replace($Location,'')};
             $Result = gofmt -l $Files;
 
-            if ($null -ne $Result -And ($Result | Measure-Object -Line | %{$_.Lines} > 0)) {
+            if ($null -ne $Result -And ($Result | Measure-Object -Line | %{$_.Lines} -gt 0)) {
                 Write-Host "Code need formatting:";
                 Write-Host $Result;
+                Write-Host;
                 $global:LASTEXITCODE = 1;
             }
         }
