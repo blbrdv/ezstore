@@ -10,6 +10,11 @@ $global:SysoFiles = @(
     "rsrc_windows_amd64.syso"
 );
 
+$global:BuildDirs = @(
+    "output",
+    "release"
+);
+
 #######
 # Utils
 #######
@@ -97,15 +102,17 @@ function Exec {
 
     Param (
         [Parameter(Mandatory=$true,Position=0)]
-        [string]$Command
+        [string]$Name,
+        [Parameter(Mandatory=$true,Position=1)]
+        [scriptblock]$Command
     )
 
     $TaskName = (Get-PSCallStack)[1].Command;
-    Write-Host " > ${TaskName}: $Command";
+    Write-Host " > ${TaskName}: $Name";
 
     $global:LASTEXITCODE = 0;
     try {
-        Invoke-Expression "${Command}";
+        & $Command;
     }
     catch {
         Write-Host "Invalid command ${Command}"
@@ -125,22 +132,25 @@ function Exec {
 function Remove-Winres-Files {
 
     foreach ($File in $global:SysoFiles) {
-        Exec "Remove-Item -Path .\cmd\$File -Force -ErrorAction SilentlyContinue";
+        $Path = ".\cmd\$File";
+        Exec "Removing $Path" { & Remove-Item -Path $Path -Force -ErrorAction SilentlyContinue };
     }
 
 }
 
 function Clean {
 
-    Exec "Remove-Item -Path 'output' -Recurse -Force -ErrorAction SilentlyContinue";
-    Exec "Remove-Item -Path 'release' -Recurse -Force -ErrorAction SilentlyContinue";
+    foreach ($Dir in $global:BuildDirs) {
+        Exec "Removing $Dir" { & Remove-Item -Path $Dir -Recurse -Force -ErrorAction SilentlyContinue };
+    }
+
     Remove-Winres-Files;
 
 }
 
 function Format {
 
-    Exec "go fmt .\...";
+    Exec "Formatting go files" { & go fmt .\... };
 
 }
 
@@ -148,14 +158,14 @@ function Lint {
 
     Check-If-Installed "Staticcheck" "staticcheck";
 
-    Exec "go vet .\...";
-    Exec "staticcheck .\...";
+    Exec "Checking issues" { & go vet .\... };
+    Exec "Checking codestyle" { & staticcheck .\... };
 
 }
 
 function Test {
 
-    Exec "go test .\internal\...";
+    Exec "Running tests" { & go test .\internal\... };
 
 }
 
@@ -168,17 +178,20 @@ function Build {
     $ProductVersion = Get-Product-Version;
     $FileVersion = Get-File-Version $ProductVersion;
 
-    Exec "go-winres make --in .\winres.json --product-version $ProductVersion --file-version $FileVersion";
+    Write-Host "Building project version $ProductVersion ($FileVersion)";
+
+    Exec "Embedding resources" { & go-winres make --in ".\winres.json" --product-version $ProductVersion --file-version $FileVersion };
 
     foreach ($File in $global:SysoFiles) {
-        Exec "Move-Item -Path $File -Destination .\cmd\$File -Force -ErrorAction SilentlyContinue";
+        $Target = ".\cmd\$File";
+        Exec "Moving $File to $Target" { & Move-Item -Path $File -Destination $Target -Force -ErrorAction SilentlyContinue };
     }
 
-    Exec "go build -ldflags='-X main.version=$ProductVersion' -o .\output\ezstore.exe .\cmd";
+    Exec "Compiling exe" { & go build -ldflags='-X main.version=$ProductVersion' -o ".\output\ezstore.exe" ".\cmd" };
 
-    Exec "7z a -bso0 -bd -sse .\release\ezstore-portable.7z .\output\ezstore.exe .\cmd\README.txt .\cmd\update.ps1"
+    Exec "Archiving files" { & 7z a -bso0 -bd -sse ".\release\ezstore-portable.7z" ".\output\ezstore.exe" ".\cmd\README.txt" ".\cmd\update.ps1" };
 
-    Exec "iscc /Q 'setup.iss' /DPV='$ProductVersion' /DFV='$FileVersion'";
+    Exec "Compiling installer" { & iscc /Q "setup.iss" /DPV=$ProductVersion /DFV=$FileVersion };
 
     Remove-Winres-Files;
 
@@ -240,7 +253,7 @@ $sw.Stop();
 $duration = Get-Duration $sw.Elapsed;
 
 if ( $ExitCode -eq 0 ) {
-    Write-Host "Finished $duration";
+    Write-Host "Success $duration";
 }
 else {
     Write-Host "Failed with code $ExitCode $duration";
