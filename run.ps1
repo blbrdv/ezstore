@@ -1,7 +1,7 @@
 Param (
     [Parameter(Mandatory=$true,Position=0)]
     [ValidateNotNullOrEmpty()]
-    [ValidateSet('clean','format','check','test','build','rebuild')]
+    [ValidateSet('clean','format','check','test','deps','build','rebuild')]
     [string]$Command
 )
 
@@ -182,6 +182,36 @@ function Test {
 
 }
 
+function Dependencies {
+
+    Exec "Check dependencies for update" {
+            $Paths = go list -m -u -f '{{if not (or .Indirect .Main)}}{{with .Update}}{{$.Path}} {{$.Version}} {{.Version}}{{end}}{{end}}' all;
+
+            $Deps = @();
+            foreach ($Path in $Paths) {
+                $Result = $Path -match "^(\S+) v(\S+) v(\S+)$";
+                if ( $Result ) {
+                    $Current = [version]$Matches[2];
+                    $New = [version]$Matches[3];
+                    if ( $New.Major -gt $Current.Major -Or ($New.Major -eq $Current.Major -And $New.Minor -gt $Current.Minor) ) {
+                        $Deps += $Path
+                    }
+                }
+            }
+
+            if ( $Deps.Length -gt 0 ) {
+                Write-Host "Dependencies need updates:";
+                foreach ($Dep in $Deps) {
+                    Write-Host $Dep;
+                }
+                Write-Host;
+
+                $global:LASTEXITCODE = 1;
+            }
+        }
+
+}
+
 function Build {
 
     Check-If-Installed "go-winres" "go-winres";
@@ -245,6 +275,10 @@ try {
         }
         'test' {
             Test;
+            break;
+        }
+        'deps' {
+            Dependencies;
             break;
         }
         'build' {

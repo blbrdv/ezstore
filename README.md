@@ -61,6 +61,7 @@ Available tasks:
 - `clean` - removes build directories and files
 - `check` - run analysis for code
 - `test` - run unit tests
+- `deps` - check for dependency updates
 - `format` - format go files
 - `build` - build cli and compile installer
 - `rebuild` - run clean and build tasks
