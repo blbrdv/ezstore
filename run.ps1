@@ -229,7 +229,7 @@ function Build {
             };
     }
 
-    Exec "Compiling exe" { go build -ldflags='-X main.version=$ProductVersion' -o ".\output\ezstore.exe" ".\cmd" };
+    Exec "Compiling exe" { go build -ldflags="-X main.version=$ProductVersion" -o ".\output\ezstore.exe" ".\cmd" };
 
     Exec "Archiving files" {
             7z a -bso0 -bd -sse ".\release\ezstore-portable.7z" ".\output\ezstore.exe" ".\cmd\README.txt" ".\cmd\update.ps1"
