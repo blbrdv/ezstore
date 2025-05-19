@@ -27,6 +27,25 @@ func (f *file) Bundles() []*bundle {
 	return slices.Concat(newBundles(f.bundle).Values(), f.Dependencies())
 }
 
+func (f *file) Equal(other *file) bool {
+	if !f.bundle.Equal(other.bundle) {
+		return false
+	}
+
+	otherLength := len(other.Dependencies())
+	if len(f.Dependencies()) != otherLength {
+		return false
+	}
+
+	for i := 0; i < otherLength; i++ {
+		if !f.Dependencies()[i].Equal(other.Dependencies()[i]) {
+			return false
+		}
+	}
+
+	return true
+}
+
 func newFile(bundle *bundle) *file {
 	return &file{bundle: bundle, dependencies: *newBundles()}
 }

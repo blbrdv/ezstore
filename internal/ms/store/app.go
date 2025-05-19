@@ -18,6 +18,25 @@ func (a *app) Dependencies() []string {
 	return ToSlice(maps.Keys(a.dependencies))
 }
 
+func (a *app) Equal(other *app) bool {
+	if !a.pkg.Equal(other.pkg) {
+		return false
+	}
+
+	otherLength := len(other.Dependencies())
+	if len(a.Dependencies()) != otherLength {
+		return false
+	}
+
+	for i := 0; i < otherLength; i++ {
+		if a.Dependencies()[i] != other.Dependencies()[i] {
+			return false
+		}
+	}
+
+	return true
+}
+
 func (a *app) String() string {
 	return fmt.Sprintf("%s %s", a.pkg.String(), PrettyString(a.Dependencies()))
 }
