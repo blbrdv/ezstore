@@ -47,7 +47,7 @@ jobs:
 
     - id: iscc-check
       run: |
-        $Test = ${{ steps.iscc-path.outputs.path }} | Test-Path
+        $Test = "${{ steps.iscc-path.outputs.path }}" | Test-Path
         $Result = ([string]$Test).ToLower()
         echo "is-installed=$Result" >> $ENV:GITHUB_OUTPUT
         echo $ENV:GITHUB_OUTPUT
