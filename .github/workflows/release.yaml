@@ -14,32 +14,43 @@ jobs:
     steps:
     - uses: actions/checkout@v4
 
-    - uses: actions/setup-go@v5
+    - id: iscc-path
+      run: |
+        $Path = "${env:TEMP}\inno"
+        echo "path=$Path" >> $ENV:GITHUB_OUTPUT
+        echo $ENV:GITHUB_OUTPUT
+
+    - name: Restore cache
+      uses: actions/cache/restore@v4
+      with:
+        path: |
+          ~\go
+          ~\AppData\Local\go-build
+          ${{ steps.iscc-path.outputs.path }}
+        key: cache-go-${{ hashFiles( './go.mod', './go.sum' ) }}
+
+    - name: Setup GO
+      uses: actions/setup-go@v5
       with:
         go-version-file: 'go.mod'
+        cache: false
 
-    - name: Setup go-winres@0.3.3
-      uses: mattdowdell/go-installer@v0.3.0
-      with:
-        package: github.com/tc-hib/go-winres
-        version: 0.3.3
+    - name: Download project dependencies
+      run: go get .\...
 
-    - name: Restore Inno Setup cache
-      uses: actions/cache/restore@v4
-      id: cache-iscc
-      with:
-        path: .\inno
-        key: cache-iscc-${{ hashFiles( '.\inno\**' ) }}
+    - name: Setup go-winres@latest
+      run: |
+        go install "github.com/tc-hib/go-winres@latest"
+
+    - id: iscc-check
+      run: |
+        $Test = ${{ steps.iscc-path.outputs.path }} | Test-Path
+        $Result = ([string]$Test).ToLower()
+        echo "is-installed=$Result" >> $ENV:GITHUB_OUTPUT
+        echo $ENV:GITHUB_OUTPUT
 
     - uses: pwall2222/inno-setup-download@v0.0.8
-      if: ${{ steps.cache-iscc.outputs.cache-hit != 'true' }}
-
-    - name: Save Inno Setup cache
-      if: ${{ steps.cache-iscc.outputs.cache-hit != 'true' }}
-      uses: actions/cache/save@v4
-      with:
-        path: .\inno
-        key: cache-iscc-${{ hashFiles( '.\inno\**' ) }}
+      if: ${{ steps.iscc-check.outputs.is-installed != 'true' }}
 
     - name: Build project
       run: .\run.ps1 build
@@ -50,3 +61,11 @@ jobs:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       with:
         args: release/*
+
+    - name: Restore cache
+      uses: actions/cache/save@v4
+      with:
+        path: |
+          ~\go
+          ~\AppData\Local\go-build
+        key: cache-go-${{ hashFiles( './go.mod', './go.sum' ) }}
