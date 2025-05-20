@@ -1,6 +1,13 @@
 # Changelog
 
-## [1.3.0] - 2025-05-11
+## [1.3.1] - 2025-05-21
+
+### Fixed
+
+- Go dependency vulnerabilities [#18](https://github.com/blbrdv/ezstore/pull/18)
+- Release CI/CD
+
+## [1.3.0] - 2025-05-20
 
 ### Added
 
@@ -10,7 +17,7 @@
 
 ### Fixed
 
-- Go dependency vulnerabilities
+- Go dependency vulnerabilities [#14](https://github.com/blbrdv/ezstore/pull/14)
 - Bug ["this package is not compatible with the device"](https://github.com/blbrdv/ezstore/issues/12)
 - Downloading app with provided version, locale and architecture
 - Inconsistent file fetching from MS Store API
@@ -59,6 +66,7 @@
 
 Initial release.
 
+[1.3.1]: https://github.com/blbrdv/ezstore/releases/tag/v1.3.1
 [1.3.0]: https://github.com/blbrdv/ezstore/releases/tag/v1.3.0
 [1.2.0]: https://github.com/blbrdv/ezstore/releases/tag/v1.2.0
 [1.1.1]: https://github.com/blbrdv/ezstore/releases/tag/v1.1.1

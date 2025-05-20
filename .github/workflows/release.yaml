@@ -30,7 +30,9 @@ jobs:
           ~\go
           ~\AppData\Local\go-build
           ${{ steps.iscc-path.outputs.path }}
-        key: ${{ runner.os }}-${{ steps.system-info.outputs.release }}-go-${{ github.job }}-${{ hashFiles( './go.sum' ) }}
+        key: ${{ runner.os }}-${{ steps.system-info.outputs.release }}-go-${{ github.job }}-${{ hashFiles( './go.sum', './iscc' ) }}
+        restore-keys: |
+          ${{ runner.os }}-${{ steps.system-info.outputs.release }}-go-${{ github.job }}-
 
     - name: Setup GO
       uses: actions/setup-go@v5
@@ -45,15 +47,18 @@ jobs:
       run: |
         go install "github.com/tc-hib/go-winres@latest"
 
-    - id: iscc-check
+    - id: iscc-info
       run: |
-        $Test = ${{ steps.iscc-path.outputs.path }} | Test-Path
+        $Test = "${{ steps.iscc-path.outputs.path }}" | Test-Path
         $Result = ([string]$Test).ToLower()
         echo "is-installed=$Result" >> $ENV:GITHUB_OUTPUT
+        echo "version=$(cat .\iscc)" >> $ENV:GITHUB_OUTPUT
         echo $ENV:GITHUB_OUTPUT
 
     - uses: pwall2222/inno-setup-download@v0.0.8
-      if: ${{ steps.iscc-check.outputs.is-installed != 'true' }}
+      if: ${{ steps.iscc-info.outputs.is-installed != 'true' }}
+      with:
+        version: ${{ steps.iscc-info.outputs.version }}
 
     - name: Build project
       run: .\run.ps1 build
@@ -71,4 +76,4 @@ jobs:
         path: |
           ~\go
           ~\AppData\Local\go-build
-        key: ${{ runner.os }}-${{ steps.system-info.outputs.release }}-go-${{ github.job }}-${{ hashFiles( './go.sum' ) }}
+        key: ${{ runner.os }}-${{ steps.system-info.outputs.release }}-go-${{ github.job }}-${{ hashFiles( './go.sum', './iscc' ) }}

@@ -26,6 +26,8 @@ jobs:
             ~\go
             ~\AppData\Local\go-build
           key: ${{ runner.os }}-${{ steps.system-info.outputs.release }}-go-${{ github.job }}-${{ hashFiles( './go.sum' ) }}
+          restore-keys: |
+            ${{ runner.os }}-${{ steps.system-info.outputs.release }}-go-${{ github.job }}-
 
       - name: Setup GO
         uses: actions/setup-go@v5

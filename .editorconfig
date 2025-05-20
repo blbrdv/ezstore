@@ -23,5 +23,5 @@ trim_trailing_whitespace = false
 [*.xml]
 insert_final_newline = false
 
-[token.txt]
+[{token.txt,iscc}]
 insert_final_newline = false
