@@ -49,6 +49,9 @@ func Install(_ context.Context, cmd *cli.Command) error {
 	log.Debugf("Trace file: %s", log.TraceFile)
 	log.Debugf("Temp dir: %s", tmpPath)
 
+	defer windows.Remove(tmpPath)
+	defer windows.Shell.Exit()
+
 	windows.Remove(tmpPath)
 	windows.MkDir(tmpPath)
 
@@ -63,8 +66,6 @@ func Install(_ context.Context, cmd *cli.Command) error {
 			return err
 		}
 	}
-
-	windows.Remove(tmpPath)
 
 	log.Success("Done!")
 

@@ -1,14 +1,12 @@
 package windows
 
 import (
-	"bytes"
 	"fmt"
 	"github.com/blbrdv/ezstore/internal/log"
 	"github.com/blbrdv/ezstore/internal/ms"
 	"github.com/blbrdv/ezstore/internal/utils"
 	"golang.org/x/sys/windows"
 	"os"
-	"os/exec"
 	"strings"
 )
 
@@ -58,21 +56,17 @@ func OpenFile(path string, flag int) *File {
 
 // Install package if its version higher that installed counterpart.
 func Install(file ms.FileInfo) error {
-	cmd := exec.Command(
-		"powershell",
-		"-Command",
-		fmt.Sprintf(
-			"Get-AppxPackage -Name %s* | Sort-Object -Property Version | Select-Object -ExpandProperty Version -Last 1",
-			file.Name,
-		),
+	var result string
+	var err error
+	result, err = Shell.Execf(
+		"Get-AppxPackage -Name %s* | Sort-Object -Property Version | Select-Object -ExpandProperty Version -Last 1",
+		file.Name,
 	)
-
-	result, err := cmd.CombinedOutput()
 	if err != nil {
 		return fmt.Errorf("can not install app %s: console command error: %s", file.Name, err.Error())
 	}
 
-	installedVersionStr := strings.Trim(string(result), "\n\r")
+	installedVersionStr := strings.Trim(result, "\n\r")
 
 	var installedVersion *ms.Version
 
@@ -86,15 +80,12 @@ func Install(file ms.FileInfo) error {
 	}
 
 	if installedVersion.LessThan(file.Version) {
-		buf := new(bytes.Buffer)
-		cmd = exec.Command("powershell", "-NoProfile", "Add-AppxPackage", "-Path", file.Path)
-		cmd.Stderr = buf
-		if err = cmd.Run(); err != nil {
-			output := buf.String()
-			if output != "" {
-				output = fmt.Sprintf("\n%s", output)
+		result, err = Shell.Execf("Add-AppxPackage -Path %s", file.Path)
+		if err != nil {
+			if result != "" {
+				result = fmt.Sprintf("\n%s", result)
 			}
-			return fmt.Errorf("can not install app %s: console command error: %s%s", file.Name, err.Error(), output)
+			return fmt.Errorf("can not install app %s: console command error: %s%s", file.Name, err.Error(), result)
 		}
 
 		log.Infof("Package %s %s installed.", file.Name, file.Version.String())
@@ -110,13 +101,12 @@ var defaultLocale = ms.Locale{Language: "en", Country: "US"}
 // GetLocale returns current locale set in hosted OS.
 // If error occurred or returned value is empty, returns default locale.
 func GetLocale() *ms.Locale {
-	cmd := exec.Command("powershell", "Get-Culture | select -exp Name")
-	cultureName, err := cmd.Output()
+	result, err := Shell.Exec("Get-Culture | select -exp Name")
 	if err != nil {
 		return &defaultLocale
 	}
 
-	localeStr := strings.TrimSpace(string(cultureName))
+	localeStr := strings.TrimSpace(result)
 	localeStr = strings.Trim(localeStr, "\r\n")
 
 	locale, err := ms.NewLocale(localeStr)
