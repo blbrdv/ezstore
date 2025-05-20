@@ -65,7 +65,7 @@ func NewLevel(input string) (LogLevel, error) {
 // Debug print input text to os.Stdout with "[DEB]" mark and appended new line when log level is Detailed.
 func Debug(value string) {
 	if Level == Detailed {
-		_, _ = fmt.Fprintln(os.Stdout, gray.Render("[DEB]"), value)
+		utils.Fprintln(os.Stdout, gray.Render("[DEB]"), value)
 	}
 }
 
@@ -77,7 +77,7 @@ func Debugf(format string, values ...any) {
 // Info print input text to os.Stdout with "[INF]" mark and appended new line when log level is Normal or above.
 func Info(value string) {
 	if Level >= Normal {
-		_, _ = fmt.Fprintln(os.Stdout, blue.Render("[INF]"), value)
+		utils.Fprintln(os.Stdout, blue.Render("[INF]"), value)
 	}
 }
 
@@ -90,7 +90,7 @@ func Infof(format string, values ...any) {
 // Warning print input text to os.Stderr with "[WRN]" mark and appended new line when log level is Normal or above.
 func Warning(value string) {
 	if Level >= Normal {
-		_, _ = fmt.Fprintln(os.Stderr, yellow.Render("[WRN]"), value)
+		utils.Fprintln(os.Stderr, yellow.Render("[WRN]"), value)
 	}
 }
 
@@ -103,14 +103,14 @@ func Warningf(format string, values ...any) {
 // Success print input text to os.Stdout with "[SCC]" mark and appended new line when log level is Minimal or above.
 func Success(value string) {
 	if Level >= Minimal {
-		_, _ = fmt.Fprintln(os.Stdout, green.Render("[SCC]"), value)
+		utils.Fprintln(os.Stdout, green.Render("[SCC]"), value)
 	}
 }
 
 // Error print input text to os.Stderr with "[ERR]" mark and appended new line when log level is Minimal or above.
 func Error(value string) {
 	if Level >= Minimal {
-		_, _ = fmt.Fprintln(os.Stderr, red.Render("[ERR]"), value)
+		utils.Fprintln(os.Stderr, red.Render("[ERR]"), value)
 	}
 }
 

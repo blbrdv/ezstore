@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"github.com/blbrdv/ezstore/internal/log"
 	"github.com/blbrdv/ezstore/internal/ms"
+	"github.com/blbrdv/ezstore/internal/ms/windows"
 	"github.com/blbrdv/ezstore/internal/utils"
 	"os"
 	"regexp"
@@ -121,13 +122,10 @@ func Download(id string, version *ms.Version, locale *ms.Locale, destinationPath
 			fmt.Sprintf("%s-%s.%s", data.Name, data.Version.String(), data.Format),
 		)
 
-		file, err := os.OpenFile(fullPath, os.O_CREATE, 0660)
-		if err != nil {
-			return nil, fmt.Errorf("can not download file: can not open file \"%s\": %s", fullPath, err.Error())
-		}
+		file := windows.OpenFile(fullPath, os.O_CREATE)
 
 		_, err = client.R().SetOutput(file).Get(data.URL)
-		_ = file.Close()
+		file.Close()
 		if err != nil {
 			return nil, fmt.Errorf("can not download file: GET %s: %s", data.URL, err.Error())
 		}

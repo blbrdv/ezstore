@@ -3,6 +3,8 @@ package store
 import (
 	"fmt"
 	"github.com/blbrdv/ezstore/internal/log"
+	"github.com/blbrdv/ezstore/internal/ms/windows"
+	"github.com/blbrdv/ezstore/internal/utils"
 	"io"
 	"os"
 	"strings"
@@ -12,41 +14,36 @@ import (
 	"github.com/imroc/req/v3"
 )
 
-func getTraceFile() *os.File {
-	file, err := os.OpenFile(log.TraceFile, os.O_APPEND|os.O_WRONLY|os.O_CREATE, 0660)
-	if err != nil {
-		panic(fmt.Sprintf("can not open trace file \"%s\": %s", log.TraceFile, err.Error()))
-	}
-
-	return file
+func getTraceFile() *windows.File {
+	return windows.OpenFile(log.TraceFile, os.O_APPEND|os.O_WRONLY|os.O_CREATE)
 }
 
-func traceRequest(traceFile *os.File, req *req.Request) {
+func traceRequest(traceFile *windows.File, req *req.Request) {
 	if req == nil {
 		return
 	}
 
 	var sb strings.Builder
 
-	_, _ = fmt.Fprintf(&sb, "> %s %s\n", strings.ToUpper(req.Method), req.RawURL)
+	utils.Fprintf(&sb, "> %s %s\n", strings.ToUpper(req.Method), req.RawURL)
 
 	for key, values := range req.Headers {
 		for _, value := range values {
-			_, _ = fmt.Fprintf(&sb, "> %s: %s\n", key, value)
+			utils.Fprintf(&sb, "> %s: %s\n", key, value)
 		}
 	}
 
 	if req.Body != nil {
-		_, _ = fmt.Fprintln(&sb, "> Body:")
-		_, _ = fmt.Fprintf(&sb, "%s\n", req.Body)
+		utils.Fprintln(&sb, "> Body:")
+		utils.Fprintf(&sb, "%s\n", req.Body)
 	}
 
-	_, _ = fmt.Fprint(&sb, "\n")
+	utils.Fprint(&sb, "\n")
 
-	_, _ = traceFile.WriteString(sb.String())
+	traceFile.WriteString(sb.String())
 }
 
-func traceError(traceFile *os.File, err error) {
+func traceError(traceFile *windows.File, err error) {
 	if err == nil {
 		return
 	}
@@ -56,17 +53,17 @@ func traceError(traceFile *os.File, err error) {
 	text := err.Error()
 
 	if text == "" {
-		_, _ = fmt.Fprintln(&sb, "! (empty)")
+		utils.Fprintln(&sb, "! (empty)")
 	} else {
-		_, _ = fmt.Fprintf(&sb, "! %s\n", text)
+		utils.Fprintf(&sb, "! %s\n", text)
 	}
 
-	_, _ = fmt.Fprint(&sb, "\n")
+	utils.Fprint(&sb, "\n")
 
-	_, _ = traceFile.WriteString(sb.String())
+	traceFile.WriteString(sb.String())
 }
 
-func traceResponse(traceFile *os.File, res *req.Response) {
+func traceResponse(traceFile *windows.File, res *req.Response) {
 	if res == nil || res.Response == nil {
 		return
 	}
@@ -75,33 +72,33 @@ func traceResponse(traceFile *os.File, res *req.Response) {
 
 	status := res.GetStatus()
 	if status != "" {
-		_, _ = fmt.Fprintf(&sb, "< %s\n", status)
+		utils.Fprintf(&sb, "< %s\n", status)
 	}
 
 	if len(res.Header) > 0 {
 		for key, values := range res.Header {
 			for _, value := range values {
-				_, _ = fmt.Fprintf(&sb, "< %s: %s\n", key, value)
+				utils.Fprintf(&sb, "< %s: %s\n", key, value)
 			}
 		}
 	}
 
 	bodyRaw, _ := io.ReadAll(res.Body)
 	if len(bodyRaw) > 0 {
-		_, _ = fmt.Fprintln(&sb, "< Body:")
+		utils.Fprintln(&sb, "< Body:")
 
 		if body := string(bodyRaw); body == "" {
 			for _, data := range bodyRaw {
-				_, _ = fmt.Fprintf(&sb, "%b", data)
+				utils.Fprintf(&sb, "%b", data)
 			}
 		} else {
-			_, _ = fmt.Fprintf(&sb, "%s\n", body)
+			utils.Fprintf(&sb, "%s\n", body)
 		}
 	}
 
-	_, _ = fmt.Fprint(&sb, "\n")
+	utils.Fprint(&sb, "\n")
 
-	_, _ = traceFile.WriteString(sb.String())
+	traceFile.WriteString(sb.String())
 }
 
 func either(e1 error, e2 error) error {
@@ -129,7 +126,7 @@ func getHTTPClient() *req.Client {
 				traceRequest(file, resp.Request)
 				traceError(file, underlyingErr)
 				traceResponse(file, resp)
-				_ = file.Close()
+				file.Close()
 			}
 
 			if underlyingErr == nil {
@@ -145,7 +142,7 @@ func getHTTPClient() *req.Client {
 				traceRequest(file, req)
 				traceError(file, underlyingErr)
 				traceResponse(file, resp)
-				_ = file.Close()
+				file.Close()
 			}
 		})
 }

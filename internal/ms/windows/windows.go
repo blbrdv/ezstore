@@ -6,10 +6,55 @@ import (
 	"github.com/blbrdv/ezstore/internal/log"
 	"github.com/blbrdv/ezstore/internal/ms"
 	"github.com/blbrdv/ezstore/internal/utils"
+	"golang.org/x/sys/windows"
 	"os"
 	"os/exec"
 	"strings"
 )
+
+type File struct {
+	*os.File
+}
+
+func (f *File) Close() {
+	err := f.File.Close()
+	if err != nil {
+		panic(err.Error())
+	}
+}
+
+func (f *File) WriteString(input string) {
+	_, err := f.File.WriteString(input)
+	if err != nil {
+		panic(err.Error())
+	}
+}
+
+func NewFile(file *os.File) *File {
+	return &File{file}
+}
+
+func Remove(path string) {
+	err := windows.Rmdir(path)
+	if err != nil {
+		panic(err.Error())
+	}
+}
+
+func MkDir(path string) {
+	err := windows.Mkdir(path, 0)
+	if err != nil {
+		panic(err.Error())
+	}
+}
+
+func OpenFile(path string, flag int) *File {
+	file, err := os.OpenFile(path, flag, 0660)
+	if err != nil {
+		panic(err.Error())
+	}
+	return NewFile(file)
+}
 
 // Install package if its version higher that installed counterpart.
 func Install(file ms.FileInfo) error {
@@ -84,10 +129,7 @@ func GetLocale() *ms.Locale {
 
 func prepareDir(elem ...string) string {
 	dir := utils.Join(append(elem, "ezstore")...)
-	err := os.MkdirAll(dir, 0660)
-	if err != nil {
-		panic(fmt.Sprintf("can not create directory \"%s\": %s", dir, err.Error()))
-	}
+	MkDir(dir)
 	return dir
 }
 

@@ -2,17 +2,10 @@ package store
 
 import (
 	"fmt"
-	"io"
+	"github.com/blbrdv/ezstore/internal/utils"
 	"reflect"
 	"strings"
 )
-
-func fprint(w io.Writer, a ...any) {
-	_, err := fmt.Fprint(w, a...)
-	if err != nil {
-		panic(err.Error())
-	}
-}
 
 func PrettyString(slice any) string {
 	val := reflect.ValueOf(slice)
@@ -26,18 +19,18 @@ func PrettyString(slice any) string {
 		if elemType.Implements(stringerType) {
 			var sb strings.Builder
 
-			fprint(&sb, "[")
+			utils.Fprint(&sb, "[")
 
 			length := val.Len() - 1
 			for i := 0; i <= length; i++ {
 				v := val.Index(i).Interface().(fmt.Stringer)
-				fprint(&sb, v.String())
+				utils.Fprint(&sb, v.String())
 				if i < length {
-					fprint(&sb, ", ")
+					utils.Fprint(&sb, ", ")
 				}
 			}
 
-			fprint(&sb, "]")
+			utils.Fprint(&sb, "]")
 
 			return sb.String()
 		}
@@ -47,17 +40,17 @@ func PrettyString(slice any) string {
 	case []string:
 		var sb strings.Builder
 
-		fprint(&sb, "[")
+		utils.Fprint(&sb, "[")
 
 		length := len(s) - 1
 		for i := 0; i <= length; i++ {
-			fprint(&sb, s[i])
+			utils.Fprint(&sb, s[i])
 			if i < length {
-				fprint(&sb, ", ")
+				utils.Fprint(&sb, ", ")
 			}
 		}
 
-		fprint(&sb, "]")
+		utils.Fprint(&sb, "]")
 
 		return sb.String()
 	default:
