@@ -17,11 +17,12 @@ jobs:
     - uses: kenchan0130/actions-system-info@master
       id: system-info
 
-    - id: iscc-path
+    - name: Set Inno Setup path
+      id: iscc-path
       run: |
         $Path = "${env:TEMP}\inno"
+        echo "Path: $Path"
         echo "path=$Path" >> $ENV:GITHUB_OUTPUT
-        echo $ENV:GITHUB_OUTPUT
 
     - name: Restore cache
       uses: actions/cache/restore@v4
@@ -47,13 +48,16 @@ jobs:
       run: |
         go install "github.com/tc-hib/go-winres@latest"
 
-    - id: iscc-info
+    - name: Set Inno Setup info
+      id: iscc-info
       run: |
         $Test = "${{ steps.iscc-path.outputs.path }}" | Test-Path
         $Result = ([string]$Test).ToLower()
+        echo "Installed: $Result"
         echo "is-installed=$Result" >> $ENV:GITHUB_OUTPUT
-        echo "version=$(cat .\iscc)" >> $ENV:GITHUB_OUTPUT
-        echo $ENV:GITHUB_OUTPUT
+        $Version = cat .\iscc
+        echo "Version: $Version"
+        echo "version=$Version" >> $ENV:GITHUB_OUTPUT
 
     - uses: pwall2222/inno-setup-download@v0.0.8
       if: ${{ steps.iscc-info.outputs.is-installed != 'true' }}
@@ -76,4 +80,5 @@ jobs:
         path: |
           ~\go
           ~\AppData\Local\go-build
+          ${{ steps.iscc-path.outputs.path }}
         key: ${{ runner.os }}-${{ steps.system-info.outputs.release }}-go-${{ github.job }}-${{ hashFiles( './go.sum', './iscc' ) }}
