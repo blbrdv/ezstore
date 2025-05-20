@@ -15,10 +15,6 @@ type Locale struct {
 
 // String returns MS Store compatible locale literal.
 func (l *Locale) String() string {
-	if l == nil {
-		return "<nil>"
-	}
-
 	if l.Country == "" {
 		return l.Language
 	}
@@ -27,15 +23,6 @@ func (l *Locale) String() string {
 }
 
 func (l *Locale) Equal(other *Locale) bool {
-	if l == other {
-		return true
-	}
-	if l == nil {
-		return false
-	}
-	if other == nil {
-		return false
-	}
 	return l.Country == other.Country && l.Language == other.Language
 }
 

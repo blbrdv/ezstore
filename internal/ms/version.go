@@ -62,24 +62,10 @@ func parse(input string) (int64, error) {
 
 // String returns SemVer representation.
 func (v *Version) String() string {
-	if v == nil {
-		return "<nil>"
-	}
-
 	return fmt.Sprintf("v%d.%d.%d.%d", v.Major, v.Minor, v.Build, v.Revision)
 }
 
 func (v *Version) Equal(other *Version) bool {
-	if v == other {
-		return true
-	}
-	if v == nil {
-		return false
-	}
-	if other == nil {
-		return false
-	}
-
 	return recursiveCompare(v.Slice(), other.Slice()) == 0
 }
 
