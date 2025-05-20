@@ -20,9 +20,9 @@ jobs:
         uses: actions/cache/restore@v4
         with:
           path: |
-            C:\Users\runneradmin\go
-            C:\Users\runneradmin\AppData\Local\go-build
-          key: cache-go-${{ hashFiles( 'C:\Users\runneradmin\{go,AppData\Local\go-build}\**' ) }}
+            ~\go
+            ~\AppData\Local\go-build
+          key: cache-go-${{ hashFiles( '~/{go,AppData/Local/go-build}/**' ) }}
 
       - name: Setup GO
         uses: actions/setup-go@v5
@@ -47,6 +47,6 @@ jobs:
         uses: actions/cache/save@v4
         with:
           path: |
-            C:\Users\runneradmin\go
-            C:\Users\runneradmin\AppData\Local\go-build
-          key: cache-go-${{ hashFiles( 'C:\Users\runneradmin\{go,AppData\Local\go-build}\**' ) }}
+            ~\go
+            ~\AppData\Local\go-build
+          key: cache-go-${{ hashFiles( '~/{go,AppData/Local/go-build}/**' ) }}
