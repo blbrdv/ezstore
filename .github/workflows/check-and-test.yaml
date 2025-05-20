@@ -25,7 +25,7 @@ jobs:
           path: |
             ~\go
             ~\AppData\Local\go-build
-          key: ${{ runner.os }}-${{ steps.system-info.outputs.release }}-go-${{ github.job }}-${{ hashFiles( './go.mod', './go.sum' ) }}
+          key: ${{ runner.os }}-${{ steps.system-info.outputs.release }}-go-${{ github.job }}-${{ hashFiles( './go.sum' ) }}
 
       - name: Setup GO
         uses: actions/setup-go@v5
@@ -34,7 +34,7 @@ jobs:
           cache: false
 
       - name: Download project dependencies
-        run: go get .\...
+        run: go get -t .\...
 
       - name: Setup staticcheck@latest
         run: |
@@ -52,4 +52,4 @@ jobs:
           path: |
             ~\go
             ~\AppData\Local\go-build
-          key: ${{ runner.os }}-${{ steps.system-info.outputs.release }}-go-${{ github.job }}-${{ hashFiles( './go.mod', './go.sum' ) }}
+          key: ${{ runner.os }}-${{ steps.system-info.outputs.release }}-go-${{ github.job }}-${{ hashFiles( './go.sum' ) }}
