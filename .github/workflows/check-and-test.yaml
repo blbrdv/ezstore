@@ -16,7 +16,19 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
-      - uses: .github/workflows/setup-go.yaml
+      - name: Restore cache
+        uses: actions/cache/restore@v4
+        with:
+          path: |
+            C:\Users\runneradmin\go
+            C:\Users\runneradmin\AppData\Local\go-build
+          key: cache-go-${{ hashFiles( 'C:\Users\runneradmin\{go,AppData\Local\go-build}\**' ) }}
+
+      - name: Setup GO
+        uses: actions/setup-go@v5
+        with:
+          go-version-file: 'go.mod'
+          cache: false
 
       - name: Download project dependencies
         run: go get .\...
@@ -31,4 +43,10 @@ jobs:
       - name: Run unit tests
         run: .\run.ps1 test
 
-      - uses: .github/workflows/teardown-go.yaml
+      - name: Restore cache
+        uses: actions/cache/save@v4
+        with:
+          path: |
+            C:\Users\runneradmin\go
+            C:\Users\runneradmin\AppData\Local\go-build
+          key: cache-go-${{ hashFiles( 'C:\Users\runneradmin\{go,AppData\Local\go-build}\**' ) }}
