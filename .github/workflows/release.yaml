@@ -14,6 +14,9 @@ jobs:
     steps:
     - uses: actions/checkout@v4
 
+    - uses: kenchan0130/actions-system-info@master
+      id: system-info
+
     - id: iscc-path
       run: |
         $Path = "${env:TEMP}\inno"
@@ -27,7 +30,7 @@ jobs:
           ~\go
           ~\AppData\Local\go-build
           ${{ steps.iscc-path.outputs.path }}
-        key: cache-go-release-${{ hashFiles( './go.mod', './go.sum' ) }}
+        key: ${{ runner.os }}-${{ steps.system-info.outputs.release }}-go-${{ github.job }}-${{ hashFiles( './go.mod', './go.sum' ) }}
 
     - name: Setup GO
       uses: actions/setup-go@v5
@@ -68,4 +71,4 @@ jobs:
         path: |
           ~\go
           ~\AppData\Local\go-build
-        key: cache-go-release-${{ hashFiles( './go.mod', './go.sum' ) }}
+        key: ${{ runner.os }}-${{ steps.system-info.outputs.release }}-go-${{ github.job }}-${{ hashFiles( './go.mod', './go.sum' ) }}
