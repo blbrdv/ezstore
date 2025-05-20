@@ -22,7 +22,7 @@ jobs:
           path: |
             ~\go
             ~\AppData\Local\go-build
-          key: cache-go-${{ hashFiles( '~/{go,AppData/Local/go-build}/**' ) }}
+          key: cache-go-${{ hashFiles( './go.mod', './go.sum' ) }}
 
       - name: Setup GO
         uses: actions/setup-go@v5
@@ -49,4 +49,4 @@ jobs:
           path: |
             ~\go
             ~\AppData\Local\go-build
-          key: cache-go-${{ hashFiles( '~/{go,AppData/Local/go-build}/**' ) }}
+          key: cache-go-${{ hashFiles( './go.mod', './go.sum' ) }}
