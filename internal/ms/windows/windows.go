@@ -5,7 +5,6 @@ import (
 	"github.com/blbrdv/ezstore/internal/log"
 	"github.com/blbrdv/ezstore/internal/ms"
 	"github.com/blbrdv/ezstore/internal/utils"
-	"golang.org/x/sys/windows"
 	"os"
 	"strings"
 )
@@ -33,14 +32,14 @@ func NewFile(file *os.File) *File {
 }
 
 func Remove(path string) {
-	err := windows.Rmdir(path)
+	err := os.RemoveAll(path)
 	if err != nil {
 		panic(err.Error())
 	}
 }
 
 func MkDir(path string) {
-	err := windows.Mkdir(path, 0)
+	err := os.MkdirAll(path, 0660)
 	if err != nil {
 		panic(err.Error())
 	}
