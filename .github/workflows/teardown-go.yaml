@@ -1,0 +1,14 @@
+name: Teardown GO
+
+on:
+  workflow_call:
+
+jobs:
+  save-cache:
+    name: Restore cache
+    uses: actions/cache/save/action.yml@v4
+    with:
+      path: |
+        C:\Users\runneradmin\go
+        C:\Users\runneradmin\AppData\Local\go-build
+      key: cache-go-${{ hashFiles( 'C:\Users\runneradmin\{go,AppData\Local\go-build}\**' ) }}

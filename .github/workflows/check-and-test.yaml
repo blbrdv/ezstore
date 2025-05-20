@@ -16,18 +16,19 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
-      - uses: actions/setup-go@v5
-        with:
-          go-version-file: 'go.mod'
+      - uses: .github/workflows/setup-go.yaml
 
-      - name: Setup staticcheck@2025.1.1
-        uses: mattdowdell/go-installer@v0.3.0
-        with:
-          package: honnef.co/go/tools/cmd/staticcheck
-          version: 2025.1.1
+      - name: Download project dependencies
+        run: go get .\...
+
+      - name: Setup staticcheck@latest
+        run: |
+          go install "honnef.co/go/tools/cmd/staticcheck@latest"
 
       - name: Check project
         run: .\run.ps1 check
 
       - name: Run unit tests
         run: .\run.ps1 test
+
+      - uses: .github/workflows/teardown-go.yaml
