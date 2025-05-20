@@ -1,15 +1,18 @@
 Param (
     [Parameter(Mandatory=$true,Position=0)]
     [ValidateNotNullOrEmpty()]
-    [ValidateSet('clean','format','lint','test','build')]
+    [ValidateSet('clean','format','check','test','deps','build','rebuild')]
     [string]$Command
 )
-
-$global:ExitCode = 0;
 
 $global:SysoFiles = @(
     "rsrc_windows_386.syso",
     "rsrc_windows_amd64.syso"
+);
+
+$global:BuildDirs = @(
+    "output",
+    "release"
 );
 
 #######
@@ -70,17 +73,7 @@ function Check-If-Installed {
 
 function Get-Product-Version {
 
-    $Version =
-        Select-String -LiteralPath "CHANGELOG.md" -Pattern "## \[([\d\.]+)\] - \d\d\d\d-\d\d-\d\d"
-        | Select-Object -Index 0
-        | %{$_.Matches.Groups[1].Value};
-
-    if ( $Version -eq "" ) {
-        Write-Host "Can not get version from CHANGELOG.md file...";
-        exit 1;
-    }
-
-    return $Version;
+    return (git describe --tags --abbrev=0).Replace("v", "");
 
 }
 
@@ -95,7 +88,7 @@ function Get-File-Version {
 
     $LastTag = git describe --tags --abbrev=0;
 
-    $Count = Invoke-Expression "git log $LastTag..HEAD --oneline"  | Measure-Object -Line | %{$_.Lines};
+    $Count = Invoke-Expression "git log $LastTag..HEAD --oneline" | Measure-Object -Line | %{$_.Lines};
 
     if ( $Count -ne "" ) {
         $Value = $Count;
@@ -109,17 +102,20 @@ function Exec {
 
     Param (
         [Parameter(Mandatory=$true,Position=0)]
-        [string]$Command
+        [string]$Name,
+        [Parameter(Mandatory=$true,Position=1)]
+        [scriptblock]$Command
     )
 
     $TaskName = (Get-PSCallStack)[1].Command;
-    Write-Host " > ${TaskName}: $Command";
+    Write-Host " > ${TaskName}: $Name";
 
     $global:LASTEXITCODE = 0;
-    Invoke-Expression "${Command}";
 
-    if ( $LASTEXITCODE -ne 0 ) {
-        throw "Command exited with code $LASTEXITCODE";
+    & $Command;
+
+    if ( $global:LASTEXITCODE -ne 0 ) {
+        throw "Command exited with code $global:LASTEXITCODE";
     }
 
 }
@@ -131,52 +127,83 @@ function Exec {
 function Remove-Winres-Files {
 
     foreach ($File in $global:SysoFiles) {
-        Exec "Remove-Item -Path .\cmd\$File -Force -ErrorAction SilentlyContinue";
+        $Path = ".\cmd\$File";
+        Exec "Removing $Path" { Remove-Item -Path $Path -Force -ErrorAction SilentlyContinue };
     }
 
 }
 
 function Clean {
 
-    Exec "Remove-Item -Path 'output' -Recurse -Force -ErrorAction SilentlyContinue";
-    Exec "Remove-Item -Path 'release' -Recurse -Force -ErrorAction SilentlyContinue";
+    foreach ($Dir in $global:BuildDirs) {
+        Exec "Removing $Dir" { Remove-Item -Path $Dir -Recurse -Force -ErrorAction SilentlyContinue };
+    }
+
     Remove-Winres-Files;
 
 }
 
 function Format {
 
-    try {
-        Exec "go fmt .\...";
-    }
-    catch {
-        $global:ExitCode = $lastexitcode;
-    }
+    Exec "Formatting go files" { go fmt .\... };
 
 }
 
-function Lint {
+function Check {
 
     Check-If-Installed "Staticcheck" "staticcheck";
 
-    try {
-        Exec "go vet .\...";
-        Exec "staticcheck .\...";
-    }
-    catch {
-        $global:ExitCode = $lastexitcode;
-    }
+    Exec "Checking issues" { go vet .\... };
+    Exec "Checking codestyle" { staticcheck .\... };
+    Exec "Checking format" {
+            $Location = (Get-Location | %{$_.Path}) + "\";
+            $Files = Get-Childitem –Path . -Include *.go -Recurse -ErrorAction SilentlyContinue |
+                %{$_.FullName.Replace($Location,'')};
+            $Result = gofmt -l $Files;
+
+            if ($null -ne $Result -And ($Result | Measure-Object -Line | %{$_.Lines} -gt 0)) {
+                Write-Host "Code need formatting:";
+                Write-Host $Result;
+                Write-Host;
+                $global:LASTEXITCODE = 1;
+            }
+        }
 
 }
 
 function Test {
 
-    try {
-        Exec "go test .\internal\...";
-    }
-    catch {
-        $global:ExitCode = $lastexitcode;
-    }
+    Exec "Running tests" { go test .\internal\... };
+
+}
+
+function Dependencies {
+
+    Exec "Check dependencies for update" {
+            $Paths = go list -m -u -f '{{if not (or .Indirect .Main)}}{{with .Update}}{{$.Path}} {{$.Version}} {{.Version}}{{end}}{{end}}' all;
+
+            $Deps = @();
+            foreach ($Path in $Paths) {
+                $Result = $Path -match "^(\S+) v(\S+) v(\S+)$";
+                if ( $Result ) {
+                    $Current = [version]$Matches[2];
+                    $New = [version]$Matches[3];
+                    if ( $New.Major -gt $Current.Major -Or ($New.Major -eq $Current.Major -And $New.Minor -gt $Current.Minor) ) {
+                        $Deps += $Path
+                    }
+                }
+            }
+
+            if ( $Deps.Length -gt 0 ) {
+                Write-Host "Dependencies need updates:";
+                foreach ($Dep in $Deps) {
+                    Write-Host $Dep;
+                }
+                Write-Host;
+
+                $global:LASTEXITCODE = 1;
+            }
+        }
 
 }
 
@@ -189,25 +216,28 @@ function Build {
     $ProductVersion = Get-Product-Version;
     $FileVersion = Get-File-Version $ProductVersion;
 
-    try {
-        Exec "go-winres make --in .\winres.json --product-version $ProductVersion --file-version $FileVersion";
+    Write-Host "Building project version $ProductVersion ($FileVersion)";
 
-        foreach ($File in $global:SysoFiles) {
-            Exec "Move-Item -Path $File -Destination .\cmd\$File -Force -ErrorAction SilentlyContinue";
-        }
+    Exec "Embedding resources" {
+            go-winres make --in ".\winres.json" --product-version $ProductVersion --file-version $FileVersion
+        };
 
-        Exec "go build -o .\output\ezstore.exe .\cmd";
-
-        Exec "7z a -bso0 -bd -sse .\release\ezstore-portable.7z .\output\ezstore.exe .\cmd\README.txt .\cmd\update.ps1"
-
-        Exec "iscc /Q 'setup.iss' /DPV='$ProductVersion' /DFV='$FileVersion'";
+    foreach ($File in $global:SysoFiles) {
+        $Target = ".\cmd\$File";
+        Exec "Moving $File to $Target" {
+                Move-Item -Path $File -Destination $Target -Force -ErrorAction SilentlyContinue
+            };
     }
-    catch {
-        $global:ExitCode = $lastexitcode;
-    }
-    finally {
-        Remove-Winres-Files;
-    }
+
+    Exec "Compiling exe" { go build -ldflags="-X main.version=$ProductVersion" -o ".\output\ezstore.exe" ".\cmd" };
+
+    Exec "Archiving files" {
+            7z a -bso0 -bd -sse ".\release\ezstore-portable.7z" ".\output\ezstore.exe" ".\cmd\README.txt" ".\cmd\update.ps1"
+        };
+
+    Exec "Compiling installer" { iscc /Q "setup.iss" /DPV=$ProductVersion /DFV=$FileVersion };
+
+    Remove-Winres-Files;
 
 }
 
@@ -222,37 +252,53 @@ Write-Host "Starting...";
 $sw = [System.Diagnostics.Stopwatch]::New();
 $sw.Start();
 
-switch ( $Command ) {
-    'clean' {
-        Clean;
-        break;
+$ExitCode = 0;
+
+try {
+    switch ( $Command ) {
+        'clean' {
+            Clean;
+            break;
+        }
+        'format' {
+            Format;
+            break;
+        }
+        'check' {
+            Check;
+            break;
+        }
+        'test' {
+            Test;
+            break;
+        }
+        'deps' {
+            Dependencies;
+            break;
+        }
+        'build' {
+            Build;
+            break;
+        }
+        'rebuild' {
+            Clean;
+            Build;
+            break;
+        }
     }
-    'format' {
-        Format;
-        break;
-    }
-    'lint' {
-        Lint;
-        break;
-    }
-    'test' {
-        Test;
-        break;
-    }
-    'build' {
-        Build;
-        break;
-    }
+}
+catch {
+    $ExitCode = $global:LASTEXITCODE;
 }
 
 $sw.Stop();
 $duration = Get-Duration $sw.Elapsed;
 
-if ( $global:ExitCode -eq 0 ) {
-    Write-Host "Finished $duration";
+if ( $ExitCode -eq 0 ) {
+    Write-Host "Success $duration";
 }
 else {
-    Write-Host "Failed with code $global:ExitCode $duration";
+    Write-Host "Failed with code $ExitCode $duration";
 }
 
-exit $global:ExitCode;
+exit $ExitCode;

@@ -2,62 +2,60 @@ package cmd
 
 import (
 	"errors"
-	"fmt"
-	types "github.com/blbrdv/ezstore/internal"
-	"github.com/blbrdv/ezstore/internal/msstore"
-	"github.com/blbrdv/ezstore/internal/windows"
-	"github.com/pterm/pterm"
+	"github.com/blbrdv/ezstore/internal/log"
+	"github.com/blbrdv/ezstore/internal/ms"
+	"github.com/blbrdv/ezstore/internal/ms/store"
+	"github.com/blbrdv/ezstore/internal/ms/windows"
+	"github.com/blbrdv/ezstore/internal/utils"
 	"github.com/urfave/cli/v3"
 	"golang.org/x/net/context"
-	"os"
-	"path/filepath"
-	"runtime"
 )
 
-// Install download package with its dependencies from MS Store by id and version,
-// and then install it with its dependencies.
+// Install download package with its dependencies from MS Store by id, version, locale and architecture,
+// and then install it all.
 func Install(_ context.Context, cmd *cli.Command) error {
-	var err error
-
-	arch := runtime.GOARCH
-	switch arch {
-	case "amd64":
-		arch = "x64"
-	case "amd64p32":
-		arch = "x86"
-	case "arm", "arm64":
-		break
-	default:
-		return fmt.Errorf("%s architecture not supported", arch)
+	verbosity, err := log.NewLevel(cmd.String("verbosity"))
+	if err != nil {
+		return err
 	}
+	log.Level = verbosity
 
 	id := cmd.StringArg("id")
 	if id == "" {
 		return errors.New("id must be set")
 	}
 
-	version := cmd.String("version")
+	versionStr := cmd.String("ver")
+	var version *ms.Version
+	if versionStr != "latest" {
+		version, err = ms.NewVersion(versionStr)
+		if err != nil {
+			return err
+		}
+	}
 
-	locale, err := types.NewLocale(cmd.String("locale"))
-	if err != nil {
+	var locale *ms.Locale
+	if cmd.String("locale") == "" {
 		locale = windows.GetLocale()
+	} else {
+		locale, err = ms.NewLocale(cmd.String("locale"))
+		if err != nil {
+			return err
+		}
 	}
 
-	if cmd.Bool("debug") {
-		pterm.EnableDebugMessages()
-	}
+	tmpPath := utils.Join(windows.TempDir, id)
 
-	pterm.Debug.Println(fmt.Sprintf("id           = %s", id))
-	pterm.Debug.Println(fmt.Sprintf("version      = %s", version))
-	pterm.Debug.Println(fmt.Sprintf("locale       = %s", locale))
-	pterm.Debug.Println(fmt.Sprintf("architecture = %s", arch))
+	log.Debugf("Trace file: %s", log.TraceFile)
+	log.Debugf("Temp dir: %s", tmpPath)
 
-	tmpPath := filepath.Join("%LocalAppData%", "ezstore", id)
-	removeDir(tmpPath)
+	defer windows.Remove(tmpPath)
+	defer windows.Shell.Exit()
 
-	defer removeDir(tmpPath)
+	windows.Remove(tmpPath)
+	windows.MkDir(tmpPath)
 
-	files, err := msstore.Download(id, version, arch, locale, tmpPath)
+	files, err := store.Download(id, version, locale, tmpPath)
 	if err != nil {
 		return err
 	}
@@ -69,14 +67,7 @@ func Install(_ context.Context, cmd *cli.Command) error {
 		}
 	}
 
-	pterm.Success.Println("Done!")
+	log.Success("Done!")
 
 	return nil
-}
-
-func removeDir(path string) {
-	err := os.RemoveAll(path)
-	if err != nil {
-		panic(err)
-	}
 }

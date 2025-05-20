@@ -1,4 +1,4 @@
-package internal
+package ms
 
 import (
 	"fmt"
@@ -19,24 +19,28 @@ func NewVersion(input string) (*Version, error) {
 	semverRegexp := regexp.MustCompile(`^v?(\d+)(?:\.(\d+))?(?:\.(\d+))?(?:\.(\d+))?$`)
 	matches := semverRegexp.FindStringSubmatch(input)
 
+	if len(matches) == 0 {
+		return nil, fmt.Errorf("\"%s\" is not a valid version", input)
+	}
+
 	a, err := strconv.ParseInt(matches[1], 10, 64)
 	if err != nil {
-		return nil, err
+		return nil, fmt.Errorf("can not convert \"%s\" to int64: %s", matches[1], err.Error())
 	}
 
 	b, err := parse(matches[2])
 	if err != nil {
-		return nil, err
+		return nil, fmt.Errorf("can not convert \"%s\" to int64: %s", matches[2], err.Error())
 	}
 
 	c, err := parse(matches[3])
 	if err != nil {
-		return nil, err
+		return nil, fmt.Errorf("can not convert \"%s\" to int64: %s", matches[3], err.Error())
 	}
 
 	d, err := parse(matches[4])
 	if err != nil {
-		return nil, err
+		return nil, fmt.Errorf("can not convert \"%s\" to int64: %s", matches[4], err.Error())
 	}
 
 	return &Version{a, b, c, d}, nil
@@ -57,26 +61,36 @@ func parse(input string) (int64, error) {
 }
 
 // String returns SemVer representation.
-func (v Version) String() string {
+func (v *Version) String() string {
 	return fmt.Sprintf("v%d.%d.%d.%d", v.Major, v.Minor, v.Build, v.Revision)
 }
 
+func (v *Version) Equal(other *Version) bool {
+	return recursiveCompare(v.Slice(), other.Slice()) == 0
+}
+
 // Compare two versions.
-func (v Version) Compare(other *Version) int {
+func (v *Version) Compare(other *Version) int {
 	return recursiveCompare(v.Slice(), other.Slice())
 }
 
 // LessThan returns true if this [Version] less than other [Version].
-func (v Version) LessThan(other *Version) bool {
+func (v *Version) LessThan(other *Version) bool {
 	return v.Compare(other) < 0
 }
 
 // Slice converts [Version] to array of 4 numbers.
-func (v Version) Slice() []int64 {
+func (v *Version) Slice() []int64 {
 	return []int64{v.Major, v.Minor, v.Build, v.Revision}
 }
 
 func recursiveCompare(left []int64, right []int64) int {
+	if len(left) > len(right) {
+		return 1
+	} else if len(left) < len(right) {
+		return -1
+	}
+
 	if len(left) == 0 {
 		return 0
 	}

@@ -1,4 +1,4 @@
-package msstore
+package store
 
 import (
 	"strings"
@@ -8,15 +8,15 @@ import (
 )
 
 func TestFE3FileUrl(t *testing.T) {
-	expectedTycketType := "aaaaa"
+	expectedTicketType := "aaaaa"
 	expectedID := "bbbbb"
 	expectedRevisionNumber := "ccccc"
 
-	xml := strings.NewReader(fe3FileURL(expectedTycketType, expectedID, expectedRevisionNumber))
+	xml := strings.NewReader(fe3FileURL(expectedTicketType, expectedID, expectedRevisionNumber))
 
 	doc, err := xmlquery.Parse(xml)
 	if err != nil {
-		t.Fatalf(`Can not parse XML file`)
+		t.Fatalf(`Can not parse XML file: %s`, err.Error())
 	}
 
 	root := xmlquery.FindOne(doc, "//s:Envelope")
@@ -24,8 +24,8 @@ func TestFE3FileUrl(t *testing.T) {
 	actualTicketType := root.
 		SelectElement("//s:Header/o:Security/wuws:WindowsUpdateTicketsToken/TicketType").
 		InnerText()
-	if actualTicketType != expectedTycketType {
-		t.Fatalf(`Incorrect TycketType, expected: "%s", actual: "%s"`, expectedTycketType, actualTicketType)
+	if actualTicketType != expectedTicketType {
+		t.Fatalf(`Incorrect TycketType, expected: "%s", actual: "%s"`, expectedTicketType, actualTicketType)
 	}
 
 	identity := root.
@@ -47,15 +47,15 @@ func TestFE3FileUrl(t *testing.T) {
 }
 
 func TestWUIDRequest(t *testing.T) {
-	expectedTycketType := "aaaaa"
+	expectedTicketType := "aaaaa"
 	expectedCookie := "bbbbb"
 	expectedCategoryIdentifier := "ccccc"
 
-	xml := strings.NewReader(wuidRequest(expectedTycketType, expectedCookie, expectedCategoryIdentifier))
+	xml := strings.NewReader(wuidRequest(expectedTicketType, expectedCookie, expectedCategoryIdentifier))
 
 	doc, err := xmlquery.Parse(xml)
 	if err != nil {
-		t.Fatalf(`Can not parse XML file`)
+		t.Fatalf(`Can not parse XML file: %s`, err.Error())
 	}
 
 	root := xmlquery.FindOne(doc, "//s:Envelope")
@@ -63,8 +63,8 @@ func TestWUIDRequest(t *testing.T) {
 	actualTicketType := root.
 		SelectElement("//s:Header/o:Security/wuws:WindowsUpdateTicketsToken/TicketType").
 		InnerText()
-	if actualTicketType != expectedTycketType {
-		t.Fatalf(`Incorrect TycketType, expected: "%s", actual: "%s"`, expectedTycketType, actualTicketType)
+	if actualTicketType != expectedTicketType {
+		t.Fatalf(`Incorrect TycketType, expected: "%s", actual: "%s"`, expectedTicketType, actualTicketType)
 	}
 
 	syncUpdates := root.
