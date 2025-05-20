@@ -70,7 +70,7 @@ func getCurrentArchitecture() Architecture {
 	goarch := runtime.GOARCH
 	arch, err := NewArchitecture(goarch)
 	if err != nil {
-		panic(fmt.Errorf("\"%s\" architecture is not supported: %s", goarch, err.Error()))
+		panic(fmt.Sprintf("\"%s\" architecture is not supported: %s", goarch, err.Error()))
 	}
 	return arch
 }

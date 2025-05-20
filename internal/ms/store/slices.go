@@ -10,14 +10,14 @@ import (
 func fprint(w io.Writer, a ...any) {
 	_, err := fmt.Fprint(w, a...)
 	if err != nil {
-		panic(err)
+		panic(err.Error())
 	}
 }
 
 func PrettyString(slice any) string {
 	val := reflect.ValueOf(slice)
 	if val.Kind() != reflect.Slice {
-		panic(fmt.Errorf("expected slice, got %T", slice))
+		panic(fmt.Sprintf("expected slice, got %T", slice))
 	}
 
 	elemType := val.Type().Elem()
@@ -61,7 +61,7 @@ func PrettyString(slice any) string {
 
 		return sb.String()
 	default:
-		panic(fmt.Errorf("invalid slice type: %T", slice))
+		panic(fmt.Sprintf("invalid slice type: %T", slice))
 	}
 }
 

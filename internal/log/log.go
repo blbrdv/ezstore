@@ -27,7 +27,7 @@ const (
 func getCurrentDir() string {
 	exePath, err := os.Executable()
 	if err != nil {
-		panic(err)
+		panic(err.Error())
 	}
 
 	currentDir := path.Dir(strings.Replace(exePath, "\\", "/", -1))

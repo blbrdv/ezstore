@@ -86,7 +86,7 @@ func prepareDir(elem ...string) string {
 	dir := utils.Join(append(elem, "ezstore")...)
 	err := os.MkdirAll(dir, 0660)
 	if err != nil {
-		panic(fmt.Errorf("can not create directory \"%s\": %s", dir, err.Error()))
+		panic(fmt.Sprintf("can not create directory \"%s\": %s", dir, err.Error()))
 	}
 	return dir
 }
@@ -99,7 +99,7 @@ func getTempDir() string {
 
 	dir, err := os.UserCacheDir()
 	if err != nil {
-		panic(err)
+		panic(err.Error())
 	}
 
 	return prepareDir(dir, "Temp")
