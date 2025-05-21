@@ -31,9 +31,9 @@ ChangesEnvironment=true
 
 ;------------------------------------------------------------------------------
 [Files]
-Source: "output\ezstore.exe"; DestDir: "{app}/bin"; Flags: ignoreversion
-Source: "cmd\README.txt"; DestDir: "{app}"; Flags: ignoreversion
-Source: "cmd\update.ps1"; DestDir: "{app}"; Flags: ignoreversion
+Source: "output\bin\ezstore.exe"; DestDir: "{app}/bin"; Flags: ignoreversion
+Source: "output\README.txt"; DestDir: "{app}"; Flags: ignoreversion
+Source: "output\update.ps1"; DestDir: "{app}"; Flags: ignoreversion
 
 
 ;------------------------------------------------------------------------------
