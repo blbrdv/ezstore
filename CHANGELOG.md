@@ -1,6 +1,12 @@
 # Changelog
 
-## [1.3.1] - 2025-05-21
+## [1.3.2] - 2025-05-21
+
+### Fixed
+
+- Update script
+
+## [1.3.1] - 2025-05-20
 
 ### Fixed
 
@@ -66,6 +72,7 @@
 
 Initial release.
 
+[1.3.2]: https://github.com/blbrdv/ezstore/releases/tag/v1.3.2
 [1.3.1]: https://github.com/blbrdv/ezstore/releases/tag/v1.3.1
 [1.3.0]: https://github.com/blbrdv/ezstore/releases/tag/v1.3.0
 [1.2.0]: https://github.com/blbrdv/ezstore/releases/tag/v1.2.0

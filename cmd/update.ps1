@@ -1,7 +1,11 @@
+Set-StrictMode -Version 3.0;
+$ErrorActionPreference = "Stop";
+trap { Write-Error $_ -ErrorAction Continue; exit 1 }
+
 $ScriptPath = Split-Path -parent $MyInvocation.MyCommand.Definition;
-$ExePath = Join-Path $ScriptPath "ezstore.exe";
+$ExePath = Join-Path (Join-Path $ScriptPath "bin") "ezstore.exe";
 $TempPath = [Environment]::GetFolderPath('LocalApplicationData');
-$InstallerPath = Join-Path $TempPath "ezstore" "ezsetup.exe";
+$InstallerPath = Join-Path (Join-Path $TempPath "ezstore") "ezsetup.exe";
 
 $global:Wait = $true;
 
@@ -21,22 +25,18 @@ if ( -not (Test-Path $ExePath) ) {
     exit 1;
 }
 
-$CurrentVersion = [Version](Get-Item $Path).VersionInfo.ProductVersion;
+$CurrentVersion = [Version](Get-Item $ExePath).VersionInfo.ProductVersion;
 
 Write-Host "Current version: $CurrentVersion";
 
-$Tag = (
-    (Invoke-WebRequest -Uri "https://api.github.com/repos/blbrdv/ezstore/releases/latest").Content
-    | ConvertFrom-Json
-).tag_name;
-
-$LastVersion = [Version]$Tag.Substring(1);
+$Response = (Invoke-WebRequest -Uri "https://api.github.com/repos/blbrdv/ezstore/releases/latest").Content | ConvertFrom-Json;
+$LastVersion = [Version]$Response.tag_name.Substring(1);
 
 Write-Host "Last version: $LastVersion";
 
-if ($LastVersion > $CurrentVersion) {
+if ($LastVersion -gt $CurrentVersion) {
     Write-Host "Update needed!";
-    Invoke-WebRequest -Uri "https://github.com/blbrdv/ezstore/releases/download/$Tag/ezsetup.exe" -OutFile $InstallerPath;
+    Invoke-WebRequest -Uri "https://github.com/blbrdv/ezstore/releases/download/${Response.tag_name}/ezsetup.exe" -OutFile $InstallerPath;
     Start-Process $InstallerPath -Wait;
 } else {
     Write-Host "No update needed.";

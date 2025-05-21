@@ -229,15 +229,21 @@ function Build {
             };
     }
 
-    Exec "Compiling exe" { go build -ldflags="-X main.version=$ProductVersion" -o ".\output\ezstore.exe" ".\cmd" };
+    Exec "Compiling exe" { go build -ldflags="-X main.version=$ProductVersion" -o ".\output\bin\ezstore.exe" ".\cmd" };
+
+    Remove-Winres-Files;
+
+    $DistFiles = Get-ChildItem -Path .\cmd -Exclude "*.go" | %{$_.Name};
+    foreach ($File in $DistFiles) {
+        $Path = ".\cmd\$File"
+        Exec "Copying $Path to output" { Copy-Item -Path $Path -Destination ".\output" }
+    }
 
     Exec "Archiving files" {
-            7z a -bso0 -bd -sse ".\release\ezstore-portable.7z" ".\output\ezstore.exe" ".\cmd\README.txt" ".\cmd\update.ps1"
+            7z a -bso0 -bd -sse ".\release\ezstore-portable.7z" ".\output\bin\ezstore.exe" ".\output\README.txt" ".\output\update.ps1"
         };
 
     Exec "Compiling installer" { iscc /Q "setup.iss" /DPV=$ProductVersion /DFV=$FileVersion };
-
-    Remove-Winres-Files;
 
 }
 
