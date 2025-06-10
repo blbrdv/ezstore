@@ -41,7 +41,7 @@ Examples:
 
 1. Clone project
 2. Install [Golang](https://go.dev/dl/) version `1.24` or later
-3. Run `go get -t .\...` to install dependencies and tools for project
+3. Run `go mod download` to install dependencies and tools for project
 
 ### Automation
 

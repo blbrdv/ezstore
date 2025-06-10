@@ -47,11 +47,7 @@ jobs:
         cache: false
 
     - name: Download project dependencies
-      run: go get .\...
-
-    - name: Setup go-winres@latest
-      run: |
-        go install "github.com/tc-hib/go-winres@latest"
+      run: go mod download
 
     - name: Set Inno Setup info
       id: iscc-info

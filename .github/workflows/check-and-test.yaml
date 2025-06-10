@@ -36,11 +36,7 @@ jobs:
           cache: false
 
       - name: Download project dependencies
-        run: go get -t .\...
-
-      - name: Setup staticcheck@latest
-        run: |
-          go install "honnef.co/go/tools/cmd/staticcheck@latest"
+        run: go mod download
 
       - name: Check project
         run: .\run.ps1 check
