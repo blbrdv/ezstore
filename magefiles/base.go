@@ -71,7 +71,16 @@ func Check() error {
 	}
 
 	println("Checking code format")
-	return gofmt()
+	out, err := sh.Output("gofmt", "-l", "-s", ".")
+	if err != nil {
+		return err
+	}
+	if out == "" {
+		return nil
+	}
+
+	println(out)
+	return fmt.Errorf("files must be formatted")
 }
 
 // Test run unit tests.

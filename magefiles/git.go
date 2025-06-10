@@ -2,8 +2,9 @@ package main
 
 import (
 	"fmt"
-	"github.com/magefile/mage/sh"
 	"strings"
+
+	"github.com/magefile/mage/sh"
 )
 
 func getLastTag() (string, error) {
