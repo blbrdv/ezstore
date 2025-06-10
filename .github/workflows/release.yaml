@@ -19,52 +19,14 @@ jobs:
     steps:
     - uses: actions/checkout@v4
 
-    - uses: kenchan0130/actions-system-info@v1.3.1
-      id: system-info
-
-    - name: Set Inno Setup path
-      id: iscc-path
-      run: |
-        $Path = "${env:TEMP}\inno"
-        echo "Path: $Path"
-        echo "path=$Path" >> $ENV:GITHUB_OUTPUT
-
-    - name: Restore cache
-      uses: actions/cache/restore@v4
-      with:
-        path: |
-          ~\go
-          ~\AppData\Local\go-build
-          ${{ steps.iscc-path.outputs.path }}
-        key: ${{ runner.os }}-${{ steps.system-info.outputs.release }}-go-${{ github.job }}-${{ hashFiles( './go.sum', './iscc' ) }}
-        restore-keys: |
-          ${{ runner.os }}-${{ steps.system-info.outputs.release }}-go-${{ github.job }}-
-
     - name: Setup GO
       uses: actions/setup-go@v5
       with:
         go-version-file: 'go.mod'
-        cache: false
-
-    - name: Download project dependencies
-      run: go mod download
-
-    - name: Set Inno Setup info
-      id: iscc-info
-      run: |
-        $Test = "${{ steps.iscc-path.outputs.path }}" | Test-Path
-        $Result = ([string]$Test).ToLower()
-        echo "Installed: $Result"
-        echo "is-installed=$Result" >> $ENV:GITHUB_OUTPUT
-        $Version = cat .\iscc
-        echo "Version: $Version"
-        echo "version=$Version" >> $ENV:GITHUB_OUTPUT
+        cache: true
 
     - name: Download Inno Setup
       uses: pwall2222/inno-setup-download@v0.0.8
-      if: ${{ steps.iscc-info.outputs.is-installed != 'true' }}
-      with:
-        version: ${{ steps.iscc-info.outputs.version }}
 
     - name: Build project
       run: .\run.ps1 build
@@ -78,12 +40,3 @@ jobs:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       with:
         args: release/*
-
-    - name: Restore cache
-      uses: actions/cache/save@v4
-      with:
-        path: |
-          ~\go
-          ~\AppData\Local\go-build
-          ${{ steps.iscc-path.outputs.path }}
-        key: ${{ runner.os }}-${{ steps.system-info.outputs.release }}-go-${{ github.job }}-${{ hashFiles( './go.sum', './iscc' ) }}
