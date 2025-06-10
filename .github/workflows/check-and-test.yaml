@@ -2,6 +2,8 @@ name: Check and test
 
 on:
   pull_request:
+    branches:
+      - 'main'
     paths-ignore:
       - '.vscode/**'
       - '.idea/**'
