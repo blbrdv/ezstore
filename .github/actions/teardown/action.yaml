@@ -14,5 +14,6 @@ runs:
     - name: Restore cache
       uses: actions/cache/save@v4
       with:
-        path: ${{ inputs.path }}
+        path: |
+          ${{ inputs.path }}
         key: ${{ inputs.key }}

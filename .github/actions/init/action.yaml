@@ -65,7 +65,8 @@ runs:
     - name: Restore cache
       uses: actions/cache/restore@v4
       with:
-        path: ${{ steps.params.path }}
+        path: |
+          ${{ steps.params.path }}
         key: ${{ steps.params.key }}
         restore-keys: |
           ${{ steps.params.restore-key }}
