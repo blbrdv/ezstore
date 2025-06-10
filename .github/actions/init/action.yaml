@@ -27,7 +27,7 @@ runs:
       id: params
       run: |
         $CachePath = "~\go`n~\AppData\Local\go-build";
-        $AdditionalPaths = ${{ inputs.path }};
+        $AdditionalPaths = "${{ inputs.path }}";
         if ($AdditionalPaths -ne "") {
           $AdditionalPaths = $AdditionalPaths.Replace("\n", "`n");
           $CachePath = "$CachePath`n$AdditionalPaths";
@@ -37,7 +37,7 @@ runs:
         echo "path=$CachePath" >> $ENV:GITHUB_OUTPUT;
 
         $Files = @( ".\go.sum" );
-        $AdditionalFiles = ${{ inputs.files }};
+        $AdditionalFiles = "${{ inputs.files }}";
         if ($AdditionalFiles -eq "") {
           $Hash = Get-FileHash -Path $Files | %{$_.Hash};
         } else {
