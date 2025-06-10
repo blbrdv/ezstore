@@ -5,11 +5,13 @@ go 1.24.0
 toolchain go1.24.2
 
 require (
+	github.com/Masterminds/semver/v3 v3.3.1
 	github.com/antchfx/xmlquery v1.4.4
 	github.com/google/go-cmp v0.7.0
 	github.com/gookit/color v1.5.4
 	github.com/hnakamur/go-powershell v0.1.0
 	github.com/imroc/req/v3 v3.52.1
+	github.com/magefile/mage v1.15.0
 	github.com/urfave/cli/v3 v3.3.1
 	github.com/ztrue/tracerr v0.4.0
 	golang.org/x/net v0.40.0
@@ -17,7 +19,6 @@ require (
 
 require (
 	github.com/BurntSushi/toml v1.4.1-0.20240526193622-a339e1f7089c // indirect
-	github.com/Masterminds/semver/v3 v3.3.1 // indirect
 	github.com/andybalholm/brotli v1.1.1 // indirect
 	github.com/antchfx/xpath v1.3.3 // indirect
 	github.com/cloudflare/circl v1.6.1 // indirect
@@ -29,7 +30,6 @@ require (
 	github.com/hashicorp/go-multierror v1.1.1 // indirect
 	github.com/icholy/digest v1.1.0 // indirect
 	github.com/klauspost/compress v1.18.0 // indirect
-	github.com/magefile/mage v1.15.0 // indirect
 	github.com/nfnt/resize v0.0.0-20180221191011-83c6a9932646 // indirect
 	github.com/onsi/ginkgo/v2 v2.23.4 // indirect
 	github.com/quic-go/qpack v0.5.1 // indirect
