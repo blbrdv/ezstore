@@ -1,0 +1,81 @@
+name: 'Init'
+
+inputs:
+  path:
+    description: 'Additional paths to cache files'
+    required: false
+  files:
+    description: 'Additional files to hash'
+    required: false
+
+outputs:
+  path:
+    description: "Path to cache files"
+    value: ${{ steps.params.outputs.path }}
+  key:
+    description: "Key for cache"
+    value: ${{ steps.params.outputs.key }}
+
+runs:
+  using: "composite"
+  steps:
+
+    - uses: kenchan0130/actions-system-info@v1.3.1
+      id: system-info
+
+    - shell: pwsh
+      id: params
+      run: |
+        $CachePath = "~\go`n~\AppData\Local\go-build";
+        $AdditionalPaths = ${{ inputs.path }};
+        if ($AdditionalPaths -ne "") {
+          $AdditionalPaths = $AdditionalPaths.Replace("\n", "`n");
+          $CachePath = "$CachePath`n$AdditionalPaths";
+        }
+        echo "Cache paths:";
+        echo $CachePath;
+        echo "path=$CachePath" >> $ENV:GITHUB_OUTPUT;
+
+        $Files = @( ".\go.sum" );
+        $AdditionalFiles = ${{ inputs.files }};
+        if ($AdditionalFiles -eq "") {
+          $Hash = Get-FileHash -Path $Files | %{$_.Hash};
+        } else {
+          foreach ($File in $AdditionalFiles.Split("\n")) {
+            $Files += $File;
+          }
+          $Hashes = Get-FileHash -Path $Files;
+          foreach ($FileHash in $Hashes) {
+            $stringAsStream = [System.IO.MemoryStream]::new();
+            $writer = [System.IO.StreamWriter]::new($stringAsStream);
+            $writer.Write($Hash.Hash + $FileHash.Hash);
+            $writer.Flush();
+            $stringAsStream.Position = 0;
+
+            $Hash = Get-FileHash -InputStream $stringAsStream | %{$_.Hash};
+          }
+        }
+        $Key = "${{ runner.os }}-${{ steps.system-info.outputs.release }}-go-${{ github.job }}-$Hash";
+        echo "Key: $Key"
+        echo "key=$Key" >> $ENV:GITHUB_OUTPUT;
+        $RestoreKey = "${{ runner.os }}-${{ steps.system-info.outputs.release }}-go-${{ github.job }}";
+        echo "RestoreKey: $RestoreKey"
+        echo "restore-key=$RestoreKey" >> $ENV:GITHUB_OUTPUT;
+
+    - name: Restore cache
+      uses: actions/cache/restore@v4
+      with:
+        path: ${{ steps.params.path }}
+        key: ${{ steps.params.key }}
+        restore-keys: |
+          ${{ steps.params.restore-key }}
+
+    - name: Setup GO
+      uses: actions/setup-go@v5
+      with:
+        go-version-file: 'go.mod'
+        cache: false
+
+    - name: Download project dependencies
+      shell: pwsh
+      run: go mod download
