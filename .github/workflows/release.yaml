@@ -19,7 +19,7 @@ jobs:
     steps:
     - uses: actions/checkout@v4
 
-    - uses: kenchan0130/actions-system-info@master
+    - uses: kenchan0130/actions-system-info@v1.3.1
       id: system-info
 
     - name: Set Inno Setup path
@@ -67,6 +67,9 @@ jobs:
 
     - name: Build project
       run: .\run.ps1 build
+
+    - name: Pack project
+      run: .\run.ps1 pack
 
     - name: Release project
       uses: anton-yurchenko/git-release@v6
