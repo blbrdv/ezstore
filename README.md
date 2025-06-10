@@ -39,32 +39,17 @@ Examples:
 
 ## Development
 
-### Requirements
-
-[Golang](https://go.dev/dl/) version `1.24` or later must be installed
-
-#### Lint
-
-[staticcheck](https://staticcheck.dev/) must be installed
-
-#### Build 
-
-1. [go-winres](https://github.com/tc-hib/go-winres) must be installed
-2. [7-Zip](https://7-zip.org/) must be installed and put in $PATH
-3. [Inno Setup 6](https://jrsoftware.org/isinfo.php) must be installed and put in $PATH
+1. Clone project
+2. Install [Golang](https://go.dev/dl/) version `1.24` or later
+3. Run `go mod download` to install dependencies and tools for project
 
 ### Automation
 
-Use `.\run.ps1 <task>`.
+Use `.\run.ps1 -l` to see available tasks.
 
-Available tasks:
-- `clean` - removes build directories and files
-- `check` - run analysis for code
-- `test` - run unit tests
-- `deps` - check for dependency updates
-- `format` - format go files
-- `build` - build cli and compile installer
-- `rebuild` - run clean and build tasks
+Use `.\run.ps1 -h <task>` to see task description.
+
+Use `.\run.ps1 [-v] <task>` to run task. Flag `-v` sets verbose output. 
 
 ## License
 

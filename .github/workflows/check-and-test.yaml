@@ -2,6 +2,8 @@ name: Check and test
 
 on:
   pull_request:
+    branches:
+      - 'main'
     paths-ignore:
       - '.vscode/**'
       - '.idea/**'
@@ -16,42 +18,17 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
-      - uses: kenchan0130/actions-system-info@master
-        id: system-info
-
-      - name: Restore cache
-        uses: actions/cache/restore@v4
-        with:
-          path: |
-            ~\go
-            ~\AppData\Local\go-build
-          key: ${{ runner.os }}-${{ steps.system-info.outputs.release }}-go-${{ github.job }}-${{ hashFiles( './go.sum' ) }}
-          restore-keys: |
-            ${{ runner.os }}-${{ steps.system-info.outputs.release }}-go-${{ github.job }}-
-
       - name: Setup GO
         uses: actions/setup-go@v5
         with:
           go-version-file: 'go.mod'
-          cache: false
+          cache: true
 
       - name: Download project dependencies
-        run: go get -t .\...
-
-      - name: Setup staticcheck@latest
-        run: |
-          go install "honnef.co/go/tools/cmd/staticcheck@latest"
+        run: go mod download -x
 
       - name: Check project
         run: .\run.ps1 check
 
       - name: Run unit tests
         run: .\run.ps1 test
-
-      - name: Restore cache
-        uses: actions/cache/save@v4
-        with:
-          path: |
-            ~\go
-            ~\AppData\Local\go-build
-          key: ${{ runner.os }}-${{ steps.system-info.outputs.release }}-go-${{ github.job }}-${{ hashFiles( './go.sum' ) }}
