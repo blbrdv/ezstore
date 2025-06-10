@@ -48,6 +48,8 @@ func Clean() error {
 
 // Format prettifies go source code.
 // Runs "go fmt" on all go files.
+//
+//goland:noinspection GoUnusedExportedFunction
 func Format() error {
 	printf(`Formatting code in "%s"`, goSRC)
 	return run("go", "fmt", goSRC)
@@ -94,6 +96,8 @@ var depRegexp = regexp.MustCompile(`^(\S+) v(\S+) v(\S+)$`)
 // Deps check for dependencies updates.
 // 1. Only direct dependencies.
 // 2. At least minor update.
+//
+//goland:noinspection GoUnusedExportedFunction
 func Deps() error {
 	// get list of dependencies that
 	// 1. need an update

@@ -4,6 +4,8 @@ import "github.com/magefile/mage/mg"
 
 // Retest run "check" and "test" steps.
 // Only for local development.
+//
+//goland:noinspection GoUnusedExportedFunction
 func Retest() {
 	mg.Deps(Check)
 	mg.Deps(Test)
@@ -11,6 +13,8 @@ func Retest() {
 
 // Rebuild run "clean" and "build" steps.
 // Only for local development.
+//
+//goland:noinspection GoUnusedExportedFunction
 func Rebuild() {
 	mg.Deps(Clean)
 	mg.Deps(Build)
@@ -18,6 +22,8 @@ func Rebuild() {
 
 // Repack run "clean", "build" and "pack" steps.
 // Only for local development.
+//
+//goland:noinspection GoUnusedExportedFunction
 func Repack() {
 	mg.Deps(Clean)
 	mg.Deps(Build)
