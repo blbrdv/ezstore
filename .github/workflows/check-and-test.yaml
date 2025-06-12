@@ -5,9 +5,10 @@ on:
     branches:
       - 'main'
     paths-ignore:
-      - '.vscode/**'
       - '.idea/**'
+      - '.vscode/**'
       - 'icons/**'
+      - 'tests/**'
 
 jobs:
   check-and-test:
