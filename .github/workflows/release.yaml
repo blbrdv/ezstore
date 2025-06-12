@@ -9,6 +9,8 @@ on:
 
 jobs:
   release:
+    if: github.ref == 'ref/tags/v*'
+
     runs-on: windows-latest
 
     permissions:
