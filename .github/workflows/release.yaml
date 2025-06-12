@@ -2,15 +2,11 @@ name: Release
 
 on:
   push:
-    branches:
-      - 'main'
     tags:
       - "*"
 
 jobs:
   release:
-    if: github.ref == 'ref/tags/v*'
-
     name: Build and release project
 
     runs-on: windows-latest
