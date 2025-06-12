@@ -11,12 +11,12 @@ jobs:
   release:
     if: github.ref == 'ref/tags/v*'
 
+    name: Build and release project
+
     runs-on: windows-latest
 
     permissions:
       contents: write
-
-    name: Build and release project
 
     steps:
     - uses: actions/checkout@v4

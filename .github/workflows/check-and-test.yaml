@@ -12,9 +12,9 @@ on:
 
 jobs:
   check-and-test:
-    runs-on: windows-latest
-
     name: Check and test project
+
+    runs-on: windows-latest
 
     steps:
       - uses: actions/checkout@v4
