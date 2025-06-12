@@ -38,6 +38,8 @@ jobs:
   test:
     name: Test
 
+    needs: build
+
     strategy:
       fail-fast: true
       matrix:
