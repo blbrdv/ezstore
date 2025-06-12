@@ -8,6 +8,8 @@ on:
 
 jobs:
   test:
+    name: Test app
+
     strategy:
       fail-fast: true
       matrix:
@@ -15,12 +17,10 @@ jobs:
 
     runs-on: ${{ matrix.os }}
 
-    name: Test app
-
     steps:
       - uses: actions/checkout@v4
         with:
-          fetch-tags: true
+          fetch-depth: 0
 
       - name: Setup GO
         uses: actions/setup-go@v5
