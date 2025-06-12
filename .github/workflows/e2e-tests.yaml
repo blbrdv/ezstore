@@ -1,0 +1,36 @@
+name: E2e tests
+
+on:
+  workflow_dispatch:
+  push:
+    branches:
+      - "main"
+
+jobs:
+  test:
+    strategy:
+      fail-fast: true
+      matrix:
+        os: [ windows-2025, windows-2022, windows-11-arm ]
+
+    runs-on: ${{ matrix.os }}
+
+    name: Test app
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Setup GO
+        uses: actions/setup-go@v5
+        with:
+          go-version-file: 'go.mod'
+          cache: true
+
+      - name: Download project dependencies
+        run: go mod download -x
+
+      - name: Build project
+        run: .\run.ps1 build
+
+      - name: Test
+        run: .\tests\install.ps1
