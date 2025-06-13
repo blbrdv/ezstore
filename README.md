@@ -1,6 +1,7 @@
 # ![icon](/icons/icon16.png) ezstore
 ![GitHub License](https://img.shields.io/github/license/blbrdv/ezstore)
 ![GitHub Release](https://img.shields.io/github/v/release/blbrdv/ezstore)
+[![E2e tests](https://github.com/blbrdv/ezstore/actions/workflows/e2e-tests.yaml/badge.svg)](https://github.com/blbrdv/ezstore/actions/workflows/e2e-tests.yaml)
 ![GitHub Downloads (all assets, all releases)](https://img.shields.io/github/downloads/blbrdv/ezstore/total)
 
 Easy install apps from MS Store.
