@@ -5,10 +5,17 @@ on:
     branches:
       - 'main'
     paths-ignore:
+      - '.github/**'
+      - '!.github/workflows/check-and-test.yaml'
       - '.idea/**'
       - '.vscode/**'
       - 'icons/**'
+      - 'innosetup/**'
       - 'tests/**'
+      - '*.md'
+      - 'LICENSE'
+      - 'setup.iss'
+      - 'winres.json'
 
 jobs:
   check-and-test:
