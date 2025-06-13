@@ -6,12 +6,9 @@ on:
     branches:
       - "main"
     paths-ignore:
-      - '.github/**'
+      - '.**' # dot-dirs and dotfiles
       - '!.github/workflows/e2e-tests.yaml'
-      - '.idea/**'
-      - '.vscode/**'
       - 'innosetup/**'
-      - '.*' # dotfiles
       - '*.md'
       - 'LICENSE'
       - '*.iss'
