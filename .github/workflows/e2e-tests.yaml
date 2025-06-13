@@ -44,16 +44,24 @@ jobs:
           path: output
 
   test:
-    name: Test
-
-    needs: build
-
     strategy:
       fail-fast: true
       matrix:
-        os: [ windows-2025, windows-2022, windows-11-arm ]
+        target:
+          - os: windows-2025
+            scenario: install
+          - os: windows-2025
+            scenario: not-found
+          - os: windows-2025
+            scenario: no-color
+          - os: windows-2022
+            scenario: install
+          - os: windows-11-arm
+            scenario: install
 
-    runs-on: ${{ matrix.os }}
+    runs-on: ${{ matrix.target.os }}
+
+    name: ${{ matrix.target.scenario }} (${{ matrix.target.os }})
 
     steps:
       - uses: actions/checkout@v4
@@ -64,5 +72,5 @@ jobs:
           name: build
           path: output
 
-      - name: Test app
-        run: .\tests\install.ps1
+      - name: Running scenario
+        run: .\tests\${{ matrix.target.scenario }}.ps1
