@@ -1,5 +1,15 @@
 # Changelog
 
+## [1.3.3] - 2025-06-13
+
+### Fixed
+
+- Files location in portable version [#25](https://github.com/blbrdv/ezstore/issues/25).
+
+### Changed
+
+- `golang.org/x/net` bump from `v0.40.0` to `v0.41.0`
+
 ## [1.3.2] - 2025-05-21
 
 ### Fixed
@@ -72,6 +82,7 @@
 
 Initial release.
 
+[1.3.3]: https://github.com/blbrdv/ezstore/releases/tag/v1.3.3
 [1.3.2]: https://github.com/blbrdv/ezstore/releases/tag/v1.3.2
 [1.3.1]: https://github.com/blbrdv/ezstore/releases/tag/v1.3.1
 [1.3.0]: https://github.com/blbrdv/ezstore/releases/tag/v1.3.0

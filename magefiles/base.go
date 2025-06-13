@@ -221,7 +221,7 @@ func Pack() error {
 	}
 
 	println("Archiving files")
-	err = run("7z", "a", "-bso0", "-bd", "-sse", "./release/ezstore-portable.7z", "./output/bin/ezstore.exe", "./output/README.txt", "./output/update.ps1")
+	err = run("7z", "a", "-bso0", "-bd", "-sse", "./release/ezstore-portable.7z", "./output/*")
 	if err != nil {
 		return err
 	}
