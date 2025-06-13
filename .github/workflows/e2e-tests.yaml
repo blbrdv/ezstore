@@ -44,6 +44,8 @@ jobs:
           path: output
 
   test:
+    needs: build
+
     strategy:
       fail-fast: true
       matrix:
