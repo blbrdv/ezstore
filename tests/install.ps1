@@ -2,22 +2,20 @@ Set-StrictMode -Version 3.0;
 $ErrorActionPreference = "Stop";
 trap { Write-Error $_ -ErrorAction Continue; exit 1 };
 
-$Id = "9mvsm3j7zj7c";
-$Name = "PeterEtelej.TreeCLI";
-$Version = "1.1.0.0";
+. ".\tests\_core.ps1";
 
-.\output\bin\ezstore.exe install $Id --ver $Version --verbosity m;
+Install $Data.Id $Data.Version;
 
 Import-Module -Name Appx -UseWindowsPowerShell -WarningAction SilentlyContinue;
 
-$Package = Get-AppxPackage -Name $Name;
+$Package = Get-AppxPackage -Name $Data.Name;
 
 if ( $null -eq $Package ) {
-    throw "Package $Name not installed";
+    throw "Package $($Data.Name) not installed";
 }
 
-if ( $Package.Version -ne $Version ) {
-    throw "Wrong version installed. Expected $Version, actual: $($Package.Version).";
+if ( $Package.Version -ne $Data.Version ) {
+    throw "Wrong version installed. Expected $($Data.Version), actual: $($Package.Version)."
 }
 
-Write-Host "Package '$Name' ($Id) $Version successfully installed!";
+Write-Host "Test passed!";
