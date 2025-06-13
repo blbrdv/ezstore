@@ -6,9 +6,16 @@ on:
     branches:
       - "main"
     paths-ignore:
+      - '.github/**'
+      - '!.github/workflows/e2e-tests.yaml'
       - '.idea/**'
       - '.vscode/**'
-      - 'icons/**'
+      - 'innosetup/**'
+      - '.*' # dotfiles
+      - '*.md'
+      - 'LICENSE'
+      - '*.iss'
+      - '*.conf'
 
 jobs:
   build:
