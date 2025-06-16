@@ -72,6 +72,12 @@ func Check() error {
 		return err
 	}
 
+	println("Checking code for unchecked errors")
+	err = tool("errcheck", "-asserts", "-blank", "-ignoretests", goSRC)
+	if err != nil {
+		return err
+	}
+
 	println("Checking code problems")
 	err = run("go", "vet", goSRC)
 	if err != nil {
