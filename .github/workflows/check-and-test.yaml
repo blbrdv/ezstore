@@ -32,6 +32,9 @@ jobs:
           go-version-file: 'go.mod'
           cache: true
 
+      - name: Security check
+        run: .\run.ps1 sec
+
       - name: Check project
         run: .\run.ps1 check
 

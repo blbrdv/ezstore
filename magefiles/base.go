@@ -15,6 +15,7 @@ import (
 var (
 	winresFiles = []string{"rsrc_windows_386.syso", "rsrc_windows_amd64.syso"}
 	goSRC       = `.\...`
+	goMod       = `go.mod`
 )
 
 func removeWinresFiles() error {
@@ -53,6 +54,29 @@ func Clean() error {
 func Format() error {
 	printf(`Formatting code in "%s"`, goSRC)
 	return run("go", "fmt", goSRC)
+}
+
+// Sec run checks for known security vulnerabilities and license violations.
+// Uses osv-scanner.
+//
+//goland:noinspection GoUnusedExportedFunction
+func Sec() error {
+	var err error
+	lockfile := fmt.Sprintf("--lockfile=%s", goMod)
+
+	println("Scanning dependencies for license violations")
+	err = licensesScan(lockfile)
+	if err != nil {
+		return err
+	}
+
+	println("Scanning code for vulnerabilities")
+	err = tool("osv-scanner", "scan", "source", lockfile)
+	if err != nil {
+		return err
+	}
+
+	return nil
 }
 
 // Check run multiple checks on go source code.
