@@ -32,9 +32,6 @@ jobs:
           go-version-file: 'go.mod'
           cache: true
 
-      - name: Download project dependencies
-        run: go mod download -x
-
       - name: Check project
         run: .\run.ps1 check
 
