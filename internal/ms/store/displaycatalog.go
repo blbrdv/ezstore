@@ -3,6 +3,7 @@ package store
 import (
 	"fmt"
 	"github.com/blbrdv/ezstore/internal/ms"
+	"net/http"
 	"strings"
 )
 
@@ -78,7 +79,7 @@ func getAppInfo(id string, locale *ms.Locale) (*apps, string, error) {
 	if err != nil {
 		return nil, "", fmt.Errorf("can not get app info: GET %s: %s", url, err.Error())
 	}
-	if resp.StatusCode == 404 {
+	if resp.StatusCode == http.StatusNotFound {
 		return nil, "", fmt.Errorf(`product with id "%s" and locale "%s" not found`, id, locale.String())
 	}
 	if resp.IsErrorState() {

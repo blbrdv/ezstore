@@ -6,6 +6,7 @@ import (
 	"github.com/blbrdv/ezstore/internal/ms"
 	"github.com/blbrdv/ezstore/internal/ms/windows"
 	"github.com/blbrdv/ezstore/internal/utils"
+	"net/http"
 	"os"
 	"regexp"
 )
@@ -20,7 +21,7 @@ func getProductName(url string) (string, error) {
 	if err != nil {
 		return "", fmt.Errorf("fetching product name failed: HEAD %s: %s", url, err.Error())
 	}
-	if res.StatusCode != 200 {
+	if res.StatusCode != http.StatusOK {
 		return "", fmt.Errorf("fetching product name failed: HEAD %s: server responded with error: %s", url, res.Status)
 	}
 
