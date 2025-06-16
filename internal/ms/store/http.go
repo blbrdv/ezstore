@@ -83,7 +83,10 @@ func traceResponse(traceFile *windows.File, res *req.Response) {
 		}
 	}
 
-	bodyRaw, _ := io.ReadAll(res.Body)
+	bodyRaw, err := io.ReadAll(res.Body)
+	if err != nil {
+		panic(err.Error())
+	}
 	if len(bodyRaw) > 0 {
 		utils.Fprintln(&sb, "< Body:")
 
@@ -116,7 +119,10 @@ func getHTTPClient() *req.Client {
 		SetCommonHeader("Content-Encoding", "Encoding.UTF8").
 		SetCommonRetryCount(5).
 		SetCommonRetryInterval(func(_ *req.Response, attempt int) time.Duration {
-			result, _ := time.ParseDuration(fmt.Sprintf("%ds", 5*attempt))
+			result, err := time.ParseDuration(fmt.Sprintf("%ds", 5*attempt))
+			if err != nil {
+				panic(err.Error())
+			}
 			return result
 		}).
 		SetCommonRetryHook(func(resp *req.Response, err error) {
