@@ -60,6 +60,12 @@ func Format() error {
 func Check() error {
 	var err error
 
+	println("Checking possibilities for use Go standard library")
+	err = tool("usestdlibvars", goSRC)
+	if err != nil {
+		return err
+	}
+
 	println("Checking code problems")
 	err = run("go", "vet", goSRC)
 	if err != nil {

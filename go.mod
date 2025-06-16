@@ -36,6 +36,7 @@ require (
 	github.com/quic-go/quic-go v0.51.0 // indirect
 	github.com/refraction-networking/utls v1.7.0 // indirect
 	github.com/russross/blackfriday/v2 v2.1.0 // indirect
+	github.com/sashamelentyev/usestdlibvars v1.29.0 // indirect
 	github.com/tc-hib/go-winres v0.3.3 // indirect
 	github.com/tc-hib/winres v0.2.1 // indirect
 	github.com/urfave/cli/v2 v2.25.7 // indirect
@@ -56,6 +57,7 @@ require (
 
 tool (
 	github.com/magefile/mage
+	github.com/sashamelentyev/usestdlibvars
 	github.com/tc-hib/go-winres
 	honnef.co/go/tools/cmd/staticcheck
 )
