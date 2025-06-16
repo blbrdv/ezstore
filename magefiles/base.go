@@ -1,7 +1,6 @@
 package main
 
 import (
-	"bufio"
 	"fmt"
 	"github.com/Masterminds/semver/v3"
 	"github.com/magefile/mage/sh"
@@ -145,15 +144,13 @@ func Deps() error {
 	// 1. need an update
 	// 2. not indirect
 	// in format "<name> <current version> <new version>"
-	list, err := sh.Output("go", "list", "-m", "-u", "-f", "{{if not (or .Indirect .Main)}}{{with .Update}}{{$.Path}} {{$.Version}} {{.Version}}{{end}}{{end}}", "all")
+	list, err := goList("{{if not (or .Indirect .Main)}}{{with .Update}}{{$.Path}} {{$.Version}} {{.Version}}{{end}}{{end}}")
 	if err != nil {
 		return err
 	}
 
 	var depsToUpdate []string
-	scanner := bufio.NewScanner(strings.NewReader(list))
-	for scanner.Scan() {
-		dep := scanner.Text()
+	for _, dep := range list {
 		match := depRegexp.FindStringSubmatch(dep)
 		if len(match) != 4 {
 			continue
@@ -172,9 +169,6 @@ func Deps() error {
 			(newVersion.Major() == currentVersion.Major() && newVersion.Minor() > currentVersion.Minor()) {
 			depsToUpdate = append(depsToUpdate, dep)
 		}
-	}
-	if err = scanner.Err(); err != nil {
-		return err
 	}
 	if len(depsToUpdate) > 0 {
 		println(strings.Join(depsToUpdate, "\n"))

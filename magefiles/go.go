@@ -9,6 +9,15 @@ import (
 	"strings"
 )
 
+func goList(format string) ([]string, error) {
+	output, err := sh.Output("go", "list", "-m", "-u", "-f", format, "all")
+	if err != nil {
+		return []string{}, err
+	}
+
+	return strings.Split(output, "\n"), nil
+}
+
 var allowedLicenses = []string{
 	"0BSD",
 	"MIT",
@@ -52,11 +61,10 @@ func licensesScan(lockfile string) error {
 	}
 	licenses := fmt.Sprintf(`--licenses=%s`, sb.String())
 
-	output, err = sh.Output("go", "list", "-m", "-u", "-f", "{{if not (or .Indirect .Main)}}{{.Path}}{{end}}", "all")
+	packages, err := goList("{{if not (or .Indirect .Main)}}{{.Path}}{{end}}")
 	if err != nil {
 		return err
 	}
-	packages := strings.Split(output, "\n")
 
 	output, err = sh.Output("go", "tool", `-modfile=magefiles\go.mod`, "osv-scanner", licenses, lockfile)
 	if err != nil && !(strings.Contains(output, "NO. OF PACKAGE VERSIONS")) {
