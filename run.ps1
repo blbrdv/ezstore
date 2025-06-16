@@ -2,9 +2,9 @@ Set-StrictMode -Version 3.0;
 $ErrorActionPreference = "Stop";
 trap { Write-Error $_ -ErrorAction Continue; exit 1 };
 
-cd "magefiles"
+Set-Location "magefiles"
 & go mod download -x
-cd ..
+Set-Location ..
 
 & go mod download -x
 

@@ -10,9 +10,9 @@ $Actual = Install $Id "1.0.0.0";
 $Actual = $Actual -replace $ColorRegexp;
 
 if ( $Actual -match $Expected ) {
-    Write-Host "Test passed!";
+    Write-Output "Test passed!";
     exit 0;
 }
 
-Write-Host "Expected (regexp): '$Expected'";
+Write-Output "Expected (regexp): '$Expected'";
 throw 'Incorrect app output.';

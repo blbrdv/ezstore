@@ -20,26 +20,26 @@ function Wait {
 }
 
 if ( -not (Test-Path $ExePath) ) {
-    Write-Host "Error: $ExePath not found";
+    Write-Output "Error: $ExePath not found";
     Wait;
     exit 1;
 }
 
 $CurrentVersion = [Version](Get-Item $ExePath).VersionInfo.ProductVersion;
 
-Write-Host "Current version: $CurrentVersion";
+Write-Output "Current version: $CurrentVersion";
 
 $Response = (Invoke-WebRequest -Uri "https://api.github.com/repos/blbrdv/ezstore/releases/latest").Content | ConvertFrom-Json;
 $LastVersion = [Version]$Response.tag_name.Substring(1);
 
-Write-Host "Last version: $LastVersion";
+Write-Output "Last version: $LastVersion";
 
 if ($LastVersion -gt $CurrentVersion) {
-    Write-Host "Update needed!";
+    Write-Output "Update needed!";
     Invoke-WebRequest -Uri "https://github.com/blbrdv/ezstore/releases/download/${Response.tag_name}/ezsetup.exe" -OutFile $InstallerPath;
     Start-Process $InstallerPath -Wait;
 } else {
-    Write-Host "No update needed.";
+    Write-Output "No update needed.";
 }
 
 Wait;
