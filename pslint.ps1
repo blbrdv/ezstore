@@ -2,7 +2,11 @@ Set-StrictMode -Version 3.0;
 $ErrorActionPreference = "Stop";
 trap { Write-Error $_ -ErrorAction Continue; exit 1 };
 
-Install-Module -Name PSScriptAnalyzer;
+if ( Test-Path env:GITHUB_ACTIONS ) {
+    Install-Module -Name PSScriptAnalyzer -Force;
+} else {
+    Install-Module -Name PSScriptAnalyzer;
+}
 
 $Settings = @{
     ExcludeRules = @(
