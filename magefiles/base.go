@@ -1,7 +1,6 @@
 package main
 
 import (
-	"bufio"
 	"fmt"
 	"github.com/Masterminds/semver/v3"
 	"github.com/magefile/mage/sh"
@@ -15,6 +14,7 @@ import (
 var (
 	winresFiles = []string{"rsrc_windows_386.syso", "rsrc_windows_amd64.syso"}
 	goSRC       = `.\...`
+	goMod       = `go.mod`
 )
 
 func removeWinresFiles() error {
@@ -53,6 +53,29 @@ func Clean() error {
 func Format() error {
 	printf(`Formatting code in "%s"`, goSRC)
 	return run("go", "fmt", goSRC)
+}
+
+// Sec run checks for known security vulnerabilities and license violations.
+// Uses osv-scanner.
+//
+//goland:noinspection GoUnusedExportedFunction
+func Sec() error {
+	var err error
+	lockfile := fmt.Sprintf("--lockfile=%s", goMod)
+
+	println("Scanning dependencies for license violations")
+	err = licensesScan(lockfile)
+	if err != nil {
+		return err
+	}
+
+	println("Scanning code for vulnerabilities")
+	err = tool("osv-scanner", "scan", "source", lockfile)
+	if err != nil {
+		return err
+	}
+
+	return nil
 }
 
 // Check run multiple checks on go source code.
@@ -121,15 +144,13 @@ func Deps() error {
 	// 1. need an update
 	// 2. not indirect
 	// in format "<name> <current version> <new version>"
-	list, err := sh.Output("go", "list", "-m", "-u", "-f", "{{if not (or .Indirect .Main)}}{{with .Update}}{{$.Path}} {{$.Version}} {{.Version}}{{end}}{{end}}", "all")
+	list, err := goList("{{if not (or .Indirect .Main)}}{{with .Update}}{{$.Path}} {{$.Version}} {{.Version}}{{end}}{{end}}")
 	if err != nil {
 		return err
 	}
 
 	var depsToUpdate []string
-	scanner := bufio.NewScanner(strings.NewReader(list))
-	for scanner.Scan() {
-		dep := scanner.Text()
+	for _, dep := range list {
 		match := depRegexp.FindStringSubmatch(dep)
 		if len(match) != 4 {
 			continue
@@ -148,9 +169,6 @@ func Deps() error {
 			(newVersion.Major() == currentVersion.Major() && newVersion.Minor() > currentVersion.Minor()) {
 			depsToUpdate = append(depsToUpdate, dep)
 		}
-	}
-	if err = scanner.Err(); err != nil {
-		return err
 	}
 	if len(depsToUpdate) > 0 {
 		println(strings.Join(depsToUpdate, "\n"))

@@ -1,4 +1,10 @@
 #!/bin/bash
 set -euo pipefail
 
-go tool mage "$@"
+cd magefiles
+go mod download -x
+cd ..
+
+go mod download -x
+
+go tool -modfile='magefiles/go.mod' mage "$@"

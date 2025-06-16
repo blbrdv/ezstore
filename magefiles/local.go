@@ -2,11 +2,12 @@ package main
 
 import "github.com/magefile/mage/mg"
 
-// Retest run "check" and "test" steps.
+// Retest run "sec", "check" and "test" steps.
 // Only for local development.
 //
 //goland:noinspection GoUnusedExportedFunction
 func Retest() {
+	mg.Deps(Sec)
 	mg.Deps(Check)
 	mg.Deps(Test)
 }

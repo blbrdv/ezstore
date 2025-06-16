@@ -6,7 +6,7 @@ import (
 )
 
 func tool(name string, params ...string) error {
-	goparams := []string{"tool"}
+	goparams := []string{"tool", `-modfile=magefiles\go.mod`}
 	goparams = append(goparams, name)
 	goparams = append(goparams, params...)
 
