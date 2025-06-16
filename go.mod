@@ -3,13 +3,11 @@ module github.com/blbrdv/ezstore
 go 1.24.4
 
 require (
-	github.com/Masterminds/semver/v3 v3.3.1
 	github.com/antchfx/xmlquery v1.4.4
 	github.com/google/go-cmp v0.7.0
 	github.com/gookit/color v1.5.4
 	github.com/hnakamur/go-powershell v0.1.0
 	github.com/imroc/req/v3 v3.52.1
-	github.com/magefile/mage v1.14.0
 	github.com/urfave/cli/v3 v3.3.1
 	github.com/ztrue/tracerr v0.4.0
 	golang.org/x/net v0.41.0
