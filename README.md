@@ -40,9 +40,7 @@ Examples:
 
 ## Development
 
-1. Clone project
-2. Install [Golang](https://go.dev/dl/) version `1.24` or later
-3. Run `go mod download` to install dependencies and tools for project
+Project need [Golang](https://go.dev/dl/) version `1.24` or later.
 
 ### Automation
 
@@ -50,7 +48,18 @@ Use `.\run.ps1 -l` to see available tasks.
 
 Use `.\run.ps1 -h <task>` to see task description.
 
-Use `.\run.ps1 [-v] <task>` to run task. Flag `-v` sets verbose output. 
+Use `.\run.ps1 [-v] <task>` to run task. Flag `-v` sets verbose output.
+
+### End-to-end tests
+
+#### Requirements
+
+1. Windows OS 8 or higher
+2. Powershell 5.1 or higher
+
+#### Execution
+
+Run `.\tests\<scenario>.ps1`.
 
 ## License
 
