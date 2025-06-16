@@ -70,7 +70,10 @@ func Install(file ms.FileInfo) error {
 	var installedVersion *ms.Version
 
 	if installedVersionStr == "" {
-		installedVersion, _ = ms.NewVersion("0")
+		installedVersion, err = ms.NewVersion("0")
+		if err != nil {
+			return err
+		}
 	} else {
 		installedVersion, err = ms.NewVersion(installedVersionStr)
 		if err != nil {

@@ -56,9 +56,27 @@ func Format() error {
 }
 
 // Check run multiple checks on go source code.
-// Uses "go vet", "staticcheck" and "gofmt -l".
+// Uses various linters and gofmt.
 func Check() error {
 	var err error
+
+	println("Checking code for possibilities to use Go standard library")
+	err = tool("usestdlibvars", goSRC)
+	if err != nil {
+		return err
+	}
+
+	println("Checking code for unnecessary type conversions")
+	err = tool("unconvert", "-v", goSRC)
+	if err != nil {
+		return err
+	}
+
+	println("Checking code for unchecked errors")
+	err = tool("errcheck", "-asserts", "-blank", "-ignoretests", goSRC)
+	if err != nil {
+		return err
+	}
 
 	println("Checking code problems")
 	err = run("go", "vet", goSRC)

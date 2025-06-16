@@ -23,10 +23,14 @@ func PrettyString(slice any) string {
 
 			length := val.Len() - 1
 			for i := 0; i <= length; i++ {
-				v := val.Index(i).Interface().(fmt.Stringer)
-				utils.Fprint(&sb, v.String())
-				if i < length {
-					utils.Fprint(&sb, ", ")
+				switch v := val.Index(i).Interface().(type) {
+				case fmt.Stringer:
+					utils.Fprint(&sb, v.String())
+					if i < length {
+						utils.Fprint(&sb, ", ")
+					}
+				default:
+					panic(fmt.Sprintf("expected 'fmt.Stringer', got %T", v))
 				}
 			}
 

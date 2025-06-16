@@ -29,13 +29,16 @@ require (
 	github.com/hashicorp/errwrap v1.1.0 // indirect
 	github.com/hashicorp/go-multierror v1.1.1 // indirect
 	github.com/icholy/digest v1.1.0 // indirect
+	github.com/kisielk/errcheck v1.9.0 // indirect
 	github.com/klauspost/compress v1.18.0 // indirect
+	github.com/mdempsky/unconvert v0.0.0-20250216222326-4a038b3d31f5 // indirect
 	github.com/nfnt/resize v0.0.0-20180221191011-83c6a9932646 // indirect
 	github.com/onsi/ginkgo/v2 v2.23.4 // indirect
 	github.com/quic-go/qpack v0.5.1 // indirect
 	github.com/quic-go/quic-go v0.51.0 // indirect
 	github.com/refraction-networking/utls v1.7.0 // indirect
 	github.com/russross/blackfriday/v2 v2.1.0 // indirect
+	github.com/sashamelentyev/usestdlibvars v1.29.0 // indirect
 	github.com/tc-hib/go-winres v0.3.3 // indirect
 	github.com/tc-hib/winres v0.2.1 // indirect
 	github.com/urfave/cli/v2 v2.25.7 // indirect
@@ -55,7 +58,10 @@ require (
 )
 
 tool (
+	github.com/kisielk/errcheck
 	github.com/magefile/mage
+	github.com/mdempsky/unconvert
+	github.com/sashamelentyev/usestdlibvars
 	github.com/tc-hib/go-winres
 	honnef.co/go/tools/cmd/staticcheck
 )
