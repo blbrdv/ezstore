@@ -26,6 +26,9 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
+      - name: Scripts check
+        run: .\pslint.ps1
+
       - name: Setup GO
         uses: actions/setup-go@v5
         with:
