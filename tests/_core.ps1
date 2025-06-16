@@ -10,9 +10,9 @@ function Install {
     )
 
     $Cmd = ".\output\bin\ezstore.exe install $Id --ver $Version --verbosity m";
-    Write-Host $Cmd;
+    Write-Output $Cmd;
     $Output = Invoke-Expression -Command "$Cmd 2>&1";
-    Write-Host $Output;
+    Write-Output $Output;
 
     return $Output;
 

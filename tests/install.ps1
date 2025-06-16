@@ -18,4 +18,4 @@ if ( $Package.Version -ne $Data.Version ) {
     throw "Wrong version installed. Expected $($Data.Version), actual: $($Package.Version)."
 }
 
-Write-Host "Test passed!";
+Write-Output "Test passed!";
