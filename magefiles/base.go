@@ -56,11 +56,11 @@ func Format() error {
 }
 
 // Check run multiple checks on go source code.
-// Uses "go vet", "staticcheck" and "gofmt -l".
+// Uses various linters and gofmt.
 func Check() error {
 	var err error
 
-	println("Checking possibilities for use Go standard library")
+	println("Checking code for possibilities to use Go standard library")
 	err = tool("usestdlibvars", goSRC)
 	if err != nil {
 		return err
