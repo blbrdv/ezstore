@@ -66,6 +66,12 @@ func Check() error {
 		return err
 	}
 
+	println("Checking code for unnecessary type conversions")
+	err = tool("unconvert", "-v", goSRC)
+	if err != nil {
+		return err
+	}
+
 	println("Checking code problems")
 	err = run("go", "vet", goSRC)
 	if err != nil {
