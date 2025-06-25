@@ -102,7 +102,7 @@ func TestGetNoAppBundles(t *testing.T) {
 }
 
 func TestGetDepBundles(t *testing.T) {
-	dep := "Foo"
+	dep := &dependency{name: "Foo"}
 	bundle1, _ := newBundle("Foo_1.0.0.0_neutral_~_b1a2r3.appx", "https://example.com/b1a2r31000")
 	bundle2, _ := newBundle("Foo_1.0.1.0_neutral_~_b1a2r3.appx", "https://example.com/b1a2r31010")
 	bundle3, _ := newBundle("Bar_1.0.0.0_x64__b3a2z1.msix", "https://example.com/b3a2z11000")
@@ -122,7 +122,7 @@ func TestGetDepBundles(t *testing.T) {
 
 func TestGetNoDepBundles(t *testing.T) {
 	expectedErr := "no bundle for \"Baz\""
-	dep := "Baz"
+	dep := &dependency{name: "Baz"}
 	bundle1, _ := newBundle("Foo_1.0.0.0_neutral_~_b1a2r3.appx", "https://example.com/b1a2r31000")
 	bundle2, _ := newBundle("Foo_1.0.1.0_neutral_~_b1a2r3.appx", "https://example.com/b1a2r31010")
 	bundle3, _ := newBundle("Bar_1.0.0.0_x64__b3a2z1.msix", "https://example.com/b3a2z11000")
