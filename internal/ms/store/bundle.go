@@ -87,7 +87,7 @@ func (b *bundles) GetDependency(name string) (*bundle, error) {
 	} else if length > 1 {
 		latest := dependencies[0]
 		for i := 1; i < length; i++ {
-			if dependencies[i].Version.Compare(latest.Version) == 1 {
+			if dependencies[i].Version.MoreThan(latest.Version) {
 				latest = dependencies[i]
 			}
 		}
