@@ -20,7 +20,8 @@ $Files = Get-ChildItem -Path .\*.ps1 -Recurse;
 $Found = $false;
 
 foreach ($File in $Files) {
-    $Output = Invoke-ScriptAnalyzer -Path $File -Settings $Settings ;
+    $Output = Invoke-ScriptAnalyzer -Path $File -Settings $Settings;
+    Write-Output "Analyzing '$File'";
     foreach ($Data in $Output) {
         $Found = $true;
         Write-Output "$($Data.ScriptName):$($Data.Line) $($Data.Message)";
@@ -28,5 +29,8 @@ foreach ($File in $Files) {
 }
 
 if ( $Found ) {
+    Write-Output "Error. Problems found.";
     exit 1;
 }
+
+Write-Output "Success. No problems found."
