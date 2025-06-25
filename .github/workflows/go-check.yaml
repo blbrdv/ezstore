@@ -1,4 +1,4 @@
-name: Check go source code
+name: Check Go source code
 
 on:
   pull_request:

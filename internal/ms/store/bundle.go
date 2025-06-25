@@ -72,11 +72,18 @@ func (b *bundles) GetAppBundle(app *app) (*bundle, error) {
 	return nil, fmt.Errorf("no bundle for \"%s\"", app.pkg.String())
 }
 
-func (b *bundles) GetDependency(name string) (*bundle, error) {
+func (b *bundles) GetDependency(depData *dependency) (*bundle, error) {
 	var dependencies []*bundle
 
 	for _, value := range b.Values() {
-		if value.Name == name {
+		if value.Name == depData.name {
+			if depData.min != nil && value.Version.LessThan(depData.min) {
+				continue
+			}
+			if depData.max != nil && value.Version.MoreThan(depData.max) {
+				continue
+			}
+
 			dependencies = append(dependencies, value)
 		}
 	}
@@ -87,14 +94,14 @@ func (b *bundles) GetDependency(name string) (*bundle, error) {
 	} else if length > 1 {
 		latest := dependencies[0]
 		for i := 1; i < length; i++ {
-			if dependencies[i].Version.Compare(latest.Version) == 1 {
+			if dependencies[i].Version.MoreThan(latest.Version) {
 				latest = dependencies[i]
 			}
 		}
 		return latest, nil
 	}
 
-	return nil, fmt.Errorf("no bundle for \"%s\"", name)
+	return nil, fmt.Errorf("no bundle for \"%s\"", depData.name)
 }
 
 func (b *bundles) String() string {

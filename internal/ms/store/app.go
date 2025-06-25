@@ -2,26 +2,37 @@ package store
 
 import (
 	"fmt"
+	"github.com/blbrdv/ezstore/internal/ms"
 	"maps"
 )
 
+type dependency struct {
+	name string
+	min  *ms.Version
+	max  *ms.Version
+}
+
 type app struct {
 	*pkg
-	dependencies map[string]struct{}
+	dependencies map[string]*dependency
 }
 
-func (a *app) Add(dependency string) {
-	a.dependencies[dependency] = struct{}{}
+func (a *app) Add(name string, min, max *ms.Version) {
+	a.dependencies[name] = &dependency{name, min, max}
 }
 
-func (a *app) Dependencies() []string {
-	return ToSlice(maps.Keys(a.dependencies))
+func (a *app) Dependencies() []*dependency {
+	var result []*dependency
+	for value := range maps.Values(a.dependencies) {
+		result = append(result, value)
+	}
+	return result
 }
 
 func (a *app) Equal(other *app) bool {
 	return a.pkg.Equal(other.pkg) &&
-		Equal(a.Dependencies(), other.Dependencies(), func(l, r string) bool {
-			return l == r
+		Equal(a.Dependencies(), other.Dependencies(), func(l, r *dependency) bool {
+			return l.name == r.name
 		})
 }
 
@@ -35,7 +46,7 @@ func newApp(input string) (*app, error) {
 		return nil, err
 	}
 
-	return &app{pkg: pkg, dependencies: map[string]struct{}{}}, nil
+	return &app{pkg: pkg, dependencies: map[string]*dependency{}}, nil
 }
 
 type apps struct {

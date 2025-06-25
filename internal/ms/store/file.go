@@ -58,7 +58,7 @@ func (f *files) Get(version *ms.Version, arch ms.Architecture) (*file, error) {
 		} else {
 			latest := f.elements[0]
 			for i := 1; i < length; i++ {
-				if f.elements[i].Version.Compare(latest.Version) == 1 {
+				if f.elements[i].Version.MoreThan(latest.Version) {
 					latest = f.elements[i]
 				}
 			}
