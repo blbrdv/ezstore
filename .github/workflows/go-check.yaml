@@ -1,33 +1,25 @@
-name: Check and test
+name: Check go source code
 
 on:
   pull_request:
     branches:
       - 'main'
-    paths-ignore:
-      - '.github/**'
-      - '!.github/workflows/check-and-test.yaml'
-      - '.idea/**'
-      - '.vscode/**'
-      - 'icons/**'
-      - 'innosetup/**'
-      - 'tests/**'
-      - '*.md'
-      - 'LICENSE'
-      - 'setup.iss'
-      - 'winres.json'
+    paths:
+      - '.github/workflows/go-check.yaml'
+      - '**.go'
+      - '**.mod'
+      - '**.sum'
+      - 'internal/**'
+      - 'run.ps1'
 
 jobs:
-  check-and-test:
+  check-source-code:
     name: Check and test project
 
     runs-on: windows-latest
 
     steps:
       - uses: actions/checkout@v4
-
-      - name: Scripts check
-        run: .\pslint.ps1
 
       - name: Setup GO
         uses: actions/setup-go@v5
