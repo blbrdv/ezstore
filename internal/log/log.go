@@ -72,7 +72,7 @@ func Trace(value string) {
 
 // Tracef format and print input text to os.Stdout with "[TRC]" mark and appended new line when log level is Detailed.
 func Tracef(format string, values ...any) {
-	Debug(fmt.Sprintf(format, values...))
+	Trace(fmt.Sprintf(format, values...))
 }
 
 // Debug print input text to os.Stdout with "[DEB]" mark and appended new line when log level is Detailed.
