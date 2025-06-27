@@ -5,15 +5,14 @@ on:
   push:
     branches:
       - "main"
-    paths-ignore:
-      - '.**' # dot-dirs and dotfiles
-      - '!.github/workflows/e2e-tests.yaml'
-      - 'innosetup/**'
-      - '*.md'
-      - 'LICENSE'
-      - '*.iss'
-      - '*.conf'
-      - 'pslint.ps1'
+    paths:
+      - '.github/workflows/e2e-tests.yaml'
+      - '**.go'
+      - '**.mod'
+      - '**.sum'
+      - 'internal/**'
+      - 'run.ps1'
+      - 'tests/**'
 
 jobs:
   build:
