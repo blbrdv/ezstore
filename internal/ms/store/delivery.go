@@ -22,7 +22,7 @@ type productInfo struct {
 	RevisionNumber string
 }
 
-func (p *productInfo) String() string {
+func (p productInfo) String() string {
 	return fmt.Sprintf("%s %s", p.UpdateID, p.RevisionNumber)
 }
 

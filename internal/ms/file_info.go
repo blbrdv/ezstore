@@ -9,6 +9,6 @@ type FileInfo struct {
 	Version *Version
 }
 
-func (fi *FileInfo) String() string {
+func (fi FileInfo) String() string {
 	return fmt.Sprintf("%s %s '%s'", fi.Name, fi.Version, fi.Path)
 }
