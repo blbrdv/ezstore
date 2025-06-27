@@ -47,6 +47,7 @@ func Download(id string, version *ms.Version, locale *ms.Locale, destinationPath
 	if err != nil {
 		return nil, fmt.Errorf("can not fetch cookie: %s", err.Error())
 	}
+	log.Tracef("Cookie: %s", cookie)
 	log.Info("Cookie fetched")
 
 	log.Debug("Fetching product info...")
@@ -54,6 +55,8 @@ func Download(id string, version *ms.Version, locale *ms.Locale, destinationPath
 	if err != nil {
 		return nil, fmt.Errorf("can not fetch product info: %s", err.Error())
 	}
+	log.Tracef("Apps: %s", apps.String())
+	log.Tracef("WUID: %s", wuid)
 	log.Info("Product info fetched")
 
 	log.Debug("Fetching product files...")
@@ -61,6 +64,7 @@ func Download(id string, version *ms.Version, locale *ms.Locale, destinationPath
 	if err != nil {
 		return nil, fmt.Errorf("can not fetch file: %s", err.Error())
 	}
+	log.Tracef("Products: %s", PrettyString(productsInfo))
 
 	bundles := newBundles()
 	for _, info := range productsInfo {
@@ -87,6 +91,7 @@ func Download(id string, version *ms.Version, locale *ms.Locale, destinationPath
 			bundles.Add(bundle)
 		}
 	}
+	log.Tracef("Bundles: %s", bundles.String())
 
 	files := newFiles()
 	for _, app := range apps.Values() {
@@ -106,11 +111,13 @@ func Download(id string, version *ms.Version, locale *ms.Locale, destinationPath
 		}
 		files.Add(file)
 	}
+	log.Tracef("Files: %s", files.String())
 
 	appFile, err := files.Get(version, ms.Arch)
 	if err != nil {
 		return nil, fmt.Errorf("can not fetch file: %s", err.Error())
 	}
+	log.Tracef("App file: %s", appFile.String())
 
 	bundlesToDownload := appFile.Bundles()
 	log.Info("Product files fetched")
@@ -133,6 +140,7 @@ func Download(id string, version *ms.Version, locale *ms.Locale, destinationPath
 
 		result = append(result, ms.FileInfo{Path: fullPath, Name: data.Name, Version: data.Version})
 	}
+	log.Tracef("Downloaded files: %s", PrettyString(result))
 	log.Info("Product files downloaded")
 
 	return result, nil
