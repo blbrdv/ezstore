@@ -44,6 +44,10 @@ func Install(_ context.Context, cmd *cli.Command) error {
 		}
 	}
 
+	log.Tracef("Id: %s", id)
+	log.Tracef("Version: %s", version)
+	log.Tracef("Locale: %s", locale)
+
 	tmpPath := utils.Join(windows.TempDir, id)
 
 	log.Debugf("Trace file: %s", log.TraceFile)
