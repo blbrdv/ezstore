@@ -39,9 +39,26 @@ func getProductName(url string) (string, error) {
 	return matches[1], nil
 }
 
+func downloadFile(destinationPath string, data *bundle) (*ms.FileInfo, error) {
+	fullPath := utils.Join(
+		destinationPath,
+		fmt.Sprintf("%s-%s.%s", data.Name, data.Version.String(), data.Format),
+	)
+
+	file := windows.OpenFile(fullPath, os.O_CREATE)
+
+	_, err := client.R().SetOutput(file).Get(data.URL)
+	file.Close()
+	if err != nil {
+		return nil, fmt.Errorf("can not download file: GET %s: %s", data.URL, err.Error())
+	}
+
+	return ms.NewFileInfo(fullPath, data.Name, data.Version), nil
+}
+
 // Download backage and its dependencies from MS Store by id, version and locale to destination directory
 // and returns array of backage and its dependencies paths.
-func Download(id string, version *ms.Version, locale *ms.Locale, destinationPath string) ([]ms.FileInfo, error) {
+func Download(id string, version *ms.Version, locale *ms.Locale, destinationPath string) (*ms.BundleFileInfo, error) {
 	log.Debug("Fetching cookie...")
 	cookie, err := getCookie()
 	if err != nil {
@@ -118,27 +135,21 @@ func Download(id string, version *ms.Version, locale *ms.Locale, destinationPath
 		return nil, fmt.Errorf("can not fetch file: %s", err.Error())
 	}
 	log.Tracef("App file: %s", appFile.String())
-
-	bundlesToDownload := appFile.Bundles()
 	log.Info("Product files fetched")
 
 	log.Debug("Download product files...")
-	var result []ms.FileInfo
-	for _, data := range bundlesToDownload {
-		fullPath := utils.Join(
-			destinationPath,
-			fmt.Sprintf("%s-%s.%s", data.Name, data.Version.String(), data.Format),
-		)
+	file, err := downloadFile(destinationPath, appFile.GetBundle())
+	if err != nil {
+		return nil, err
+	}
 
-		file := windows.OpenFile(fullPath, os.O_CREATE)
-
-		_, err = client.R().SetOutput(file).Get(data.URL)
-		file.Close()
+	result := ms.NewBundleFileInfo(file)
+	for _, dependency := range appFile.Dependencies() {
+		depFile, err := downloadFile(destinationPath, dependency)
 		if err != nil {
-			return nil, fmt.Errorf("can not download file: GET %s: %s", data.URL, err.Error())
+			return nil, err
 		}
-
-		result = append(result, ms.FileInfo{Path: fullPath, Name: data.Name, Version: data.Version})
+		result.AddDependency(depFile)
 	}
 	log.Tracef("Downloaded files: %s", PrettyString(result))
 	log.Info("Product files downloaded")

@@ -3,12 +3,15 @@ package store
 import (
 	"fmt"
 	"github.com/blbrdv/ezstore/internal/ms"
-	"slices"
 )
 
 type file struct {
 	*bundle
 	dependencies bundles
+}
+
+func (f *file) GetBundle() *bundle {
+	return f.bundle
 }
 
 func (f *file) Add(dependency *bundle) {
@@ -21,10 +24,6 @@ func (f *file) Dependencies() []*bundle {
 
 func (f *file) String() string {
 	return fmt.Sprintf("%s %s", f.bundle.String(), PrettyString(f.Dependencies()))
-}
-
-func (f *file) Bundles() []*bundle {
-	return append(slices.Concat(f.Dependencies()), f.bundle)
 }
 
 func (f *file) Equal(other *file) bool {

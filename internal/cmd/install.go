@@ -55,16 +55,14 @@ func Install(_ context.Context, cmd *cli.Command) error {
 	windows.Remove(tmpPath)
 	windows.MkDir(tmpPath)
 
-	files, err := store.Download(id, version, locale, tmpPath)
+	file, err := store.Download(id, version, locale, tmpPath)
 	if err != nil {
 		return err
 	}
 
-	for _, file := range files {
-		err = windows.Install(file)
-		if err != nil {
-			return err
-		}
+	err = windows.Install(file)
+	if err != nil {
+		return err
 	}
 
 	log.Success("Done!")

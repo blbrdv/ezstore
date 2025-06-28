@@ -1,14 +1,31 @@
 package ms
 
-import "fmt"
-
-// FileInfo represents useful information about file bundle.
 type FileInfo struct {
 	Path    string
 	Name    string
 	Version *Version
 }
 
-func (fi FileInfo) String() string {
-	return fmt.Sprintf("%s %s '%s'", fi.Name, fi.Version, fi.Path)
+func NewFileInfo(path, name string, version *Version) *FileInfo {
+	return &FileInfo{Path: path, Name: name, Version: version}
+}
+
+type BundleFileInfo struct {
+	*FileInfo
+	dependencies []*FileInfo
+}
+
+func (b *BundleFileInfo) Dependencies() []*FileInfo {
+	return b.dependencies
+}
+
+func (b *BundleFileInfo) AddDependency(file *FileInfo) {
+	b.dependencies = append(b.dependencies, file)
+}
+
+func NewBundleFileInfo(file *FileInfo) *BundleFileInfo {
+	return &BundleFileInfo{
+		FileInfo:     file,
+		dependencies: []*FileInfo{},
+	}
 }
