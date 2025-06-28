@@ -24,7 +24,7 @@ func (f *file) String() string {
 }
 
 func (f *file) Bundles() []*bundle {
-	return slices.Concat(newBundles(f.bundle).Values(), f.Dependencies())
+	return append(slices.Concat(f.Dependencies()), f.bundle)
 }
 
 func (f *file) Equal(other *file) bool {
