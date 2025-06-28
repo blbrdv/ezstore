@@ -1,5 +1,9 @@
 package ms
 
+import (
+	"fmt"
+)
+
 type FileInfo struct {
 	Path    string
 	Name    string
@@ -10,9 +14,17 @@ func NewFileInfo(path, name string, version *Version) *FileInfo {
 	return &FileInfo{Path: path, Name: name, Version: version}
 }
 
+func (f *FileInfo) String() string {
+	return fmt.Sprintf("%s %s '%s'", f.Name, f.Version, f.Path)
+}
+
 type BundleFileInfo struct {
 	*FileInfo
 	dependencies []*FileInfo
+}
+
+func (b *BundleFileInfo) String() string {
+	return fmt.Sprintf("{%s %v}", b.FileInfo.String(), b.Dependencies())
 }
 
 func (b *BundleFileInfo) Dependencies() []*FileInfo {

@@ -151,7 +151,7 @@ func Download(id string, version *ms.Version, locale *ms.Locale, destinationPath
 		}
 		result.AddDependency(depFile)
 	}
-	log.Tracef("Downloaded files: %s", PrettyString(result))
+	log.Tracef("Downloaded files: %s", result)
 	log.Info("Product files downloaded")
 
 	return result, nil
