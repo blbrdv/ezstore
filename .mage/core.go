@@ -6,6 +6,8 @@ import (
 	"fmt"
 )
 
+var modfile = `-modfile=.mage\go.mod`
+
 func println(value string) {
 	_, err := fmt.Println(value)
 	if err != nil {

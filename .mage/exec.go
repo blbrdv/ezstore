@@ -8,7 +8,7 @@ import (
 )
 
 func tool(name string, params ...string) error {
-	goparams := []string{"tool", `-modfile=.mage\go.mod`}
+	goparams := []string{"tool", modfile}
 	goparams = append(goparams, name)
 	goparams = append(goparams, params...)
 
