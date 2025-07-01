@@ -1,0 +1,23 @@
+name: Cache update
+
+on:
+  workflow_dispatch:
+  schedule:
+    - cron: '01 00 * * 1'
+
+jobs:
+  update-cache:
+    name: Cache update
+
+    runs-on: windows-latest
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Setup GO
+        id: cache
+        uses: ./.github/actions/setup-go
+
+      - name: Save cache
+        if: steps.cache.outputs.cache-hit != 'true'
+        uses: ./.github/actions/save-cache

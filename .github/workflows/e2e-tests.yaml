@@ -5,15 +5,16 @@ on:
   push:
     branches:
       - "main"
-    paths-ignore:
-      - '.**' # dot-dirs and dotfiles
-      - '!.github/workflows/e2e-tests.yaml'
-      - 'innosetup/**'
-      - '*.md'
-      - 'LICENSE'
-      - '*.iss'
-      - '*.conf'
-      - 'pslint.ps1'
+    paths:
+      - '.github/actions/**'
+      - '.github/workflows/e2e-tests.yaml'
+      - '.mage/**'
+      - '**.go'
+      - '**.mod'
+      - '**.sum'
+      - 'internal/**'
+      - 'tests/**'
+      - 'run.ps1'
 
 jobs:
   build:
@@ -27,13 +28,14 @@ jobs:
           fetch-depth: 0
 
       - name: Setup GO
-        uses: actions/setup-go@v5
-        with:
-          go-version-file: 'go.mod'
-          cache: true
+        uses: ./.github/actions/setup-go
 
       - name: Build project
         run: .\run.ps1 build
+
+      - name: Save cache
+        if: always()
+        uses: ./.github/actions/save-cache
 
       - name: Upload app
         uses: actions/upload-artifact@v4
