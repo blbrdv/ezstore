@@ -2,6 +2,7 @@ package store
 
 import (
 	"fmt"
+	"github.com/blbrdv/ezstore/internal/utils"
 	"io"
 	"reflect"
 	"slices"
@@ -50,16 +51,16 @@ func printCollection(tp reflect.Type, s reflect.Value) string {
 	last := length - 1
 	f := getPrintFunc(tp)
 
-	_, _ = fmt.Fprint(&sb, "[")
+	utils.Fprint(&sb, "[")
 
 	for i := 0; i < length; i++ {
 		f(&sb, s.Index(i))
 		if i != last {
-			_, _ = fmt.Fprint(&sb, ", ")
+			utils.Fprint(&sb, ", ")
 		}
 	}
 
-	_, _ = fmt.Fprint(&sb, "]")
+	utils.Fprint(&sb, "]")
 
 	return sb.String()
 }
@@ -75,7 +76,7 @@ func getPrintFunc(tp reflect.Type) func(writer io.Writer, value reflect.Value) {
 		return printf("%d")
 	} else if slices.Contains(collectionTypes, tp.Kind()) {
 		return func(writer io.Writer, value reflect.Value) {
-			_, _ = fmt.Fprint(writer, printCollection(tp.Elem(), value))
+			utils.Fprint(writer, printCollection(tp.Elem(), value))
 		}
 	} else if tp.Kind() == reflect.Interface {
 		return func(writer io.Writer, value reflect.Value) {
@@ -86,7 +87,7 @@ func getPrintFunc(tp reflect.Type) func(writer io.Writer, value reflect.Value) {
 		return func(writer io.Writer, value reflect.Value) {
 			elem := value.Elem()
 			f := getPrintFunc(elem.Type())
-			_, _ = fmt.Fprint(writer, "*")
+			utils.Fprint(writer, "*")
 			f(writer, elem)
 		}
 	} else {
@@ -96,7 +97,7 @@ func getPrintFunc(tp reflect.Type) func(writer io.Writer, value reflect.Value) {
 
 func printf(format string) func(writer io.Writer, value reflect.Value) {
 	return func(writer io.Writer, value reflect.Value) {
-		_, _ = fmt.Fprintf(writer, format, value.Interface())
+		utils.Fprintf(writer, format, value.Interface())
 	}
 }
 
