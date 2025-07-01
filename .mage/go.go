@@ -1,3 +1,5 @@
+//go:build mage
+
 package main
 
 import (
@@ -66,7 +68,7 @@ func licensesScan(lockfile string) error {
 		return err
 	}
 
-	output, err = sh.Output("go", "tool", `-modfile=magefiles\go.mod`, "osv-scanner", licenses, lockfile)
+	output, err = sh.Output("go", "tool", `-modfile=.mage\go.mod`, "osv-scanner", licenses, lockfile)
 	if err != nil && !(strings.Contains(output, "NO. OF PACKAGE VERSIONS")) {
 		return err
 	}

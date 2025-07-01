@@ -1,0 +1,12 @@
+name: 'Teardown'
+runs:
+  using: 'composite'
+  steps:
+    - name: Save cache
+      uses: actions/cache/save@v4
+      with:
+        path: |
+          ~\go
+          ~\AppData\Local\go-build
+          %USERPROFILE%\magefile
+        key: ${{ runner.os }}-${{ runner.arch }}-go-${{ hashFiles('.\go.mod', '.\.mage\go.mod') }}
