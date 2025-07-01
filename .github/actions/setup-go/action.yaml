@@ -26,23 +26,23 @@ runs:
 
         try {
           $GoOutput = & go version;
-          echo $GoOutput;
           $GoOutput -match '^go version (go)?([.0-9]+)';
-          echo $Matches;
           $GoInstalledVersion = $Matches[2];
-          echo $GoInstalledVersion;
+          echo "Go installed version: $GoInstalledVersion";
 
           $GoNeededVersion = & go list -f '{{.GoVersion}}' -m;
-          echo $GoNeededVersion;
+          echo "Go needed version:    $GoNeededVersion";
 
           if ( $GoNeededVersion -eq $GoInstalledVersion ) {
-            $NeedInstall = 'false'
+            $NeedInstall = 'false';
           }
         } finally {
-          $Output = "need-install=$NeedInstall";
-
-          echo $Output;
-          echo $Output >> $env:GITHUB_OUTPUT;
+          if ( $NeedInstall -eq 'true' ) {
+            echo "Need to setup Go";
+          } else {
+            echo "No need for Go setup";
+          }
+          echo "need-install=$NeedInstall" >> $env:GITHUB_OUTPUT;
         }
 
     - name: Setup GO
