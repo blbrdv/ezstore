@@ -1,7 +1,6 @@
 package store
 
 import (
-	"github.com/blbrdv/ezstore/internal/ms"
 	"github.com/google/go-cmp/cmp"
 	"testing"
 )
@@ -66,7 +65,7 @@ func TestBundles(t *testing.T) {
 }
 
 func TestGetAppBundles(t *testing.T) {
-	app, _ := newApp("Foo_1.0.0.0_neutral_~_b1a2r3")
+	app, _ := newApp("Foo_1.0.0.0_neutral_~_b1a2r3", "neutral")
 	bundle1, _ := newBundle("Foo_1.0.0.0_neutral_~_b1a2r3.appx", "https://example.com/b1a2r31000")
 	bundle2, _ := newBundle("Bar_1.0.0.0_x64__b3a2z1.msix", "https://example.com/b3a2z11000")
 
@@ -85,7 +84,7 @@ func TestGetAppBundles(t *testing.T) {
 
 func TestGetNoAppBundles(t *testing.T) {
 	expectedErr := "no bundle for \"Foo_v1.0.0.0_neutral__b1a2r3\""
-	app, _ := newApp("Foo_1.0.0.0_neutral_~_b1a2r3")
+	app, _ := newApp("Foo_1.0.0.0_neutral_~_b1a2r3", "neutral")
 	bundle1, _ := newBundle("Foo_1.0.1.0_neutral_~_b1a2r3.appx", "https://example.com/b1a2r31010")
 	bundle2, _ := newBundle("Bar_1.0.0.0_x64__b3a2z1.msix", "https://example.com/b3a2z11000")
 
@@ -110,7 +109,7 @@ func TestGetDepBundles(t *testing.T) {
 
 	bundles := newBundles(bundle3, bundle2, bundle1)
 
-	actual, err := bundles.GetDependency(dep, ms.Arch)
+	actual, err := bundles.GetDependency(dep, "neutral")
 
 	if err != nil {
 		t.Fatalf("Function return no bundle: %s", err.Error())
@@ -130,7 +129,7 @@ func TestGetNoDepBundles(t *testing.T) {
 
 	bundles := newBundles(bundle3, bundle2, bundle1)
 
-	actual, err := bundles.GetDependency(dep, ms.Arch)
+	actual, err := bundles.GetDependency(dep, "neutral")
 
 	if err == nil {
 		t.Fatalf("Function must return error \"%s\", but return result \"%s\"", expectedErr, actual.String())

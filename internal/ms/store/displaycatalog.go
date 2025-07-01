@@ -22,6 +22,7 @@ type fulfillmentData struct {
 }
 
 type jsonPkg struct {
+	Architectures         []string        `json:"Architectures"`
 	Name                  string          `json:"PackageFullName"`
 	FrameworkDependencies []framework     `json:"FrameworkDependencies"`
 	PlatformDependencies  []platform      `json:"PlatformDependencies"`
@@ -116,7 +117,7 @@ func getAppInfo(id string, locale *ms.Locale) (*apps, string, error) {
 	apps := newApps()
 	wuid := ""
 	for _, pkg := range packages {
-		app, err := newApp(pkg.Name)
+		app, err := newApp(pkg.Name, pkg.Architectures[0])
 		if err != nil {
 			return nil, "", err
 		}

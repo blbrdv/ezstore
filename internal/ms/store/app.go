@@ -8,6 +8,8 @@ import (
 type app struct {
 	*pkg
 	dependencies map[string]struct{}
+
+	DepArch string
 }
 
 func (a *app) Add(dependency string) {
@@ -29,13 +31,13 @@ func (a *app) String() string {
 	return fmt.Sprintf("%s %s", a.pkg.String(), PrettyString(a.Dependencies()))
 }
 
-func newApp(input string) (*app, error) {
+func newApp(input string, arch string) (*app, error) {
 	pkg, err := newPackage(input)
 	if err != nil {
 		return nil, err
 	}
 
-	return &app{pkg: pkg, dependencies: map[string]struct{}{}}, nil
+	return &app{pkg: pkg, dependencies: map[string]struct{}{}, DepArch: arch}, nil
 }
 
 type apps struct {
