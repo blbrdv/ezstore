@@ -1,3 +1,5 @@
+//go:build mage
+
 package main
 
 import (
@@ -6,7 +8,7 @@ import (
 )
 
 func tool(name string, params ...string) error {
-	goparams := []string{"tool", `-modfile=magefiles\go.mod`}
+	goparams := []string{"tool", `-modfile=.mage\go.mod`}
 	goparams = append(goparams, name)
 	goparams = append(goparams, params...)
 

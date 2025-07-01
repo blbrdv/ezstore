@@ -8,6 +8,7 @@ on:
     paths-ignore:
       - '.**' # dot-dirs and dotfiles
       - '!.github/workflows/e2e-tests.yaml'
+      - '!.mage'
       - 'innosetup/**'
       - '*.md'
       - 'LICENSE'
