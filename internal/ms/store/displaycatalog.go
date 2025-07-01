@@ -95,9 +95,9 @@ func getAppInfo(id string, locale *ms.Locale) (*apps, string, error) {
 
 	var packages []jsonPkg
 	for _, availability := range info.Product.SkuAvailabilities {
-		redeemable, err := canRedeem(availability)
-		if err != nil {
-			return nil, "", err
+		redeemable, err2 := canRedeem(availability)
+		if err2 != nil {
+			return nil, "", err2
 		}
 
 		if redeemable {
@@ -119,9 +119,9 @@ func getAppInfo(id string, locale *ms.Locale) (*apps, string, error) {
 	apps := newApps()
 	wuid := ""
 	for _, pkg := range packages {
-		app, err := newApp(pkg.Name, pkg.Architectures[0])
-		if err != nil {
-			return nil, "", err
+		app, err2 := newApp(pkg.Name, pkg.Architectures[0])
+		if err2 != nil {
+			return nil, "", err2
 		}
 
 		for _, dep := range pkg.FrameworkDependencies {

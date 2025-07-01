@@ -120,9 +120,9 @@ func Download(id string, version *ms.Version, locale *ms.Locale, destinationPath
 		file := newFile(appBundle)
 
 		for _, dep := range app.Dependencies() {
-			depBundle, err2 := bundles.GetDependency(dep, app.DepArch)
-			if err2 != nil {
-				return nil, fmt.Errorf("can not fetch file: %s", err2.Error())
+			depBundle, err3 := bundles.GetDependency(dep, app.DepArch)
+			if err3 != nil {
+				return nil, fmt.Errorf("can not fetch file: %s", err3.Error())
 			}
 			file.Add(depBundle)
 		}
@@ -145,9 +145,9 @@ func Download(id string, version *ms.Version, locale *ms.Locale, destinationPath
 
 	result := ms.NewBundleFileInfo(file)
 	for _, dependency := range appFile.Dependencies() {
-		depFile, err := downloadFile(destinationPath, dependency)
-		if err != nil {
-			return nil, err
+		depFile, err2 := downloadFile(destinationPath, dependency)
+		if err2 != nil {
+			return nil, err2
 		}
 		result.AddDependency(depFile)
 	}
