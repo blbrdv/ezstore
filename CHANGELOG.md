@@ -1,5 +1,15 @@
 # Changelog
 
+## [1.3.4] - 2025-06-25
+
+### Added
+
+- Add check for min/max version support for framework dependencies [#32](https://github.com/blbrdv/ezstore/issues/32)
+
+### Changed
+
+- `github.com/imroc/req` bump from `v3.52.1` to `v3.53.0`
+
 ## [1.3.3] - 2025-06-13
 
 ### Fixed
@@ -82,6 +92,7 @@
 
 Initial release.
 
+[1.3.4]: https://github.com/blbrdv/ezstore/releases/tag/v1.3.4
 [1.3.3]: https://github.com/blbrdv/ezstore/releases/tag/v1.3.3
 [1.3.2]: https://github.com/blbrdv/ezstore/releases/tag/v1.3.2
 [1.3.1]: https://github.com/blbrdv/ezstore/releases/tag/v1.3.1

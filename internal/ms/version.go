@@ -8,10 +8,11 @@ import (
 
 // Version type represents 4-digit version used in Windows and MS Store.
 type Version struct {
-	Major    int64
-	Minor    int64
-	Build    int64
-	Revision int64
+	Major    uint16
+	Minor    uint16
+	Build    uint16
+	Revision uint16
+	Encoded  uint64
 }
 
 // NewVersion returns [Version] from string representing SemVer.
@@ -23,38 +24,53 @@ func NewVersion(input string) (*Version, error) {
 		return nil, fmt.Errorf("\"%s\" is not a valid version", input)
 	}
 
-	a, err := strconv.ParseInt(matches[1], 10, 64)
+	major, err := parse(matches[1])
 	if err != nil {
-		return nil, fmt.Errorf("can not convert \"%s\" to int64: %s", matches[1], err.Error())
+		return nil, fmt.Errorf("can not convert \"%s\" to uint16: %s", matches[1], err.Error())
 	}
 
-	b, err := parse(matches[2])
+	minor, err := parse(matches[2])
 	if err != nil {
-		return nil, fmt.Errorf("can not convert \"%s\" to int64: %s", matches[2], err.Error())
+		return nil, fmt.Errorf("can not convert \"%s\" to uint16: %s", matches[2], err.Error())
 	}
 
-	c, err := parse(matches[3])
+	build, err := parse(matches[3])
 	if err != nil {
-		return nil, fmt.Errorf("can not convert \"%s\" to int64: %s", matches[3], err.Error())
+		return nil, fmt.Errorf("can not convert \"%s\" to uint16: %s", matches[3], err.Error())
 	}
 
-	d, err := parse(matches[4])
+	revision, err := parse(matches[4])
 	if err != nil {
-		return nil, fmt.Errorf("can not convert \"%s\" to int64: %s", matches[4], err.Error())
+		return nil, fmt.Errorf("can not convert \"%s\" to uint16: %s", matches[4], err.Error())
 	}
 
-	return &Version{a, b, c, d}, nil
+	return &Version{major, minor, build, revision, encode(major, minor, build, revision)}, nil
 }
 
-func parse(input string) (int64, error) {
-	if input != "" {
-		result, err := strconv.ParseInt(input, 10, 64)
+func NewVersionFromNumber(input uint64) *Version {
+	major := uint16((input >> 48) & 0xFFFF)
+	minor := uint16((input >> 32) & 0xFFFF)
+	build := uint16((input >> 16) & 0xFFFF)
+	revision := uint16(input & 0xFFFF)
 
+	return &Version{major, minor, build, revision, input}
+}
+
+func encode(major, minor, build, revision uint16) uint64 {
+	return (uint64(major) << 48) | (uint64(minor) << 32) | (uint64(build) << 16) | uint64(revision)
+}
+
+func parse(input string) (uint16, error) {
+	if input != "" {
+		number, err := strconv.ParseInt(input, 10, 16)
 		if err != nil {
 			return 0, err
 		}
+		if number < 0 || number > 65535 {
+			return 0, fmt.Errorf("number is out of uint16 range")
+		}
 
-		return result, nil
+		return uint16(number), nil
 	} else {
 		return 0, nil
 	}
@@ -65,44 +81,31 @@ func (v *Version) String() string {
 	return fmt.Sprintf("v%d.%d.%d.%d", v.Major, v.Minor, v.Build, v.Revision)
 }
 
-func (v *Version) Equal(other *Version) bool {
-	return recursiveCompare(v.Slice(), other.Slice()) == 0
+// Number returns uint64 representation.
+func (v *Version) Number() uint64 {
+	return v.Encoded
 }
 
-// Compare two versions.
-func (v *Version) Compare(other *Version) int {
-	return recursiveCompare(v.Slice(), other.Slice())
+func (v *Version) Equal(other *Version) bool {
+	return v.Number() == other.Number()
 }
 
 // LessThan returns true if this [Version] less than other [Version].
 func (v *Version) LessThan(other *Version) bool {
-	return v.Compare(other) < 0
+	return v.Number() < other.Number()
 }
 
-// Slice converts [Version] to array of 4 numbers.
-func (v *Version) Slice() []int64 {
-	return []int64{v.Major, v.Minor, v.Build, v.Revision}
+// MoreThan returns true if this [Version] more than other [Version].
+func (v *Version) MoreThan(other *Version) bool {
+	return v.Number() > other.Number()
 }
 
-func recursiveCompare(left []int64, right []int64) int {
-	if len(left) > len(right) {
-		return 1
-	} else if len(left) < len(right) {
-		return -1
-	}
+// LessOrEqual returns true if this [Version] less or equal than other [Version].
+func (v *Version) LessOrEqual(other *Version) bool {
+	return v.Number() <= other.Number()
+}
 
-	if len(left) == 0 {
-		return 0
-	}
-
-	leftNumber := left[0]
-	rightNumber := right[0]
-
-	if leftNumber > rightNumber {
-		return 1
-	} else if leftNumber < rightNumber {
-		return -1
-	}
-
-	return recursiveCompare(left[1:], right[1:])
+// MoreOrEqual returns true if this [Version] more or equal than other [Version].
+func (v *Version) MoreOrEqual(other *Version) bool {
+	return v.Number() >= other.Number()
 }

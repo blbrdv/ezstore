@@ -11,6 +11,8 @@ const displaycatalogURL = "https://displaycatalog.mp.microsoft.com/v7.0/products
 
 type framework struct {
 	Name string `json:"PackageIdentity"`
+	Min  uint64 `json:"MinVersion"`
+	Max  uint64 `json:"MaxTested"`
 }
 
 type platform struct {
@@ -123,7 +125,16 @@ func getAppInfo(id string, locale *ms.Locale) (*apps, string, error) {
 		}
 
 		for _, dep := range pkg.FrameworkDependencies {
-			app.Add(dep.Name)
+			var minVersion *ms.Version = nil
+			var maxVersion *ms.Version = nil
+			if dep.Min != 0 {
+				minVersion = ms.NewVersionFromNumber(dep.Min)
+			}
+			if dep.Max != 0 {
+				maxVersion = ms.NewVersionFromNumber(dep.Max)
+			}
+
+			app.Add(dep.Name, minVersion, maxVersion)
 		}
 
 		apps.Add(app)

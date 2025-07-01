@@ -7,7 +7,7 @@ import (
 
 func TestApp(t *testing.T) {
 	pkg, _ := newPackage("Foo_1.0.0.0_neutral_~_b1a2r3")
-	expected := &app{pkg: pkg, dependencies: map[string]struct{}{}}
+	expected := &app{pkg: pkg, dependencies: map[string]*dependency{}}
 	actual, err := newApp("Foo_1.0.0.0_neutral_~_b1a2r3", "neutral")
 
 	if err != nil {
@@ -37,7 +37,7 @@ func TestAddDependencyToApp(t *testing.T) {
 			app, _ := newApp("Foo_1.0.0.0_neutral_~_b1a2r3", "neutral")
 
 			for _, dep := range data.Dependencies {
-				app.Add(dep)
+				app.Add(dep, nil, nil)
 			}
 
 			depCount := len(app.Dependencies())
