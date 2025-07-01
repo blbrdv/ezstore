@@ -1,0 +1,37 @@
+{
+  "os": [
+    {
+      "label": "windows-2025",
+      "name": "WIN 10 2025 (x64)"
+    },
+    {
+      "label": "windows-2022",
+      "name": "WIN 10 2022 (x64)"
+    },
+    {
+      "label": "windows-11-arm",
+      "name": "WIN 11 (ARM64)"
+    }
+  ],
+  "targets": [
+    {
+      "label": "windows-2025",
+      "scenario": "no-color"
+    },
+    {
+      "label": "windows-2025",
+      "scenario": "not-found"
+    }
+  ],
+  "install": [
+    {
+      "id": "9mvsm3j7zj7c"
+    },
+    {
+      "id": "9wzdncrfhwm4"
+    },
+    {
+      "id": "9nksqgp7f2nh"
+    }
+  ]
+}
