@@ -26,7 +26,7 @@ runs:
 
         try {
           $GoOutput = & go version;
-          $GoOutput -match '^go version (go)?([.0-9]+)';
+          $Matches = $GoOutput -match '^go version (go)?([.0-9]+)';
           $GoInstalledVersion = $Matches[2];
           echo "Go installed version: $GoInstalledVersion";
 
