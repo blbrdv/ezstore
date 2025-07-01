@@ -12,7 +12,8 @@ $Settings = @{
     ExcludeRules = @(
         'PSAvoidGlobalVars',
         'PSUseDeclaredVarsMoreThanAssignments',
-        'PSAvoidUsingInvokeExpression'
+        'PSAvoidUsingInvokeExpression',
+        'PSAvoidUsingWriteHost'
     )
 }
 
