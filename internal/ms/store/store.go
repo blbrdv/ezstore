@@ -42,7 +42,7 @@ func getProductName(url string) (string, error) {
 func downloadFile(destinationPath string, data *bundle) (*ms.FileInfo, error) {
 	fullPath := utils.Join(
 		destinationPath,
-		fmt.Sprintf("%s-%s.%s", data.Name, data.Version.String(), data.Format),
+		fmt.Sprintf("%s_%s_%s.%s", data.Name, data.Version.String(), data.Arch, data.Format),
 	)
 
 	file := windows.OpenFile(fullPath, os.O_CREATE)
