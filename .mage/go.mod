@@ -89,14 +89,12 @@ require (
 	github.com/jbenet/go-context v0.0.0-20150711004518-d14ea06fba99 // indirect
 	github.com/jedib0t/go-pretty/v6 v6.6.7 // indirect
 	github.com/kevinburke/ssh_config v1.2.0 // indirect
-	github.com/kisielk/errcheck v1.9.0 // indirect
 	github.com/klauspost/compress v1.18.0 // indirect
 	github.com/lucasb-eyer/go-colorful v1.2.0 // indirect
 	github.com/mattn/go-colorable v0.1.13 // indirect
 	github.com/mattn/go-isatty v0.0.20 // indirect
 	github.com/mattn/go-localereader v0.0.1 // indirect
 	github.com/mattn/go-runewidth v0.0.16 // indirect
-	github.com/mdempsky/unconvert v0.0.0-20250216222326-4a038b3d31f5 // indirect
 	github.com/microcosm-cc/bluemonday v1.0.27 // indirect
 	github.com/micromdm/plist v0.2.1 // indirect
 	github.com/mitchellh/go-homedir v1.1.0 // indirect
@@ -130,7 +128,6 @@ require (
 	github.com/rust-secure-code/go-rustaudit v0.0.0-20250226111315-e20ec32e963c // indirect
 	github.com/saferwall/pe v1.5.6 // indirect
 	github.com/sahilm/fuzzy v0.1.1 // indirect
-	github.com/sashamelentyev/usestdlibvars v1.29.0 // indirect
 	github.com/secDre4mer/pkcs7 v0.0.0-20240322103146-665324a4461d // indirect
 	github.com/sergi/go-diff v1.3.2-0.20230802210424-5b0b94c5c0d3 // indirect
 	github.com/sirupsen/logrus v1.9.3 // indirect
@@ -162,7 +159,6 @@ require (
 	go.uber.org/multierr v1.11.0 // indirect
 	golang.org/x/crypto v0.39.0 // indirect
 	golang.org/x/exp v0.0.0-20250408133849-7e4ce0ab07d0 // indirect
-	golang.org/x/exp/typeparams v0.0.0-20231108232855-2478ac86f678 // indirect
 	golang.org/x/image v0.12.0 // indirect
 	golang.org/x/mod v0.25.0 // indirect
 	golang.org/x/net v0.41.0 // indirect
@@ -182,8 +178,6 @@ require (
 	gopkg.in/warnings.v0 v0.1.2 // indirect
 	gopkg.in/yaml.v3 v3.0.1 // indirect
 	gotest.tools/gotestsum v1.12.3 // indirect
-	gotest.tools/v3 v3.5.2 // indirect
-	honnef.co/go/tools v0.6.1 // indirect
 	modernc.org/libc v1.65.7 // indirect
 	modernc.org/mathutil v1.7.1 // indirect
 	modernc.org/memory v1.11.0 // indirect
@@ -195,11 +189,7 @@ require (
 
 tool (
 	github.com/google/osv-scanner/v2/cmd/osv-scanner
-	github.com/kisielk/errcheck
 	github.com/magefile/mage
-	github.com/mdempsky/unconvert
-	github.com/sashamelentyev/usestdlibvars
 	github.com/tc-hib/go-winres
 	gotest.tools/gotestsum
-	honnef.co/go/tools/cmd/staticcheck
 )
