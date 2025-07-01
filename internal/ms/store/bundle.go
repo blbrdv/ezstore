@@ -72,11 +72,11 @@ func (b *bundles) GetAppBundle(app *app) (*bundle, error) {
 	return nil, fmt.Errorf("no bundle for \"%s\"", app.pkg.String())
 }
 
-func (b *bundles) GetDependency(name string) (*bundle, error) {
+func (b *bundles) GetDependency(name string, arch ms.Architecture) (*bundle, error) {
 	var dependencies []*bundle
 
 	for _, value := range b.Values() {
-		if value.Name == name {
+		if value.Name == name && ms.IsSupported(value.Arch, arch) {
 			dependencies = append(dependencies, value)
 		}
 	}

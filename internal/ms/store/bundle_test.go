@@ -1,6 +1,7 @@
 package store
 
 import (
+	"github.com/blbrdv/ezstore/internal/ms"
 	"github.com/google/go-cmp/cmp"
 	"testing"
 )
@@ -109,7 +110,7 @@ func TestGetDepBundles(t *testing.T) {
 
 	bundles := newBundles(bundle3, bundle2, bundle1)
 
-	actual, err := bundles.GetDependency(dep)
+	actual, err := bundles.GetDependency(dep, ms.Arch)
 
 	if err != nil {
 		t.Fatalf("Function return no bundle: %s", err.Error())
@@ -129,7 +130,7 @@ func TestGetNoDepBundles(t *testing.T) {
 
 	bundles := newBundles(bundle3, bundle2, bundle1)
 
-	actual, err := bundles.GetDependency(dep)
+	actual, err := bundles.GetDependency(dep, ms.Arch)
 
 	if err == nil {
 		t.Fatalf("Function must return error \"%s\", but return result \"%s\"", expectedErr, actual.String())

@@ -75,11 +75,9 @@ func (f *files) Get(version *ms.Version, arch ms.Architecture) (*file, error) {
 			return nil, fmt.Errorf("no file with %s %s: no files with this version", version.String(), arch)
 		}
 
-		for _, supported := range arch.CompatibleWith() {
-			for _, file := range files {
-				if file.Arch == supported {
-					return file, nil
-				}
+		for _, file := range files {
+			if ms.IsSupported(file.Arch, arch) {
+				return file, nil
 			}
 		}
 
