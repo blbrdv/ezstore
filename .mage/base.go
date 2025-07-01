@@ -131,7 +131,7 @@ func Check() error {
 // Test run unit tests.
 func Test() error {
 	println("Running unit tests")
-	return sh.RunV("go", "test", `.\internal\...`)
+	return toolV("gotestsum", "-f", "testname", "--", `.\internal\...`)
 }
 
 var depRegexp = regexp.MustCompile(`^(\S+) v(\S+) v(\S+)$`)
