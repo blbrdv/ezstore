@@ -6,6 +6,7 @@ on:
     branches:
       - "main"
     paths:
+      - '.github/actions/**'
       - '.github/workflows/e2e-tests.yaml'
       - '.mage/**'
       - '**.go'

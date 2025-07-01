@@ -5,6 +5,7 @@ on:
     branches:
       - 'main'
     paths:
+      - '.github/actions/**'
       - '.github/workflows/go-check.yaml'
       - '.mage/**'
       - '**.go'
