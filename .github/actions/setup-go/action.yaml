@@ -18,8 +18,35 @@ runs:
         restore-keys: |
           ${{ runner.os }}-${{ runner.arch }}-go-
 
+    - name: Check if need Go installation
+      id: go
+      shell: pwsh
+      run: |
+        $NeedInstall = 'true';
+
+        try {
+          $GoOutput = & go version;
+          echo $GoOutput;
+          $GoOutput -match '^go version (go)?([.0-9]+)';
+          echo $Matches;
+          $GoInstalledVersion = $Matches[2];
+          echo $GoInstalledVersion;
+
+          $GoNeededVersion = & go list -f '{{.GoVersion}}' -m;
+          echo $GoNeededVersion;
+
+          if ( $GoNeededVersion -eq $GoInstalledVersion ) {
+            $NeedInstall = 'false'
+          }
+        } finally {
+          $Output = "need-install=$NeedInstall";
+
+          echo $Output;
+          echo $Output >> $env:GITHUB_OUTPUT;
+        }
+
     - name: Setup GO
-      if: steps.cache.outputs.cache-hit != 'true'
+      if: steps.cache.outputs.cache-hit != 'true' && steps.go.outputs.need-install == 'true'
       uses: actions/setup-go@v5
       with:
         go-version-file: 'go.mod'
