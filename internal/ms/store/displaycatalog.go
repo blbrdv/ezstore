@@ -69,7 +69,7 @@ func canRedeem(skuAvailability skuAvailability) (bool, error) {
 }
 
 func getAppInfo(id string, locale *ms.Locale) (*apps, string, error) {
-	var appInfo appInfo
+	var info appInfo
 	url := fmt.Sprintf(
 		"%s/%s?market=%s&languages=%s,%s,neutral",
 		displaycatalogURL,
@@ -78,7 +78,7 @@ func getAppInfo(id string, locale *ms.Locale) (*apps, string, error) {
 		locale.String(),
 		locale.Language,
 	)
-	resp, err := client.R().SetSuccessResult(&appInfo).Get(url)
+	resp, err := client.R().SetSuccessResult(&info).Get(url)
 	if err != nil {
 		return nil, "", fmt.Errorf("can not get app info: GET %s: %s", url, err.Error())
 	}
@@ -89,12 +89,12 @@ func getAppInfo(id string, locale *ms.Locale) (*apps, string, error) {
 		return nil, "", fmt.Errorf("can not get app info: GET %s: server returns error: %s", url, resp.Status)
 	}
 
-	if len(appInfo.Product.SkuAvailabilities) == 0 {
+	if len(info.Product.SkuAvailabilities) == 0 {
 		return nil, "", fmt.Errorf("can not get app info: no availabilities for this app")
 	}
 
 	var packages []jsonPkg
-	for _, availability := range appInfo.Product.SkuAvailabilities {
+	for _, availability := range info.Product.SkuAvailabilities {
 		redeemable, err := canRedeem(availability)
 		if err != nil {
 			return nil, "", err

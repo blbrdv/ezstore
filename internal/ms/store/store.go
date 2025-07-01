@@ -85,20 +85,20 @@ func Download(id string, version *ms.Version, locale *ms.Locale, destinationPath
 
 	bundles := newBundles()
 	for _, info := range productsInfo {
-		productURLs, err := getURL(info)
-		if err != nil {
-			return nil, fmt.Errorf("can not fetch file: %s", err.Error())
+		productURLs, err2 := getURL(info)
+		if err2 != nil {
+			return nil, fmt.Errorf("can not fetch file: %s", err2.Error())
 		}
 
 		for _, url := range productURLs {
-			bundleName, err := getProductName(url)
-			if err != nil {
-				return nil, fmt.Errorf("can not fetch file: %s", err.Error())
+			bundleName, err3 := getProductName(url)
+			if err3 != nil {
+				return nil, fmt.Errorf("can not fetch file: %s", err3.Error())
 			}
 
-			bundle, err := newBundle(bundleName, url)
-			if err != nil {
-				return nil, fmt.Errorf("can not fetch file: %s", err.Error())
+			bundle, err3 := newBundle(bundleName, url)
+			if err3 != nil {
+				return nil, fmt.Errorf("can not fetch file: %s", err3.Error())
 			}
 
 			if bundle.Format == "blockmap" {
@@ -112,17 +112,17 @@ func Download(id string, version *ms.Version, locale *ms.Locale, destinationPath
 
 	files := newFiles()
 	for _, app := range apps.Values() {
-		appBundle, err := bundles.GetAppBundle(app)
-		if err != nil {
-			return nil, fmt.Errorf("can not fetch file: %s", err.Error())
+		appBundle, err2 := bundles.GetAppBundle(app)
+		if err2 != nil {
+			return nil, fmt.Errorf("can not fetch file: %s", err2.Error())
 		}
 
 		file := newFile(appBundle)
 
 		for _, dep := range app.Dependencies() {
-			depBundle, err := bundles.GetDependency(dep, app.DepArch)
-			if err != nil {
-				return nil, fmt.Errorf("can not fetch file: %s", err.Error())
+			depBundle, err2 := bundles.GetDependency(dep, app.DepArch)
+			if err2 != nil {
+				return nil, fmt.Errorf("can not fetch file: %s", err2.Error())
 			}
 			file.Add(depBundle)
 		}

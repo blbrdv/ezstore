@@ -13,7 +13,7 @@ type Powershell struct {
 func (p *Powershell) Execf(format string, input ...any) (string, error) {
 	script := fmt.Sprintf(format, input...)
 	log.Tracef("Powershell: %s", script)
-	return p.Shell.Exec(script)
+	return p.Exec(script)
 }
 
 func (p *Powershell) Exit() {

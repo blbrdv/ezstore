@@ -30,7 +30,7 @@ func getCurrentDir() string {
 		panic(err.Error())
 	}
 
-	currentDir := path.Dir(strings.Replace(exePath, "\\", "/", -1))
+	currentDir := path.Dir(strings.ReplaceAll(exePath, "\\", "/"))
 	return currentDir
 }
 
