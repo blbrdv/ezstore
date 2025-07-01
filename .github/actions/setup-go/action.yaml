@@ -23,6 +23,7 @@ runs:
 
     - name: Download dependencies
       if: steps.cache.outputs.cache-hit != 'true'
+      shell: pwsh
       run: |
         cd .mage
         go mod download -x

@@ -28,14 +28,14 @@ jobs:
           fetch-depth: 0
 
       - name: Setup GO
-        uses: .github/actions/setup-go.yaml
+        uses: ./.github/actions/setup-go
 
       - name: Build project
         run: .\run.ps1 build
 
       - name: Save cache
         if: always()
-        uses: .github/actions/save-cache.yaml
+        uses: ./.github/actions/save-cache
 
       - name: Upload app
         uses: actions/upload-artifact@v4

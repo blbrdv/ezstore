@@ -23,7 +23,7 @@ jobs:
       - uses: actions/checkout@v4
 
       - name: Setup GO
-        uses: .github/actions/setup-go.yaml
+        uses: ./.github/actions/setup-go
 
       - name: Security check
         run: .\run.ps1 sec
@@ -36,4 +36,4 @@ jobs:
 
       - name: Save cache
         if: always()
-        uses: .github/actions/save-cache.yaml
+        uses: ./.github/actions/save-cache
