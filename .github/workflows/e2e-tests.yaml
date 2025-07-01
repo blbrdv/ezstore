@@ -43,27 +43,59 @@ jobs:
           name: build
           path: output
 
+  generation:
+    runs-on: windows-latest
+
+    outputs:
+      matrix: ${{ steps.set-matrix.outputs.matrix }}
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Generating matrix
+        id: set-matrix
+        run: |
+          $Data = Get-Content -Raw '.\.github\matrix.json' | ConvertFrom-Json;
+          $Include = @();
+
+          foreach ( $Target in $Data.targets ) {
+            foreach ( $Os in $Data.os ) {
+              if ( $Target.label -eq $Os.label ) {
+                $Include += @{
+                  label = $Os.label
+                  name = "'$($Target.scenario)' on $($Os.name)"
+                  run = ".\tests\$($Target.scenario).ps1"
+                };
+              }
+            }
+          }
+
+          foreach ( $Install in $Data.install ) {
+            foreach ( $Os in $Data.os ) {
+              $Include += @{
+                label = $Os.label
+                name = "'$($Install.id)'on $($Os.name)"
+                run = ".\tests\install.ps1 $($Install.id)"
+              };
+            }
+          }
+
+          $Matrix = (@{ include = $Include } | ConvertTo-JSON) -replace '\n';
+          $JSON = "matrix=$Matrix";
+
+          echo $JSON;
+          echo $JSON | Out-File -FilePath $env:GITHUB_OUTPUT -Append -Encoding utf8;
+
   test:
-    needs: build
+    needs: [build, generation]
 
     strategy:
-      fail-fast: true
-      matrix:
-        target:
-          - os: windows-2025
-            scenario: install
-          - os: windows-2025
-            scenario: not-found
-          - os: windows-2025
-            scenario: no-color
-          - os: windows-2022
-            scenario: install
-          - os: windows-11-arm
-            scenario: install
+      fail-fast: false
+      matrix: ${{ fromJson( needs.generation.outputs.matrix ) }}
 
-    runs-on: ${{ matrix.target.os }}
+    runs-on: ${{ matrix.label }}
 
-    name: ${{ matrix.target.scenario }} (${{ matrix.target.os }})
+    name: ${{ matrix.name }}
 
     steps:
       - uses: actions/checkout@v4
@@ -75,4 +107,4 @@ jobs:
           path: output
 
       - name: Running scenario
-        run: .\tests\${{ matrix.target.scenario }}.ps1
+        run: ${{ matrix.run }}
