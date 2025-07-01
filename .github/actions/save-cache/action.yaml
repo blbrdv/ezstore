@@ -9,4 +9,4 @@ runs:
           ~\go
           ~\AppData\Local\go-build
           %USERPROFILE%\magefile
-        key: ${{ runner.os }}-go-${{ hashFiles('.\go.mod', '.\.mage\go.mod') }}
+        key: ${{ runner.os }}-${{ runner.arch }}-go-${{ hashFiles('.\go.mod', '.\.mage\go.mod') }}
