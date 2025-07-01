@@ -74,3 +74,13 @@ func getCurrentArchitecture() Architecture {
 	}
 	return arch
 }
+
+func IsSupported(left string, right Architecture) bool {
+	for _, supported := range right.CompatibleWith() {
+		if left == supported {
+			return true
+		}
+	}
+
+	return false
+}

@@ -54,46 +54,38 @@ func OpenFile(path string, flag int) *File {
 }
 
 // Install package if its version higher that installed counterpart.
-func Install(file ms.FileInfo) error {
-	var result string
-	var err error
-	result, err = Shell.Execf(
-		"Get-AppxPackage -Name %s* | Sort-Object -Property Version | Select-Object -ExpandProperty Version -Last 1",
-		file.Name,
-	)
-	if err != nil {
-		return fmt.Errorf("can not install app %s: console command error: %s", file.Name, err.Error())
-	}
+func Install(file *ms.BundleFileInfo) error {
+	var depsStr string
+	deps := file.Dependencies()
+	length := len(deps)
 
-	installedVersionStr := strings.Trim(result, "\n\r")
-
-	var installedVersion *ms.Version
-
-	if installedVersionStr == "" {
-		installedVersion, err = ms.NewVersion("0")
-		if err != nil {
-			return err
-		}
+	if length == 0 {
+		depsStr = ""
 	} else {
-		installedVersion, err = ms.NewVersion(installedVersionStr)
-		if err != nil {
-			return fmt.Errorf("can not install app %s: can not get installed version: %s", file.Name, err.Error())
-		}
-	}
+		var sb strings.Builder
 
-	if installedVersion.LessThan(file.Version) {
-		result, err = Shell.Execf("Add-AppxPackage -Path %s", file.Path)
-		if err != nil {
-			if result != "" {
-				result = fmt.Sprintf("\n%s", result)
+		_, _ = fmt.Fprint(&sb, " -DependencyPath ")
+
+		last := length - 1
+		for i := 0; i < length; i++ {
+			dep := deps[i]
+			_, _ = fmt.Fprintf(&sb, `"%s"`, dep.Path)
+			if i != last {
+				_, _ = fmt.Fprint(&sb, ", ")
 			}
-			return fmt.Errorf("can not install app %s: console command error: %s%s", file.Name, err.Error(), result)
 		}
-
-		log.Infof("Package %s %s installed.", file.Name, file.Version.String())
-	} else {
-		log.Infof("Package %s %s already installed. Skipping.", file.Name, installedVersion)
+		depsStr = sb.String()
 	}
+
+	result, err := Shell.Execf("Add-AppxPackage -Path %s%s", file.Path, depsStr)
+	if err != nil {
+		if result != "" {
+			result = fmt.Sprintf("\n%s", result)
+		}
+		return fmt.Errorf("can not install app %s: console command error: %s%s", file.Name, err.Error(), result)
+	}
+
+	log.Infof("Package %s %s installed.", file.Name, file.Version.String())
 
 	return nil
 }

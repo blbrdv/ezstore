@@ -1,19 +1,26 @@
 package store
 
 import (
+	"fmt"
 	"testing"
 )
 
-type SomeData struct {
-	Value string
+type ComplexStruct struct {
+	Str string
+	Num int
 }
 
-func (sd *SomeData) String() string {
-	return sd.Value
+func (cs *ComplexStruct) String() string {
+	return fmt.Sprintf("'%s' -- %d", cs.Str, cs.Num)
 }
 
-func (sd *SomeData) Equal(other *SomeData) bool {
-	return sd.Value == other.Value
+func (cs *ComplexStruct) Equal(other *ComplexStruct) bool {
+	return cs.Str == other.Str
+}
+
+type SimpleStruct struct {
+	Str string
+	Num int
 }
 
 var slicesPrettyStringData = []struct {
@@ -22,16 +29,45 @@ var slicesPrettyStringData = []struct {
 	Expected string
 }{
 	{"TestEmptyStringSlice", []string{}, "[]"},
-	{"TestOneStringSlice", []string{"foo"}, "[foo]"},
-	{"TestTwoStringSlice", []string{"foo", "bar"}, "[foo, bar]"},
-	{"TestManyStringSlice", []string{"foo", "bar", "baz"}, "[foo, bar, baz]"},
-	{"TestRepeatStringSlice", []string{"foobar", "foobar"}, "[foobar, foobar]"},
+	{"TestOneStringSlice", []string{"foo"}, "[\"foo\"]"},
+	{"TestTwoStringSlice", []string{"foo", "bar"}, "[\"foo\", \"bar\"]"},
+	{"TestManyStringSlice", []string{"foo", "bar", "baz"}, "[\"foo\", \"bar\", \"baz\"]"},
+	{"TestRepeatStringSlice", []string{"foobar", "foobar"}, "[\"foobar\", \"foobar\"]"},
 
-	{"TestEmptyDataSlice", []*SomeData{}, "[]"},
-	{"TestOneDataSlice", []*SomeData{{Value: "foo"}}, "[foo]"},
-	{"TestTwoDataSlice", []*SomeData{{Value: "foo"}, {Value: "bar"}}, "[foo, bar]"},
-	{"TestManyDataSlice", []*SomeData{{Value: "foo"}, {Value: "bar"}, {Value: "baz"}}, "[foo, bar, baz]"},
-	{"TestRepeatDataSlice", []*SomeData{{Value: "foobar"}, {Value: "foobar"}}, "[foobar, foobar]"},
+	{"TestEmptySimpleStructSlice", []SimpleStruct{}, "[]"},
+	{"TestOneSimpleStructSlice", []SimpleStruct{{Str: "foo", Num: 1}}, "[{foo 1}]"},
+	{"TestTwoSimpleStructSlice", []SimpleStruct{{Str: "foo", Num: 2}, {Str: "bar", Num: 3}}, "[{foo 2}, {bar 3}]"},
+	{"TestManySimpleStructSlice", []SimpleStruct{{Str: "foo", Num: 4}, {Str: "bar", Num: 5}, {Str: "baz", Num: 6}},
+		"[{foo 4}, {bar 5}, {baz 6}]"},
+	{"TestRepeatSimpleStructSlice", []SimpleStruct{{Str: "foobar", Num: 7}, {Str: "foobar", Num: 7}},
+		"[{foobar 7}, {foobar 7}]"},
+
+	{"TestEmptySimpleStructPtrSlice", []*SimpleStruct{}, "[]"},
+	{"TestOneSimpleStructPtrSlice", []*SimpleStruct{{Str: "foo", Num: 1}}, "[*{foo 1}]"},
+	{"TestTwoSimpleStructPtrSlice", []*SimpleStruct{{Str: "foo", Num: 2}, {Str: "bar", Num: 3}},
+		"[*{foo 2}, *{bar 3}]"},
+	{"TestManySimpleStructPtrSlice", []*SimpleStruct{{Str: "foo", Num: 4}, {Str: "bar", Num: 5}, {Str: "baz", Num: 6}},
+		"[*{foo 4}, *{bar 5}, *{baz 6}]"},
+	{"TestRepeatSimpleStructPtrSlice", []*SimpleStruct{{Str: "foobar", Num: 7}, {Str: "foobar", Num: 7}},
+		"[*{foobar 7}, *{foobar 7}]"},
+
+	{"TestEmptyComplexStructSlice", []ComplexStruct{}, "[]"},
+	{"TestOneComplexStructSlice", []ComplexStruct{{Str: "foo", Num: 1}}, "[{foo 1}]"},
+	{"TestTwoComplexStructSlice", []ComplexStruct{{Str: "foo", Num: 2}, {Str: "bar", Num: 3}}, "[{foo 2}, {bar 3}]"},
+	{"TestManyComplexStructSlice", []ComplexStruct{{Str: "foo", Num: 4}, {Str: "bar", Num: 5}, {Str: "baz", Num: 6}},
+		"[{foo 4}, {bar 5}, {baz 6}]"},
+	{"TestRepeatComplexStructSlice", []ComplexStruct{{Str: "foobar", Num: 7}, {Str: "foobar", Num: 7}},
+		"[{foobar 7}, {foobar 7}]"},
+
+	{"TestEmptyComplexStructPtrSlice", []*ComplexStruct{}, "[]"},
+	{"TestOneComplexStructPtrSlice", []*ComplexStruct{{Str: "foo", Num: 1}}, "['foo' -- 1]"},
+	{"TestTwoComplexStructPtrSlice", []*ComplexStruct{{Str: "foo", Num: 2}, {Str: "bar", Num: 3}},
+		"['foo' -- 2, 'bar' -- 3]"},
+	{"TestManyComplexStructPtrSlice", []*ComplexStruct{{Str: "foo", Num: 4},
+		{Str: "bar", Num: 5}, {Str: "baz", Num: 6}},
+		"['foo' -- 4, 'bar' -- 5, 'baz' -- 6]"},
+	{"TestRepeatComplexStructPtrSlice", []*ComplexStruct{{Str: "foobar", Num: 7}, {Str: "foobar", Num: 7}},
+		"['foobar' -- 7, 'foobar' -- 7]"},
 }
 
 func TestPrettyStringSlices(t *testing.T) {
@@ -49,15 +85,15 @@ func TestPrettyStringSlices(t *testing.T) {
 
 var slicesEqualData = []struct {
 	Name  string
-	Left  []*SomeData
-	Right []*SomeData
+	Left  []*ComplexStruct
+	Right []*ComplexStruct
 	Equal bool
 }{
-	{"TestEmptySlices", []*SomeData{}, []*SomeData{}, true},
-	{"TestEqualSlices", []*SomeData{{Value: "a"}, {Value: "b"}}, []*SomeData{{Value: "b"}, {Value: "a"}}, true},
-	{"TestUnequalLeftSlices", []*SomeData{{Value: "a"}}, []*SomeData{{Value: "b"}, {Value: "a"}}, false},
-	{"TestUnequalRightSlices", []*SomeData{{Value: "a"}, {Value: "b"}}, []*SomeData{{Value: "a"}}, false},
-	{"TestUnequalSlices", []*SomeData{{Value: "a"}, {Value: "b"}}, []*SomeData{{Value: "b"}, {Value: "c"}}, false},
+	{"TestEmptySlices", []*ComplexStruct{}, []*ComplexStruct{}, true},
+	{"TestEqualSlices", []*ComplexStruct{{Str: "a"}, {Str: "b"}}, []*ComplexStruct{{Str: "b"}, {Str: "a"}}, true},
+	{"TestUnequalLeftSlices", []*ComplexStruct{{Str: "a"}}, []*ComplexStruct{{Str: "b"}, {Str: "a"}}, false},
+	{"TestUnequalRightSlices", []*ComplexStruct{{Str: "a"}, {Str: "b"}}, []*ComplexStruct{{Str: "a"}}, false},
+	{"TestUnequalSlices", []*ComplexStruct{{Str: "a"}, {Str: "b"}}, []*ComplexStruct{{Str: "b"}, {Str: "c"}}, false},
 }
 
 func TestEqualSlices(t *testing.T) {
@@ -67,7 +103,7 @@ func TestEqualSlices(t *testing.T) {
 			right := data.Right
 			expected := data.Equal
 
-			actual := Equal(left, right, func(l, r *SomeData) bool {
+			actual := Equal(left, right, func(l, r *ComplexStruct) bool {
 				return l.Equal(r)
 			})
 

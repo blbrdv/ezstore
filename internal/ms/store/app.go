@@ -15,6 +15,8 @@ type dependency struct {
 type app struct {
 	*pkg
 	dependencies map[string]*dependency
+
+	DepArch string
 }
 
 func (a *app) Add(name string, min, max *ms.Version) {
@@ -40,13 +42,13 @@ func (a *app) String() string {
 	return fmt.Sprintf("%s %s", a.pkg.String(), PrettyString(a.Dependencies()))
 }
 
-func newApp(input string) (*app, error) {
+func newApp(input string, arch string) (*app, error) {
 	pkg, err := newPackage(input)
 	if err != nil {
 		return nil, err
 	}
 
-	return &app{pkg: pkg, dependencies: map[string]*dependency{}}, nil
+	return &app{pkg: pkg, dependencies: map[string]*dependency{}, DepArch: arch}, nil
 }
 
 type apps struct {

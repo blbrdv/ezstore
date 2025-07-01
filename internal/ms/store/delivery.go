@@ -22,6 +22,10 @@ type productInfo struct {
 	RevisionNumber string
 }
 
+func (p productInfo) String() string {
+	return fmt.Sprintf("%s %s", p.UpdateID, p.RevisionNumber)
+}
+
 func getXMLClient() *req.Client {
 	return client.SetCommonHeader("Content-Type", "application/soap+xml")
 }

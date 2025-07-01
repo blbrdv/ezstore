@@ -3,62 +3,101 @@ package store
 import (
 	"fmt"
 	"github.com/blbrdv/ezstore/internal/utils"
+	"io"
 	"reflect"
+	"slices"
 	"strings"
 )
 
 func PrettyString(slice any) string {
-	val := reflect.ValueOf(slice)
-	if val.Kind() != reflect.Slice {
-		panic(fmt.Sprintf("expected slice, got %T", slice))
+	tp := reflect.TypeOf(slice)
+	if tp.Kind() != reflect.Slice {
+		panic(fmt.Sprintf("expected slice, got '%T' type", slice))
 	}
 
-	elemType := val.Type().Elem()
-	if elemType.Kind() == reflect.Ptr && elemType.Elem().Kind() == reflect.Struct {
-		stringerType := reflect.TypeOf((*fmt.Stringer)(nil)).Elem()
-		if elemType.Implements(stringerType) {
-			var sb strings.Builder
+	return printCollection(tp.Elem(), reflect.ValueOf(slice))
+}
 
-			utils.Fprint(&sb, "[")
+var numberTypes = []reflect.Kind{
+	reflect.Int,
+	reflect.Int8,
+	reflect.Int16,
+	reflect.Int32,
+	reflect.Int64,
+	reflect.Uint,
+	reflect.Uint8,
+	reflect.Uint16,
+	reflect.Uint32,
+	reflect.Uint64,
+	reflect.Uintptr,
+	reflect.Float32,
+	reflect.Float64,
+	reflect.Complex64,
+	reflect.Complex128,
+}
 
-			length := val.Len() - 1
-			for i := 0; i <= length; i++ {
-				switch v := val.Index(i).Interface().(type) {
-				case fmt.Stringer:
-					utils.Fprint(&sb, v.String())
-					if i < length {
-						utils.Fprint(&sb, ", ")
-					}
-				default:
-					panic(fmt.Sprintf("expected 'fmt.Stringer', got %T", v))
-				}
-			}
+var collectionTypes = []reflect.Kind{
+	reflect.Array,
+	reflect.Map,
+	reflect.Slice,
+}
 
-			utils.Fprint(&sb, "]")
+var stringerType = reflect.TypeOf((*fmt.Stringer)(nil)).Elem()
 
-			return sb.String()
+func printCollection(tp reflect.Type, s reflect.Value) string {
+	var sb strings.Builder
+
+	length := s.Len()
+	last := length - 1
+	f := getPrintFunc(tp)
+
+	utils.Fprint(&sb, "[")
+
+	for i := 0; i < length; i++ {
+		f(&sb, s.Index(i))
+		if i != last {
+			utils.Fprint(&sb, ", ")
 		}
 	}
 
-	switch s := slice.(type) {
-	case []string:
-		var sb strings.Builder
+	utils.Fprint(&sb, "]")
 
-		utils.Fprint(&sb, "[")
+	return sb.String()
+}
 
-		length := len(s) - 1
-		for i := 0; i <= length; i++ {
-			utils.Fprint(&sb, s[i])
-			if i < length {
-				utils.Fprint(&sb, ", ")
-			}
+func getPrintFunc(tp reflect.Type) func(writer io.Writer, value reflect.Value) {
+	if tp.Implements(stringerType) {
+		return printf("%s")
+	} else if tp.Kind() == reflect.String {
+		return printf("%q")
+	} else if tp.Kind() == reflect.Bool {
+		return printf("%t")
+	} else if slices.Contains(numberTypes, tp.Kind()) {
+		return printf("%d")
+	} else if slices.Contains(collectionTypes, tp.Kind()) {
+		return func(writer io.Writer, value reflect.Value) {
+			utils.Fprint(writer, printCollection(tp.Elem(), value))
 		}
+	} else if tp.Kind() == reflect.Interface {
+		return func(writer io.Writer, value reflect.Value) {
+			f := getPrintFunc(value.Type())
+			f(writer, value)
+		}
+	} else if tp.Kind() == reflect.Pointer {
+		return func(writer io.Writer, value reflect.Value) {
+			elem := value.Elem()
+			f := getPrintFunc(elem.Type())
+			utils.Fprint(writer, "*")
+			f(writer, elem)
+		}
+	} else {
+		return printf("%v")
+	}
+}
 
-		utils.Fprint(&sb, "]")
-
-		return sb.String()
-	default:
-		panic(fmt.Sprintf("invalid slice type: %T", slice))
+func printf(format string) func(writer io.Writer, value reflect.Value) {
+	return func(writer io.Writer, value reflect.Value) {
+		utils.Fprintf(writer, format, value.Interface())
 	}
 }
 
