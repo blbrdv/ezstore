@@ -9,6 +9,7 @@ import "github.com/magefile/mage/mg"
 //
 //goland:noinspection GoUnusedExportedFunction
 func Retest() {
+	mg.Deps(Lint)
 	mg.Deps(Check)
 	mg.Deps(Test)
 }

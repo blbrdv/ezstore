@@ -8,22 +8,22 @@ import (
 )
 
 func toolV(name string, params ...string) error {
-	return runTool(true, name, params...)
+	return runTool(true, name, modfile, params...)
 }
 
 func tool(name string, params ...string) error {
-	return runTool(false, name, params...)
+	return runTool(false, name, modfile, params...)
 }
 
-func runTool(v bool, name string, params ...string) error {
-	goparams := []string{"tool", modfile}
-	goparams = append(goparams, name)
-	goparams = append(goparams, params...)
+func runTool(v bool, name string, modfile string, params ...string) error {
+	goParams := []string{"tool", modfile}
+	goParams = append(goParams, name)
+	goParams = append(goParams, params...)
 
 	if v {
-		return sh.RunV("go", goparams...)
+		return sh.RunV("go", goParams...)
 	} else {
-		return run("go", goparams...)
+		return run("go", goParams...)
 	}
 }
 

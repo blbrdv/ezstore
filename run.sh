@@ -3,7 +3,9 @@ set -euo pipefail
 
 cd .mage
 go mod download -x
-cd ..
+cd golangci-lint
+go mod download -x
+cd ../..
 
 go mod download -x
 

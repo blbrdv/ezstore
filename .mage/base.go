@@ -80,41 +80,14 @@ func Sec() error {
 	return nil
 }
 
-// Check run multiple checks on go source code.
-// Uses various linters and gofmt.
+// Lint run golangci-lint.
+func Lint() error {
+	println("Run linters")
+	return runTool(true, "golangci-lint", `-modfile=.mage\golangci-lint\go.mod`, "run", `.\internal\...`)
+}
+
+// Check run gofmt and check if formatting needed.
 func Check() error {
-	var err error
-
-	println("Checking code for possibilities to use Go standard library")
-	err = tool("usestdlibvars", goSRC)
-	if err != nil {
-		return err
-	}
-
-	println("Checking code for unnecessary type conversions")
-	err = tool("unconvert", "-v", goSRC)
-	if err != nil {
-		return err
-	}
-
-	println("Checking code for unchecked errors")
-	err = tool("errcheck", "-asserts", "-blank", "-ignoretests", goSRC)
-	if err != nil {
-		return err
-	}
-
-	println("Checking code problems")
-	err = run("go", "vet", goSRC)
-	if err != nil {
-		return err
-	}
-
-	println("Checking code style")
-	err = tool("staticcheck", goSRC)
-	if err != nil {
-		return err
-	}
-
 	println("Checking code format")
 	out, err := sh.Output("gofmt", "-l", "-s", ".")
 	if err != nil {
