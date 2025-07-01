@@ -1,0 +1,30 @@
+name: 'Innit'
+runs:
+  using: 'composite'
+  steps:
+    - name: Restore cache
+      id: cache
+      uses: actions/cache/restore@v4
+      with:
+        path: |
+          ~\go
+          ~\AppData\Local\go-build
+          %USERPROFILE%\magefile
+        key: ${{ runner.os }}-go-${{ hashFiles('.\go.mod', '.\.mage\go.mod') }}
+        restore-keys: |
+          ${{ runner.os }}-go-
+
+    - name: Setup GO
+      if: steps.cache.outputs.cache-hit != 'true'
+      uses: actions/setup-go@v5
+      with:
+        go-version-file: 'go.mod'
+        cache: false
+
+    - name: Download dependencies
+      if: steps.cache.outputs.cache-hit != 'true'
+      run: |
+        cd .mage
+        go mod download -x
+        cd ..
+        go mod download -x
