@@ -1,10 +1,15 @@
 # Changelog
 
-## [1.3.4] - 2025-06-25
+## [1.4.0] - 2025-07-02
 
 ### Added
 
 - Add check for min/max version support for framework dependencies [#32](https://github.com/blbrdv/ezstore/issues/32)
+
+### Fixed
+
+- Fixed fetching and installing bundle dependency with different architecture that required by app
+- Fixed incorrect bundle installation order
 
 ### Changed
 
@@ -92,7 +97,7 @@
 
 Initial release.
 
-[1.3.4]: https://github.com/blbrdv/ezstore/releases/tag/v1.3.4
+[1.4.0]: https://github.com/blbrdv/ezstore/releases/tag/v1.4.0
 [1.3.3]: https://github.com/blbrdv/ezstore/releases/tag/v1.3.3
 [1.3.2]: https://github.com/blbrdv/ezstore/releases/tag/v1.3.2
 [1.3.1]: https://github.com/blbrdv/ezstore/releases/tag/v1.3.1
