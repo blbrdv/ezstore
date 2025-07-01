@@ -1,4 +1,8 @@
 name: 'Innit'
+outputs:
+  cache-hit:
+    description: True if cache was hit
+    value: ${{ steps.cache.outputs.cache-hit }}
 runs:
   using: 'composite'
   steps:
