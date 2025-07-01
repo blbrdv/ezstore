@@ -19,14 +19,14 @@ runs:
           ${{ runner.os }}-${{ runner.arch }}-go-
 
     - name: Check if need Go installation
+      if: steps.cache.outputs.cache-hit != 'true'
       id: go
       shell: pwsh
       run: |
         $NeedInstall = 'true';
 
         try {
-          $GoOutput = & go version;
-          $Matches = $GoOutput -match '^go version (go)?([.0-9]+)';
+          (& go version) -match '^go version (go)?([.0-9]+)' > $null;
           $GoInstalledVersion = $Matches[2];
           echo "Go installed version: $GoInstalledVersion";
 
