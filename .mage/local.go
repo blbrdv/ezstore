@@ -4,7 +4,7 @@ package main
 
 import "github.com/magefile/mage/mg"
 
-// Retest run "check" and "test" steps.
+// Retest run "lint", "check" and "test" steps.
 // Only for local development.
 //
 //goland:noinspection GoUnusedExportedFunction
