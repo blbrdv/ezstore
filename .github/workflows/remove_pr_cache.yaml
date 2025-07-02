@@ -15,8 +15,10 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
+#          $ClosedPRs = gh pr list --state closed --json | ConvertFrom-Json
+#          gh cache list --ref refs/pull/<number>/merge
       - name: List
         run: |
-          gh cache list
+          gh pr list --state closed
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
