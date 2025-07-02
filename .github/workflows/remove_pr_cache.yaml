@@ -17,10 +17,10 @@ jobs:
 
       - name: List
         run: |
-          closed_prs=$(gh pr list --state closed --json id,title)
+          closed_prs=$(gh pr list --state closed --json number,title)
 
           while IFS= read -r pr; do
-            pr_id=$(echo "$pr" | jq -r '.id')
+            pr_id=$(echo "$pr" | jq -r '.number')
             pr_title=$(echo "$pr" | jq -r '.title')
             echo "Pr $pr_id '$pr_title'"
 
