@@ -63,7 +63,7 @@ func encode(major, minor, build, revision uint16) uint64 {
 
 func parse(input string) (uint16, error) {
 	if input != "" {
-		number, err := strconv.ParseInt(input, 10, 16)
+		number, err := strconv.ParseInt(input, 10, 64)
 		if err != nil {
 			return 0, err
 		}
