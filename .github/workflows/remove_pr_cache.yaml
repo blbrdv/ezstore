@@ -17,11 +17,15 @@ jobs:
 
       - name: List
         run: |
-          $ClosedPRs = gh pr list --state closed --json | ConvertFrom-Json;
-          foreach ( $PR in $ClosedPRs ) {
-            echo "Pr $($PR.id) '$($PR.title)'"
-            $PRCaches = gh cache list --ref refs/pull/$($PR.id)/merge | ConvertFrom-Json;
-            echo $PRCaches;
-          }
+          closed_prs=$(gh pr list --state closed --json)
+
+          while IFS= read -r pr; do
+            pr_id=$(echo "$pr" | jq -r '.id')
+            pr_title=$(echo "$pr" | jq -r '.title')
+            echo "Pr $pr_id '$pr_title'"
+
+            pr_caches=$(gh cache list --ref "refs/pull/$pr_id/merge" --json)
+            echo "$pr_caches"
+          done <<< "$(echo "$closed_prs" | jq -c '.[]')"
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
