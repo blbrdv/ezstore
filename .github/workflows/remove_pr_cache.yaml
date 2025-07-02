@@ -22,10 +22,16 @@ jobs:
           while IFS= read -r pr; do
             pr_id=$(echo "$pr" | jq -r '.number')
             pr_title=$(echo "$pr" | jq -r '.title')
-            echo "Pr $pr_id '$pr_title'"
 
-            pr_caches=$(gh cache list --ref "refs/pull/$pr_id/merge" --json id,key,ref)
-            echo "$pr_caches"
+            pr_caches=$(gh cache list --ref "refs/pull/$pr_id/merge" --json id)
+
+            while IFS= read -r cache; do
+              cache_id=$(echo "$cache" | jq -r '.id')
+
+              echo "Deleting $cache_id for #$pr_id '$pr_title'"
+
+              gh cache delete $cache_id
+            done <<< "$(echo "$pr_caches" | jq -c '.[]')"
           done <<< "$(echo "$closed_prs" | jq -c '.[]')"
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
