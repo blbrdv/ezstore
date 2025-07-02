@@ -22,8 +22,9 @@ func (b *bundle) String() string {
 	return fmt.Sprintf("%s_%s_%s__%s.%s (\"%s\")", b.Name, b.Version.String(), b.Arch, b.ID, b.Format, b.URL)
 }
 
+var bundleRegexp = regexp.MustCompile(`^([0-9a-zA-Z.-]+)_([\d.]+)_([a-zA-Z0-9]+)_~?_([a-z0-9]+).([a-zA-Z]+)$`)
+
 func newBundle(input string, url string) (*bundle, error) {
-	bundleRegexp := regexp.MustCompile(`^([0-9a-zA-Z.-]+)_([\d.]+)_([a-zA-Z0-9]+)_~?_([a-z0-9]+).([a-zA-Z]+)$`)
 	matches := bundleRegexp.FindStringSubmatch(input)
 	if len(matches) == 0 {
 		return nil, fmt.Errorf("\"%s\" is not valid bundle", input)
@@ -32,7 +33,7 @@ func newBundle(input string, url string) (*bundle, error) {
 	pfm := &packageFamilyName{Name: matches[1], ID: matches[4]}
 	version, err := ms.NewVersion(matches[2])
 	if err != nil {
-		return nil, fmt.Errorf("\"%s\" is not valid bundle", input)
+		return nil, fmt.Errorf("\"%s\" is not valid bundle: %s", input, err.Error())
 	}
 	pkg := &pkg{
 		packageFamilyName: pfm,

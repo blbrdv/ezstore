@@ -15,9 +15,10 @@ type Version struct {
 	Encoded  uint64
 }
 
+var semverRegexp = regexp.MustCompile(`^v?(\d+)(?:\.(\d+))?(?:\.(\d+))?(?:\.(\d+))?$`)
+
 // NewVersion returns [Version] from string representing SemVer.
 func NewVersion(input string) (*Version, error) {
-	semverRegexp := regexp.MustCompile(`^v?(\d+)(?:\.(\d+))?(?:\.(\d+))?(?:\.(\d+))?$`)
 	matches := semverRegexp.FindStringSubmatch(input)
 
 	if len(matches) == 0 {

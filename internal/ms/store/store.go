@@ -11,6 +11,8 @@ import (
 	"regexp"
 )
 
+var fileNameRegexp = regexp.MustCompile(`filename=(\S+)`)
+
 func getProductName(url string) (string, error) {
 	res, err := client.
 		SetCommonHeader("Connection", "Keep-Alive").
@@ -30,7 +32,6 @@ func getProductName(url string) (string, error) {
 		return "", fmt.Errorf("fetching product name failed: can not get file name: response header \"Content-Disposition\" is empty")
 	}
 
-	fileNameRegexp := regexp.MustCompile(`filename=(\S+)`)
 	matches := fileNameRegexp.FindStringSubmatch(header)
 	if len(matches) != 2 {
 		return "", fmt.Errorf("fetching product name failed: can not get file name: response header \"Content-Disposition\" has invalid format: %s", header)
