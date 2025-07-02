@@ -26,7 +26,7 @@ jobs:
             pr_caches=$(gh cache list --ref "refs/pull/$pr_id/merge" --json id | jq -c '.[]')
             echo "$pr_caches"
 
-            if [ "$pr_caches" -ne "[]" ]; then
+            if [[ "$pr_caches" -ne "[]" ]]; then
               while IFS= read -r cache; do
                 cache_id=$(echo "$cache" | jq -r '.id')
 
