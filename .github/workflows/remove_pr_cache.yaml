@@ -15,16 +15,6 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
-
-      #            if [[ "$pr_caches" -ne "[]" ]]; then
-      #              while IFS= read -r cache; do
-      #                cache_id=$(echo "$cache" | jq -r '.id')
-      #
-      #                echo "Deleting $cache_id for #$pr_id '$pr_title'"
-      #
-      #                gh cache delete $cache_id
-      #              done <<< "$pr_caches"
-      #            fi
       - name: List
         run: |
           closed_prs=$(gh pr list --state closed --json number,title | jq -c '.[]')
@@ -33,8 +23,17 @@ jobs:
             pr_id=$(echo "$pr" | jq -r '.number')
             pr_title=$(echo "$pr" | jq -r '.title')
 
-            pr_caches=$(gh cache list --ref "refs/pull/$pr_id/merge" --json id | jq -c '.[]')
-            echo "$pr_caches"
+            pr_caches=$(gh cache list --ref "refs/pull/$pr_id/merge" --json id)
+
+            if [[ "$pr_caches" -ne "[]" ]]; then
+              while IFS= read -r cache; do
+                cache_id=$(echo "$cache" | jq -r '.id')
+
+                echo "Deleting $cache_id for #$pr_id '$pr_title'"
+
+                gh cache delete $cache_id
+              done <<< "$(echo "$pr_caches" | jq -c '.[]')"
+            fi
           done <<< "$closed_prs"
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
