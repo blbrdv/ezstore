@@ -17,14 +17,14 @@ jobs:
 
       - name: List
         run: |
-          closed_prs=$(gh pr list --state closed --json)
+          closed_prs=$(gh pr list --state closed --json id,title)
 
           while IFS= read -r pr; do
             pr_id=$(echo "$pr" | jq -r '.id')
             pr_title=$(echo "$pr" | jq -r '.title')
             echo "Pr $pr_id '$pr_title'"
 
-            pr_caches=$(gh cache list --ref "refs/pull/$pr_id/merge" --json)
+            pr_caches=$(gh cache list --ref "refs/pull/$pr_id/merge" --json id,key,ref)
             echo "$pr_caches"
           done <<< "$(echo "$closed_prs" | jq -c '.[]')"
         env:
