@@ -114,7 +114,7 @@ func getAppInfo(id string, locale *ms.Locale) (*apps, string, error) {
 	for _, availability := range info.Product.SkuAvailabilities {
 		redeemable, err2 := canRedeem(availability)
 		if err2 != nil {
-			return nil, "", err2
+			return nil, "", fmt.Errorf("cannot detect redeemable sku: %s", err2.Error())
 		}
 
 		if redeemable {
@@ -138,13 +138,13 @@ func getAppInfo(id string, locale *ms.Locale) (*apps, string, error) {
 	for _, pkg := range packages {
 		tmpPkg, err2 := newPackage(pkg.Name)
 		if err2 != nil {
-			return nil, "", err2
+			return nil, "", fmt.Errorf("cannot get package by name: %s", err2.Error())
 		}
 
 		fullName := fmt.Sprintf("%s_%s_%s__%s", appName, tmpPkg.Version, tmpPkg.Arch, bundleID)
 		app, err2 := newApp(fullName, pkg.Architectures[0])
 		if err2 != nil {
-			return nil, "", err2
+			return nil, "", fmt.Errorf("cannot get package by full name: %s", err2.Error())
 		}
 
 		for _, dep := range pkg.FrameworkDependencies {

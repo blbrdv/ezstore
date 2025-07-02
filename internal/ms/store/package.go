@@ -47,7 +47,7 @@ func (p *pkg) String() string {
 	return fmt.Sprintf("%s_%s_%s__%s", p.Name, p.Version.String(), p.Arch, p.ID)
 }
 
-var packageRegexp = regexp.MustCompile(`^([0-9a-zA-Z.-]+)_([\d.]+)_([a-zA-Z0-9]+)_~?_([a-z0-9]+)$`)
+var packageRegexp = regexp.MustCompile(`^([0-9a-zA-Z.-]+)_v?([\d.]+)_([a-zA-Z0-9]+)_~?_([a-z0-9]+)$`)
 
 func newPackage(input string) (*pkg, error) {
 	matches := packageRegexp.FindStringSubmatch(input)
