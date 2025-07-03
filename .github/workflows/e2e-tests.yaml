@@ -90,7 +90,7 @@ jobs:
             foreach ( $Os in $Data.os ) {
               $Include += @{
                 label = $Os.label
-                name = "'$($Install.id)'on $($Os.name)"
+                name = "'$($Install.id)' on $($Os.name)"
                 run = ".\tests\install.ps1 $($Install.id)"
               };
             }
