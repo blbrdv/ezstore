@@ -33,28 +33,3 @@ function Install {
 }
 
 $ColorRegexp = '\x1b\[[0-9;]*m';
-
-$Targets = @{
-
-    # Tree CLI app
-    # no dependencies
-    "9mvsm3j7zj7c" = @{
-        Name = "PeterEtelej.TreeCLI"
-        Version = "1.1.0.0"
-    }
-
-    # Wikipedia app
-    # one dependency
-    "9wzdncrfhwm4" = @{
-        Name = "WikimediaFoundation.Wikipedia"
-        Version = "1.0.0.0"
-    }
-
-    # VPN Proxy: Fast & Unlimited
-    # 6 dependencies
-    "9pntscmcg01j" = @{
-        Name = "59992Roob.BestProxyFastUnlimitedVPNfunctionality"
-        Version = "1.0.20.0"
-    }
-
-};

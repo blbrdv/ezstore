@@ -1,6 +1,6 @@
 param (
     [Parameter(Mandatory=$true,Position=0)]
-    [string]$Id
+    [string]$JSON
 )
 
 Set-StrictMode -Version 3.0;
@@ -9,24 +9,20 @@ trap { Write-Error $_ -ErrorAction Continue; exit 1 };
 
 . ".\tests\_core.ps1";
 
-$Target = $Targets[$Id];
+$Target = $JSON | ConvertFrom-Json;
 
-if ( $null -eq $Target ) {
-    throw "Unknow app ID: $Id"
-}
-
-Install $Id $Target.Version;
+Install $Target.id $Target.version > $null;
 
 Import-Module -Name Appx -UseWindowsPowerShell -WarningAction SilentlyContinue;
 
-$Package = Get-AppxPackage -Name $Target.Name;
+$Package = Get-AppxPackage -Name $Target.name;
 
 if ( $null -eq $Package ) {
-    throw "Package $($Target.Name) not installed";
+    throw "Package $($Target.name) not installed";
 }
 
-if ( $Package.Version -ne $Target.Version ) {
-    throw "Wrong version installed. Expected $($Target.Version), actual: $($Package.Version)."
+if ( $Package.Version -ne $Target.version ) {
+    throw "Wrong version installed. Expected $($Target.version), actual: $($Package.Version)."
 }
 
 Write-Output "Test passed!";

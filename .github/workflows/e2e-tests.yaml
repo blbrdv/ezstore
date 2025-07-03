@@ -87,11 +87,12 @@ jobs:
           }
 
           foreach ( $Install in $Data.install ) {
+            $Target = $Install | ConvertTo-Json;
             foreach ( $Os in $Data.os ) {
               $Include += @{
                 label = $Os.label
                 name = "'$($Install.id)' on $($Os.name)"
-                run = ".\tests\install.ps1 $($Install.id)"
+                run = ".\tests\install.ps1 '$Target'"
               };
             }
           }
