@@ -12,6 +12,22 @@ type dependency struct {
 	max  *ms.Version
 }
 
+func (d *dependency) String() string {
+	var minVersion string
+	var maxVersion string
+	if d.min == nil {
+		minVersion = "none"
+	} else {
+		minVersion = d.min.String()
+	}
+	if d.max == nil {
+		maxVersion = "none"
+	} else {
+		maxVersion = d.max.String()
+	}
+	return fmt.Sprintf(`"%s" >=%s <=%s`, d.name, minVersion, maxVersion)
+}
+
 type app struct {
 	*pkg
 	dependencies map[string]*dependency
