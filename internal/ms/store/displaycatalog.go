@@ -4,7 +4,6 @@ import (
 	"fmt"
 	"github.com/blbrdv/ezstore/internal/ms"
 	"net/http"
-	"regexp"
 	"strings"
 )
 
@@ -49,12 +48,7 @@ type skuAvailability struct {
 	Availabilities []availability `json:"Availabilities"`
 }
 
-type productProperties struct {
-	PackageFamilyName string `json:"PackageFamilyName"`
-}
-
 type product struct {
-	Properties        productProperties `json:"Properties"`
 	SkuAvailabilities []skuAvailability `json:"DisplaySkuAvailabilities"`
 }
 
@@ -73,8 +67,6 @@ func canRedeem(skuAvailability skuAvailability) (bool, error) {
 
 	return false, nil
 }
-
-var appNameRegexp = regexp.MustCompile(`^([^_]+)_([^_]+)$`)
 
 func getAppInfo(id string, locale *ms.Locale) (*apps, string, error) {
 	var info appInfo
@@ -100,15 +92,6 @@ func getAppInfo(id string, locale *ms.Locale) (*apps, string, error) {
 	if len(info.Product.SkuAvailabilities) == 0 {
 		return nil, "", fmt.Errorf("can not get app info: no availabilities for this app")
 	}
-
-	familyName := info.Product.Properties.PackageFamilyName
-	matches := appNameRegexp.FindStringSubmatch(familyName)
-	if len(matches) == 0 {
-		return nil, "", fmt.Errorf("\"%s\" is not valid package family name", familyName)
-	}
-
-	appName := matches[1]
-	bundleID := matches[2]
 
 	var packages []jsonPkg
 	for _, availability := range info.Product.SkuAvailabilities {
@@ -136,13 +119,7 @@ func getAppInfo(id string, locale *ms.Locale) (*apps, string, error) {
 	apps := newApps()
 	wuid := ""
 	for _, pkg := range packages {
-		tmpPkg, err2 := newPackage(pkg.Name)
-		if err2 != nil {
-			return nil, "", fmt.Errorf("cannot get package by name: %s", err2.Error())
-		}
-
-		fullName := fmt.Sprintf("%s_%s_%s__%s", appName, tmpPkg.Version, tmpPkg.Arch, bundleID)
-		app, err2 := newApp(fullName, pkg.Architectures[0])
+		app, err2 := newApp(pkg.Name, pkg.Architectures[0])
 		if err2 != nil {
 			return nil, "", fmt.Errorf("cannot get package by full name: %s", err2.Error())
 		}
