@@ -10,12 +10,15 @@ jobs:
   clear:
     name: Remove old Pull Requests cache
 
+    permissions:
+      actions: write
+
     runs-on: ubuntu-24.04
 
     steps:
       - uses: actions/checkout@v4
 
-      - name: List
+      - name: Remove old cache
         run: |
           closed_prs=$(gh pr list --state closed --json number,title | jq -c '.[]')
 
