@@ -29,10 +29,10 @@ runs:
         try {
           (& go version) -match '^go version (go)?([.0-9]+)' > $null;
           $GoInstalledVersion = $Matches[2];
-          echo "Go installed version: $GoInstalledVersion";
+          echo "Go installed version: '$GoInstalledVersion'";
 
           $GoNeededVersion = & go list -f '{{.GoVersion}}' -m;
-          echo "Go needed version:    $GoNeededVersion";
+          echo "Go needed version:    '$GoNeededVersion'";
 
           if ( $GoNeededVersion -eq $GoInstalledVersion ) {
             $NeedInstall = 'false';
