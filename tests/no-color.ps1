@@ -4,7 +4,7 @@ trap { Write-Error $_ -ErrorAction Continue; exit 1 };
 
 . ".\tests\_core.ps1";
 
-$Key = $($Targets.Keys)[2];
+$Key = "9mvsm3j7zj7c"
 
 $Env:NO_COLOR = "1"
 $Output = Install $Key $Targets[$Key].Version;

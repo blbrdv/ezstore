@@ -50,11 +50,11 @@ $Targets = @{
         Version = "1.0.0.0"
     }
 
-    # WhatsApp app
-    # 5 dependencies
-    "9nksqgp7f2nh" = @{
-        Name = "5319275A.WhatsAppDesktop"
-        Version = "2.2524.4.0"
+    # VPN Proxy: Fast & Unlimited
+    # 6 dependencies
+    "9pntscmcg01j" = @{
+        Name = "59992Roob.BestProxyFastUnlimitedVPNfunctionality"
+        Version = "1.0.20.0"
     }
 
 };
