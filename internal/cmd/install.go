@@ -44,6 +44,10 @@ func Install(_ context.Context, cmd *cli.Command) error {
 		}
 	}
 
+	log.Tracef("Id: %s", id)
+	log.Tracef("Version: %s", version)
+	log.Tracef("Locale: %s", locale)
+
 	tmpPath := utils.Join(windows.TempDir, id)
 
 	log.Debugf("Trace file: %s", log.TraceFile)
@@ -55,16 +59,14 @@ func Install(_ context.Context, cmd *cli.Command) error {
 	windows.Remove(tmpPath)
 	windows.MkDir(tmpPath)
 
-	files, err := store.Download(id, version, locale, tmpPath)
+	file, err := store.Download(id, version, locale, tmpPath)
 	if err != nil {
 		return err
 	}
 
-	for _, file := range files {
-		err = windows.Install(file)
-		if err != nil {
-			return err
-		}
+	err = windows.Install(file)
+	if err != nil {
+		return err
 	}
 
 	log.Success("Done!")

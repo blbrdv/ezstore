@@ -20,9 +20,10 @@ func (pfm *packageFamilyName) String() string {
 	return fmt.Sprintf("%s_%s", pfm.Name, pfm.ID)
 }
 
+var packageFamilyRegexp = regexp.MustCompile(`^([0-9a-zA-Z.-]+)_([a-z0-9]+)$`)
+
 func newPackageFamilyName(input string) (*packageFamilyName, error) {
-	packageRegexp := regexp.MustCompile(`^([0-9a-zA-Z.-]+)_([a-z0-9]+)$`)
-	matches := packageRegexp.FindStringSubmatch(input)
+	matches := packageFamilyRegexp.FindStringSubmatch(input)
 	if len(matches) == 0 {
 		return nil, fmt.Errorf("\"%s\" is not valid package family name", input)
 	}
@@ -46,8 +47,9 @@ func (p *pkg) String() string {
 	return fmt.Sprintf("%s_%s_%s__%s", p.Name, p.Version.String(), p.Arch, p.ID)
 }
 
+var packageRegexp = regexp.MustCompile(`^([0-9a-zA-Z.-]+)_v?([\d.]+)_([a-zA-Z0-9]+)_~?_([a-z0-9]+)$`)
+
 func newPackage(input string) (*pkg, error) {
-	packageRegexp := regexp.MustCompile(`^([0-9a-zA-Z.-]+)_([\d.]+)_([a-zA-Z0-9]+)_~?_([a-z0-9]+)$`)
 	matches := packageRegexp.FindStringSubmatch(input)
 	if len(matches) == 0 {
 		return nil, fmt.Errorf("\"%s\" is not valid package", input)

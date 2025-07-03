@@ -12,9 +12,10 @@ runs:
       with:
         path: |
           ~\go
-          ~\AppData\Local\go-build
+          %LocalAppData%\go-build
+          %LocalAppData%\golangci-lint
           %USERPROFILE%\magefile
-        key: ${{ runner.os }}-${{ runner.arch }}-go-${{ hashFiles('.\go.mod', '.\.mage\go.mod') }}
+        key: ${{ runner.os }}-${{ runner.arch }}-go-${{ hashFiles('.\go.mod', '.\.mage\go.mod', '.\.mage\golangci-lint\go.mod') }}
         restore-keys: |
           ${{ runner.os }}-${{ runner.arch }}-go-
 
@@ -28,10 +29,10 @@ runs:
         try {
           (& go version) -match '^go version (go)?([.0-9]+)' > $null;
           $GoInstalledVersion = $Matches[2];
-          echo "Go installed version: $GoInstalledVersion";
+          echo "Go installed version: '$GoInstalledVersion'";
 
           $GoNeededVersion = & go list -f '{{.GoVersion}}' -m;
-          echo "Go needed version:    $GoNeededVersion";
+          echo "Go needed version:    '$GoNeededVersion'";
 
           if ( $GoNeededVersion -eq $GoInstalledVersion ) {
             $NeedInstall = 'false';
@@ -58,5 +59,7 @@ runs:
       run: |
         cd .mage
         go mod download -x
-        cd ..
+        cd golangci-lint
+        go mod download -x
+        cd ..\..
         go mod download -x

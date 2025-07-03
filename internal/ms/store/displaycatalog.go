@@ -11,6 +11,8 @@ const displaycatalogURL = "https://displaycatalog.mp.microsoft.com/v7.0/products
 
 type framework struct {
 	Name string `json:"PackageIdentity"`
+	Min  uint64 `json:"MinVersion"`
+	Max  uint64 `json:"MaxTested"`
 }
 
 type platform struct {
@@ -22,6 +24,7 @@ type fulfillmentData struct {
 }
 
 type jsonPkg struct {
+	Architectures         []string        `json:"Architectures"`
 	Name                  string          `json:"PackageFullName"`
 	FrameworkDependencies []framework     `json:"FrameworkDependencies"`
 	PlatformDependencies  []platform      `json:"PlatformDependencies"`
@@ -66,7 +69,7 @@ func canRedeem(skuAvailability skuAvailability) (bool, error) {
 }
 
 func getAppInfo(id string, locale *ms.Locale) (*apps, string, error) {
-	var appInfo appInfo
+	var info appInfo
 	url := fmt.Sprintf(
 		"%s/%s?market=%s&languages=%s,%s,neutral",
 		displaycatalogURL,
@@ -75,7 +78,7 @@ func getAppInfo(id string, locale *ms.Locale) (*apps, string, error) {
 		locale.String(),
 		locale.Language,
 	)
-	resp, err := client.R().SetSuccessResult(&appInfo).Get(url)
+	resp, err := client.R().SetSuccessResult(&info).Get(url)
 	if err != nil {
 		return nil, "", fmt.Errorf("can not get app info: GET %s: %s", url, err.Error())
 	}
@@ -86,15 +89,15 @@ func getAppInfo(id string, locale *ms.Locale) (*apps, string, error) {
 		return nil, "", fmt.Errorf("can not get app info: GET %s: server returns error: %s", url, resp.Status)
 	}
 
-	if len(appInfo.Product.SkuAvailabilities) == 0 {
+	if len(info.Product.SkuAvailabilities) == 0 {
 		return nil, "", fmt.Errorf("can not get app info: no availabilities for this app")
 	}
 
 	var packages []jsonPkg
-	for _, availability := range appInfo.Product.SkuAvailabilities {
-		redeemable, err := canRedeem(availability)
-		if err != nil {
-			return nil, "", err
+	for _, availability := range info.Product.SkuAvailabilities {
+		redeemable, err2 := canRedeem(availability)
+		if err2 != nil {
+			return nil, "", fmt.Errorf("cannot detect redeemable sku: %s", err2.Error())
 		}
 
 		if redeemable {
@@ -116,13 +119,22 @@ func getAppInfo(id string, locale *ms.Locale) (*apps, string, error) {
 	apps := newApps()
 	wuid := ""
 	for _, pkg := range packages {
-		app, err := newApp(pkg.Name)
-		if err != nil {
-			return nil, "", err
+		app, err2 := newApp(pkg.Name, pkg.Architectures[0])
+		if err2 != nil {
+			return nil, "", fmt.Errorf("cannot get package by full name: %s", err2.Error())
 		}
 
 		for _, dep := range pkg.FrameworkDependencies {
-			app.Add(dep.Name)
+			var minVersion *ms.Version = nil
+			var maxVersion *ms.Version = nil
+			if dep.Min != 0 {
+				minVersion = ms.NewVersionFromNumber(dep.Min)
+			}
+			if dep.Max != 0 {
+				maxVersion = ms.NewVersionFromNumber(dep.Max)
+			}
+
+			app.Add(dep.Name, minVersion, maxVersion)
 		}
 
 		apps.Add(app)

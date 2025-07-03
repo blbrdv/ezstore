@@ -2,6 +2,7 @@ package windows
 
 import (
 	"fmt"
+	"github.com/blbrdv/ezstore/internal/log"
 	"github.com/hnakamur/go-powershell"
 )
 
@@ -10,7 +11,9 @@ type Powershell struct {
 }
 
 func (p *Powershell) Execf(format string, input ...any) (string, error) {
-	return p.Shell.Exec(fmt.Sprintf(format, input...))
+	script := fmt.Sprintf(format, input...)
+	log.Tracef("Powershell: %s", script)
+	return p.Exec(script)
 }
 
 func (p *Powershell) Exit() {

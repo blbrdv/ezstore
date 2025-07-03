@@ -29,7 +29,10 @@ jobs:
       - name: Security check
         run: .\run.ps1 sec
 
-      - name: Check project
+      - name: Lint project
+        run: .\run.ps1 lint
+
+      - name: Check code format
         run: .\run.ps1 check
 
       - name: Run unit tests

@@ -1,14 +1,19 @@
 package store
 
 import (
+	"fmt"
 	"github.com/google/go-cmp/cmp"
 	"testing"
 )
 
 func TestApp(t *testing.T) {
-	pkg, _ := newPackage("Foo_1.0.0.0_neutral_~_b1a2r3")
-	expected := &app{pkg: pkg, dependencies: map[string]struct{}{}}
-	actual, err := newApp("Foo_1.0.0.0_neutral_~_b1a2r3")
+	pkg, err := newPackage("Foo_1.0.0.0_neutral_~_b1a2r3")
+	if err != nil {
+		t.Fatalf("Package not created: %s", err.Error())
+	}
+
+	expected := &app{pkg: pkg, dependencies: map[string]*dependency{}}
+	actual, err := newApp("Foo_1.0.0.0_neutral_~_b1a2r3", "neutral")
 
 	if err != nil {
 		t.Fatalf("Function not created app: %s", err.Error())
@@ -34,10 +39,13 @@ var appData = []struct {
 func TestAddDependencyToApp(t *testing.T) {
 	for _, data := range appData {
 		t.Run(data.Name, func(t *testing.T) {
-			app, _ := newApp("Foo_1.0.0.0_neutral_~_b1a2r3")
+			app, err := newApp("Foo_1.0.0.0_neutral_~_b1a2r3", "neutral")
+			if err != nil {
+				t.Fatalf("App not created: %s", err.Error())
+			}
 
 			for _, dep := range data.Dependencies {
-				app.Add(dep)
+				app.Add(dep, nil, nil)
 			}
 
 			depCount := len(app.Dependencies())
@@ -50,7 +58,10 @@ func TestAddDependencyToApp(t *testing.T) {
 }
 
 func createApp(input string) *app {
-	app, _ := newApp(input)
+	app, err := newApp(input, "neutral")
+	if err != nil {
+		panic(fmt.Sprintf("Package not created: %s", err.Error()))
+	}
 	return app
 }
 

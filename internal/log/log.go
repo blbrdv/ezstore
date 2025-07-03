@@ -30,7 +30,7 @@ func getCurrentDir() string {
 		panic(err.Error())
 	}
 
-	currentDir := path.Dir(strings.Replace(exePath, "\\", "/", -1))
+	currentDir := path.Dir(strings.ReplaceAll(exePath, "\\", "/"))
 	return currentDir
 }
 
@@ -47,6 +47,7 @@ var levels = map[string]LogLevel{
 	"d": Detailed,
 }
 
+var black = color.Style{color.OpBold}
 var gray = color.Style{color.FgGray, color.OpBold}
 var blue = color.Style{color.FgBlue, color.OpBold}
 var green = color.Style{color.FgGreen, color.OpBold}
@@ -60,6 +61,18 @@ func NewLevel(input string) (LogLevel, error) {
 		return 0, fmt.Errorf("%s is invalid log level", input)
 	}
 	return result, nil
+}
+
+// Trace print input text to os.Stdout with "[TRC]" mark and appended new line when log level is Detailed.
+func Trace(value string) {
+	if Level == Detailed {
+		utils.Fprintln(os.Stdout, black.Render("[TRC]"), value)
+	}
+}
+
+// Tracef format and print input text to os.Stdout with "[TRC]" mark and appended new line when log level is Detailed.
+func Tracef(format string, values ...any) {
+	Trace(fmt.Sprintf(format, values...))
 }
 
 // Debug print input text to os.Stdout with "[DEB]" mark and appended new line when log level is Detailed.

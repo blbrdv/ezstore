@@ -7,6 +7,7 @@ runs:
       with:
         path: |
           ~\go
-          ~\AppData\Local\go-build
+          %LocalAppData%\go-build
+          %LocalAppData%\golangci-lint
           %USERPROFILE%\magefile
-        key: ${{ runner.os }}-${{ runner.arch }}-go-${{ hashFiles('.\go.mod', '.\.mage\go.mod') }}
+        key: ${{ runner.os }}-${{ runner.arch }}-go-${{ hashFiles('.\go.mod', '.\.mage\go.mod', '.\.mage\golangci-lint\go.mod') }}

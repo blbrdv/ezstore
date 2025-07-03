@@ -7,12 +7,24 @@ import (
 	"github.com/magefile/mage/sh"
 )
 
-func tool(name string, params ...string) error {
-	goparams := []string{"tool", `-modfile=.mage\go.mod`}
-	goparams = append(goparams, name)
-	goparams = append(goparams, params...)
+func toolV(name string, params ...string) error {
+	return runTool(true, name, modfile, params...)
+}
 
-	return run("go", goparams...)
+func tool(name string, params ...string) error {
+	return runTool(false, name, modfile, params...)
+}
+
+func runTool(v bool, name string, modfile string, params ...string) error {
+	goParams := []string{"tool", modfile}
+	goParams = append(goParams, name)
+	goParams = append(goParams, params...)
+
+	if v {
+		return sh.RunV("go", goParams...)
+	} else {
+		return run("go", goParams...)
+	}
 }
 
 func run(cmd string, args ...string) error {

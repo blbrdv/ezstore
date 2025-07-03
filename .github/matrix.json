@@ -25,13 +25,19 @@
   ],
   "install": [
     {
-      "id": "9mvsm3j7zj7c"
+      "id": "9mvsm3j7zj7c",
+      "name": "PeterEtelej.TreeCLI",
+      "version": "1.1.0.0"
     },
     {
-      "id": "9wzdncrfhwm4"
+      "id": "9wzdncrfhwm4",
+      "name": "WikimediaFoundation.Wikipedia",
+      "version": "1.0.0.0"
     },
     {
-      "id": "9nksqgp7f2nh"
+      "id": "9pntscmcg01j",
+      "name": "59992Roob.BestProxyFastUnlimitedVPNfunctionality",
+      "version": "1.0.20.0"
     }
   ]
 }

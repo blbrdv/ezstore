@@ -33,28 +33,3 @@ function Install {
 }
 
 $ColorRegexp = '\x1b\[[0-9;]*m';
-
-$Targets = @{
-
-    # Tree CLI app
-    # no dependencies
-    "9mvsm3j7zj7c" = @{
-        Name = "PeterEtelej.TreeCLI"
-        Version = "1.1.0.0"
-    }
-
-    # Wikipedia app
-    # one dependency
-    "9wzdncrfhwm4" = @{
-        Name = "WikimediaFoundation.Wikipedia"
-        Version = "1.0.0.0"
-    }
-
-    # WhatsApp app
-    # 5 dependencies
-    "9nksqgp7f2nh" = @{
-        Name = "5319275A.WhatsAppDesktop"
-        Version = "2.2524.4.0"
-    }
-
-};

@@ -3,12 +3,15 @@ package store
 import (
 	"fmt"
 	"github.com/blbrdv/ezstore/internal/ms"
-	"slices"
 )
 
 type file struct {
 	*bundle
 	dependencies bundles
+}
+
+func (f *file) GetBundle() *bundle {
+	return f.bundle
 }
 
 func (f *file) Add(dependency *bundle) {
@@ -21,10 +24,6 @@ func (f *file) Dependencies() []*bundle {
 
 func (f *file) String() string {
 	return fmt.Sprintf("%s %s", f.bundle.String(), PrettyString(f.Dependencies()))
-}
-
-func (f *file) Bundles() []*bundle {
-	return slices.Concat(newBundles(f.bundle).Values(), f.Dependencies())
 }
 
 func (f *file) Equal(other *file) bool {
@@ -58,7 +57,7 @@ func (f *files) Get(version *ms.Version, arch ms.Architecture) (*file, error) {
 		} else {
 			latest := f.elements[0]
 			for i := 1; i < length; i++ {
-				if f.elements[i].Version.Compare(latest.Version) == 1 {
+				if f.elements[i].Version.MoreThan(latest.Version) {
 					latest = f.elements[i]
 				}
 			}
@@ -76,11 +75,9 @@ func (f *files) Get(version *ms.Version, arch ms.Architecture) (*file, error) {
 			return nil, fmt.Errorf("no file with %s %s: no files with this version", version.String(), arch)
 		}
 
-		for _, supported := range arch.CompatibleWith() {
-			for _, file := range files {
-				if file.Arch == supported {
-					return file, nil
-				}
+		for _, file := range files {
+			if ms.IsSupported(file.Arch, arch) {
+				return file, nil
 			}
 		}
 

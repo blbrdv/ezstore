@@ -22,6 +22,10 @@ type productInfo struct {
 	RevisionNumber string
 }
 
+func (p productInfo) String() string {
+	return fmt.Sprintf("%s %s", p.UpdateID, p.RevisionNumber)
+}
+
 func getXMLClient() *req.Client {
 	return client.SetCommonHeader("Content-Type", "application/soap+xml")
 }
@@ -61,21 +65,18 @@ func getProducts(cookie string, categoryIdentifier string) ([]productInfo, error
 		return list, fmt.Errorf("can not get products files: can not parse result: %s", err.Error())
 	}
 
-	undeformedXMLStr := strings.Replace(
-		strings.Replace(
-			strings.Replace(
+	undeformedXMLStr := strings.ReplaceAll(
+		strings.ReplaceAll(
+			strings.ReplaceAll(
 				data.OutputXML(true),
 				"&lt;",
 				"<",
-				-1,
 			),
 			"&gt;",
 			">",
-			-1,
 		),
 		"&#34;",
 		"\"",
-		-1,
 	)
 
 	data, err = xmlquery.Parse(strings.NewReader(undeformedXMLStr))
