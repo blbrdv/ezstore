@@ -35,7 +35,7 @@ func Repack() {
 
 // Compile run "build"to target directory.
 //
-//goland:noinspection GoExportedElementShouldHaveComment
+//goland:noinspection GoUnusedExportedFunction
 func Compile(targetDir string) error {
 	return build(targetDir)
 }
