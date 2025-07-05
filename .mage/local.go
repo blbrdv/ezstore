@@ -33,6 +33,9 @@ func Repack() {
 	mg.Deps(Pack)
 }
 
+// Compile run "build"to target directory.
+//
+//goland:noinspection GoExportedElementShouldHaveComment
 func Compile(targetDir string) error {
 	return build(targetDir)
 }
