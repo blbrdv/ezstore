@@ -14,7 +14,7 @@
           "name": "ezstore"
         },
         "description": "Easy install apps from MS Store",
-        "minimum-os": "win10",
+        "minimum-os": "win8",
         "execution-level": "as invoker",
         "ui-access": false,
         "auto-elevate": false,
