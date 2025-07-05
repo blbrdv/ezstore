@@ -14,6 +14,12 @@ import (
 // Install download package with its dependencies from MS Store by id, version, locale and architecture,
 // and then install it all.
 func Install(_ context.Context, cmd *cli.Command) error {
+	shell, err := windows.GetPowershell()
+	if err != nil {
+		return err
+	}
+	defer shell.Exit()
+
 	verbosity, err := log.NewLevel(cmd.String("verbosity"))
 	if err != nil {
 		return err
@@ -36,7 +42,7 @@ func Install(_ context.Context, cmd *cli.Command) error {
 
 	var locale *ms.Locale
 	if cmd.String("locale") == "" {
-		locale = windows.GetLocale()
+		locale = windows.GetLocale(shell)
 	} else {
 		locale, err = ms.NewLocale(cmd.String("locale"))
 		if err != nil {
@@ -54,7 +60,6 @@ func Install(_ context.Context, cmd *cli.Command) error {
 	log.Debugf("Temp dir: %s", tmpPath)
 
 	defer windows.Remove(tmpPath)
-	defer windows.Shell.Exit()
 
 	windows.Remove(tmpPath)
 	windows.MkDir(tmpPath)
@@ -64,7 +69,7 @@ func Install(_ context.Context, cmd *cli.Command) error {
 		return err
 	}
 
-	err = windows.Install(file)
+	err = windows.Install(file, shell)
 	if err != nil {
 		return err
 	}

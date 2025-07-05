@@ -27,12 +27,10 @@ func NewPowershell(shell *powershell.Shell) *Powershell {
 	return &Powershell{shell}
 }
 
-func getPowershell() *Powershell {
+func GetPowershell() (*Powershell, error) {
 	shell, err := powershell.New()
 	if err != nil {
-		panic(err.Error())
+		return nil, err
 	}
-	return NewPowershell(shell)
+	return NewPowershell(shell), nil
 }
-
-var Shell = getPowershell()

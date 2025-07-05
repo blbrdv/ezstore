@@ -54,7 +54,7 @@ func OpenFile(path string, flag int) *File {
 }
 
 // Install package if its version higher that installed counterpart.
-func Install(file *ms.BundleFileInfo) error {
+func Install(file *ms.BundleFileInfo, shell *Powershell) error {
 	var depsStr string
 	deps := file.Dependencies()
 	length := len(deps)
@@ -77,7 +77,7 @@ func Install(file *ms.BundleFileInfo) error {
 		depsStr = sb.String()
 	}
 
-	result, err := Shell.Execf("Add-AppxPackage -Path %s%s", file.Path, depsStr)
+	result, err := shell.Execf("Add-AppxPackage -Path %s%s", file.Path, depsStr)
 	if err != nil {
 		if result != "" {
 			result = fmt.Sprintf("\n%s", result)
@@ -94,8 +94,8 @@ var defaultLocale = ms.Locale{Language: "en", Country: "US"}
 
 // GetLocale returns current locale set in hosted OS.
 // If error occurred or returned value is empty, returns default locale.
-func GetLocale() *ms.Locale {
-	result, err := Shell.Exec("Get-Culture | select -exp Name")
+func GetLocale(shell *Powershell) *ms.Locale {
+	result, err := shell.Exec("Get-Culture | select -exp Name")
 	if err != nil {
 		return &defaultLocale
 	}
