@@ -45,7 +45,12 @@ func build(target string) error {
 	printf("Compiling project with version %s (%s)", productVersion, fileVersion)
 
 	println("Embedding resources")
-	err = tool("go-winres", "make", "--in", "./winres.json", "--product-version", productVersion, "--file-version", fileVersion)
+	err = tool("go-winres", "make", "--arch", "amd64,386,arm64,arm", "--in", "./winres.json", "--product-version", productVersion, "--file-version", fileVersion)
+	if err != nil {
+		return err
+	}
+
+	winresFiles, err := getWinresFiles()
 	if err != nil {
 		return err
 	}

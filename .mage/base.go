@@ -7,19 +7,33 @@ import (
 	"github.com/Masterminds/semver/v3"
 	"github.com/magefile/mage/sh"
 	"path"
+	"path/filepath"
 	"regexp"
 	"strings"
 )
 
 var (
-	winresFiles = []string{"rsrc_windows_386.syso", "rsrc_windows_amd64.syso"}
-	goSRC       = `.\...`
-	goMod       = `go.mod`
+	winresGlob = "rsrc_windows_*.syso"
+	goSRC      = `.\...`
+	goMod      = `go.mod`
 )
 
+func getWinresFiles(subdirs ...string) ([]string, error) {
+	subdirs = append(subdirs, winresGlob)
+	glob, err := filepath.Abs(path.Join(subdirs...))
+	if err != nil {
+		return nil, err
+	}
+	return filepath.Glob(glob)
+}
+
 func removeWinresFiles() error {
-	for _, file := range winresFiles {
-		err := remove(path.Join("./cmd", file))
+	files, err := getWinresFiles("./cmd")
+	if err != nil {
+		return err
+	}
+	for _, file := range files {
+		err := remove(file)
 		if err != nil {
 			return err
 		}
