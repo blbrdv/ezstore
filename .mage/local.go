@@ -32,3 +32,7 @@ func Repack() {
 	mg.Deps(Build)
 	mg.Deps(Pack)
 }
+
+func Compile(targetDir string) error {
+	return build(targetDir)
+}

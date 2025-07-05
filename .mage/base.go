@@ -6,9 +6,7 @@ import (
 	"fmt"
 	"github.com/Masterminds/semver/v3"
 	"github.com/magefile/mage/sh"
-	"io/fs"
 	"path"
-	"path/filepath"
 	"regexp"
 	"strings"
 )
@@ -157,62 +155,7 @@ func Deps() error {
 // Build builds project.
 // Compile exe and put it with necessary files into "output" dir.
 func Build() error {
-	var err error
-
-	productVersion, err := getProductVersion()
-	if err != nil {
-		return err
-	}
-
-	fileVersion, err := getFileVersion(productVersion)
-	if err != nil {
-		return err
-	}
-
-	printf("Compiling project with version %s (%s)", productVersion, fileVersion)
-
-	println("Embedding resources")
-	err = tool("go-winres", "make", "--in", "./winres.json", "--product-version", productVersion, "--file-version", fileVersion)
-	if err != nil {
-		return err
-	}
-
-	err = move("./cmd", winresFiles...)
-	if err != nil {
-		return err
-	}
-
-	println("Compiling exe")
-	err = run("go", "build", fmt.Sprintf("-ldflags=-X main.version=%s", productVersion), "-o", "./output/bin/ezstore.exe", "./cmd")
-	if err != nil {
-		return err
-	}
-
-	err = removeWinresFiles()
-	if err != nil {
-		return err
-	}
-
-	var files []string
-	err = filepath.WalkDir("./cmd", func(path string, d fs.DirEntry, err error) error {
-		if !d.IsDir() && filepath.Ext(path) != ".go" {
-			files = append(files, path)
-		}
-		return nil
-	})
-	if err != nil {
-		return err
-	}
-	if len(files) < 1 {
-		return fmt.Errorf("could not fild dist files in cmd directory")
-	}
-
-	err = cp("./output", files...)
-	if err != nil {
-		return err
-	}
-
-	return nil
+	return build("./output")
 }
 
 // Pack prepare project for release.
