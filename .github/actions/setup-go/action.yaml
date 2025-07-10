@@ -11,11 +11,10 @@ runs:
       uses: actions/cache/restore@v4
       with:
         path: |
-          ~\go
+          %USERPROFILE%\go
           %LocalAppData%\go-build
           %LocalAppData%\golangci-lint
-          %USERPROFILE%\magefile
-        key: ${{ runner.os }}-${{ runner.arch }}-go-${{ hashFiles('.\go.mod', '.\.mage\go.mod', '.\.mage\golangci-lint\go.mod') }}
+        key: ${{ runner.os }}-${{ runner.arch }}-go-${{ hashFiles('.\go.mod', '.\.build\go.mod', '.\.build\golangci-lint\go.mod') }}
         restore-keys: |
           ${{ runner.os }}-${{ runner.arch }}-go-
 
