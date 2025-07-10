@@ -82,25 +82,24 @@ var pack = goyek.Define(goyek.Task{
 			if err != nil {
 				action.Fatal(err)
 			}
+		}
 
-			// TODO: add architectures
-			output, err = base.Run(
-				action,
-				true,
-				base.LocalPath,
-				nil,
-				"iscc",
-				"/Q",
-				"setup.iss",
-				fmt.Sprintf("/DPV=%s", productVersion),
-				fmt.Sprintf("/DFV=%s", fileVersion),
-			)
-			if len(output) > 0 {
-				action.Log(output)
-			}
-			if err != nil {
-				action.Fatal(err)
-			}
+		output, err = base.Run(
+			action,
+			true,
+			base.LocalPath,
+			nil,
+			"iscc",
+			"/Q",
+			"setup.iss",
+			fmt.Sprintf("/DPV=%s", productVersion),
+			fmt.Sprintf("/DFV=%s", fileVersion),
+		)
+		if len(output) > 0 {
+			action.Log(output)
+		}
+		if err != nil {
+			action.Fatal(err)
 		}
 	},
 })
