@@ -6,8 +6,7 @@ outputs:
 runs:
   using: 'composite'
   steps:
-    - name: Restore cache
-      id: cache
+    - id: cache
       uses: actions/cache/restore@v4
       with:
         path: |
@@ -18,8 +17,7 @@ runs:
         restore-keys: |
           ${{ runner.os }}-${{ runner.arch }}-go-
 
-    - name: Check if need Go installation
-      if: steps.cache.outputs.cache-hit != 'true'
+    - if: steps.cache.outputs.cache-hit != 'true'
       id: go
       shell: pwsh
       run: |
@@ -45,15 +43,13 @@ runs:
           echo "need-install=$NeedInstall" >> $env:GITHUB_OUTPUT;
         }
 
-    - name: Setup GO
-      if: steps.cache.outputs.cache-hit != 'true' && steps.go.outputs.need-install == 'true'
+    - if: steps.cache.outputs.cache-hit != 'true' && steps.go.outputs.need-install == 'true'
       uses: actions/setup-go@v5
       with:
         go-version-file: 'go.mod'
         cache: false
 
-    - name: Download dependencies
-      if: steps.cache.outputs.cache-hit != 'true'
+    - if: steps.cache.outputs.cache-hit != 'true'
       shell: pwsh
       run: .\run.ps1 help > $null;
 

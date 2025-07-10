@@ -2,8 +2,7 @@ name: 'Teardown'
 runs:
   using: 'composite'
   steps:
-    - name: Save cache
-      uses: actions/cache/save@v4
+    - uses: actions/cache/save@v4
       with:
         path: |
           %USERPROFILE%\go
