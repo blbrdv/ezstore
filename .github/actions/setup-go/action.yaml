@@ -10,7 +10,7 @@ runs:
       uses: actions/cache/restore@v4
       with:
         path: |
-          %USERPROFILE%\go
+          ~\go
           %LocalAppData%\go-build
           %LocalAppData%\golangci-lint
         key: ${{ runner.os }}-${{ runner.arch }}-go-${{ hashFiles('.\go.mod', '.\.build\go.mod', '.\.build\golangci-lint\go.mod') }}
@@ -52,9 +52,3 @@ runs:
     - if: steps.cache.outputs.cache-hit != 'true'
       shell: pwsh
       run: .\run.ps1 help > $null;
-
-    - shell: pwsh
-      run: |
-        ls %USERPROFILE%\go;
-        ls %LocalAppData%\go-build;
-        ls %LocalAppData%\golangci-lint;

@@ -5,7 +5,7 @@ runs:
     - uses: actions/cache/save@v4
       with:
         path: |
-          %USERPROFILE%\go
+          ~\go
           %LocalAppData%\go-build
           %LocalAppData%\golangci-lint
         key: ${{ runner.os }}-${{ runner.arch }}-go-${{ hashFiles('.\go.mod', '.\.build\go.mod', '.\.build\golangci-lint\go.mod') }}
