@@ -22,7 +22,7 @@ var pack = goyek.Define(goyek.Task{
 			srcPath = *buildPath
 		} else {
 			// for some reason 7z behave different for 'dir' and './dir'
-			srcPath = base.LocalPath + "/" + *buildPath
+			srcPath = base.PathJoin(base.LocalPath, *buildPath)
 		}
 
 		info, err := os.Stat(srcPath)
