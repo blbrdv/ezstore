@@ -13,6 +13,7 @@ func Fprint(w io.Writer, a ...any) {
 	}
 }
 
+//goland:noinspection GoUnusedExportedFunction
 func Fprintln(w io.Writer, a ...any) {
 	_, err := fmt.Fprintln(w, a...)
 	if err != nil {
@@ -20,6 +21,7 @@ func Fprintln(w io.Writer, a ...any) {
 	}
 }
 
+//goland:noinspection GoUnusedExportedFunction
 func Fprintf(w io.Writer, format string, a ...any) {
 	_, err := fmt.Fprintf(w, format, a...)
 	if err != nil {
