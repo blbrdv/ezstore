@@ -14,7 +14,11 @@ var (
 	buildPath  = flag.String("b", "output", "Path for build output.")
 	packPath   = flag.String("p", "release", "Path for pack output.")
 	targetPath = flag.String("t", "", "Target path.")
-	targetArch = flag.String("arch", archsList, "Target architecture.")
+	targetArch = flag.String("arch", archsList, fmt.Sprintf("Target architecture. Allowed: %s", archsList))
+	config     = flag.String("c", "release", fmt.Sprintf(
+		"Sets level of optimisation for compilation. Allowed: %s",
+		configList,
+	))
 )
 
 func main() {

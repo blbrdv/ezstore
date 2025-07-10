@@ -20,8 +20,13 @@ var (
 		"386",
 		"amd64",
 	}
-	archsList = strings.Join(allowedArchs, ",")
-	cmdPath   = base.PathJoin(base.LocalPath, "cmd")
+	archsList      = strings.Join(allowedArchs, ",")
+	cmdPath        = base.PathJoin(base.LocalPath, "cmd")
+	allowedConfigs = []string{
+		"debug",
+		"release",
+	}
+	configList = strings.Join(allowedConfigs, ",")
 )
 
 func getWinresFiles(subdirs ...string) ([]string, error) {
@@ -80,8 +85,12 @@ var build = goyek.Define(goyek.Task{
 		targetArchs := strings.Split(*targetArch, ",")
 		for _, arch := range targetArchs {
 			if !slices.Contains(allowedArchs, arch) {
-				action.Fatal(fmt.Errorf(`"%s" is invalid target architecture, allowed values: %v`, arch, archsList))
+				action.Fatal(fmt.Errorf(`"%s" is invalid target architecture, allowed values: %s`, arch, archsList))
 			}
+		}
+
+		if !slices.Contains(allowedConfigs, *config) {
+			action.Fatal(fmt.Errorf(`"%s" is invalid build config, allowed values: %s`, *config, configList))
 		}
 
 		productVersion, err := base.GetProductVersion(action, base.LocalPath)
@@ -92,6 +101,11 @@ var build = goyek.Define(goyek.Task{
 		fileVersion, err := base.GetFileVersion(action, productVersion, base.LocalPath)
 		if err != nil {
 			action.Fatal(err)
+		}
+
+		ldFlag := fmt.Sprintf("-ldflags=-X main.version=%s", productVersion)
+		if *config == "release" {
+			ldFlag += " -s -w"
 		}
 
 		for _, arch := range targetArchs {
@@ -136,7 +150,8 @@ var build = goyek.Define(goyek.Task{
 					"GOARCH": arch,
 				},
 				"go", "build",
-				fmt.Sprintf("-ldflags=-X main.version=%s", productVersion),
+				ldFlag,
+				"-trimpath=1",
 				"-o", base.PathJoin(fullOutputPath, "bin/ezstore.exe"),
 				cmdPath,
 			)
