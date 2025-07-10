@@ -56,7 +56,7 @@ runs:
       if: steps.cache.outputs.cache-hit != 'true'
       shell: pwsh
       run: |
-        cd .mage
+        cd .build
         go mod download -x
         cd golangci-lint
         go mod download -x
