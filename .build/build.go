@@ -7,7 +7,6 @@ import (
 	"io/fs"
 	"main/base"
 	"os"
-	"path"
 	"path/filepath"
 	"slices"
 	"strings"
@@ -27,7 +26,7 @@ var (
 
 func getWinresFiles(subdirs ...string) ([]string, error) {
 	subdirs = append(subdirs, winresGlob)
-	return filepath.Glob(path.Join(subdirs...))
+	return filepath.Glob(base.PathJoin(subdirs...))
 }
 
 func removeWinresFiles(action *goyek.A, path string) error {
@@ -98,7 +97,7 @@ var build = goyek.Define(goyek.Task{
 		for _, arch := range targetArchs {
 			var output string
 
-			fullOutputPath := path.Join(*buildPath, arch)
+			fullOutputPath := base.PathJoin(*buildPath, arch)
 
 			output, err = base.RunGoTool(
 				action,
@@ -138,7 +137,7 @@ var build = goyek.Define(goyek.Task{
 				},
 				"go", "build",
 				fmt.Sprintf("-ldflags=-X main.version=%s", productVersion),
-				"-o", path.Join(fullOutputPath, "bin/ezstore.exe"),
+				"-o", base.PathJoin(fullOutputPath, "bin/ezstore.exe"),
 				cmdPath,
 			)
 			if len(output) > 0 {

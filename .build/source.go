@@ -4,7 +4,6 @@ import (
 	"fmt"
 	"github.com/goyek/goyek/v2"
 	"main/base"
-	"path"
 	"path/filepath"
 )
 
@@ -58,7 +57,7 @@ var lint = goyek.Define(goyek.Task{
 			base.LocalPath,
 			nil,
 			"go", "tool",
-			fmt.Sprintf("-modfile=%s", path.Join(base.BuildPath, "golangci-lint", base.GoMod)),
+			fmt.Sprintf("-modfile=%s", base.PathJoin(base.BuildPath, "golangci-lint", base.GoMod)),
 			"golangci-lint",
 			"run",
 			internalPath,

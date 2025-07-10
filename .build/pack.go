@@ -7,7 +7,7 @@ import (
 	"io/fs"
 	"main/base"
 	"os"
-	"path"
+	"path/filepath"
 	"slices"
 	"strings"
 )
@@ -16,7 +16,16 @@ var pack = goyek.Define(goyek.Task{
 	Name:  "pack",
 	Usage: "Pack project's files for distribution.",
 	Action: func(action *goyek.A) {
-		info, err := os.Stat(*buildPath)
+		var output string
+		var srcPath string
+		if filepath.IsAbs(*buildPath) {
+			srcPath = *buildPath
+		} else {
+			// for some reason 7z behave different for 'dir' and './dir'
+			srcPath = base.LocalPath + "/" + *buildPath
+		}
+
+		info, err := os.Stat(srcPath)
 		if err != nil {
 			action.Fatal(err)
 		}
@@ -52,9 +61,8 @@ var pack = goyek.Define(goyek.Task{
 		}
 
 		for _, arch := range targetArchs {
-			var output string
 
-			fullOutputPath := path.Join(*packPath, arch)
+			fullOutputPath := base.PathJoin(*packPath, arch)
 
 			output, err = base.Run(
 				action,
@@ -65,8 +73,8 @@ var pack = goyek.Define(goyek.Task{
 				"-bso0",
 				"-bd",
 				"-sse",
-				path.Join(fullOutputPath, fmt.Sprintf("ezstore-%s-portable.7z", arch)),
-				path.Join(*buildPath, "*"),
+				base.PathJoin(fullOutputPath, fmt.Sprintf("ezstore-%s-portable.7z", arch)),
+				base.PathJoin(srcPath, arch, "*"),
 			)
 			if len(output) > 0 {
 				action.Log(output)

@@ -54,11 +54,11 @@ func Run(
 			action.Logf(envFormat, key, value)
 		}
 
-		action.Logf("> %s %s", name, PrettifyPath(strings.Join(normalizedArgs, " ")))
+		action.Logf("> %s %s", name, PrettifyPath(strings.Join(args, " ")))
 	}
 
 	out := bytes.NewBufferString("")
-	cmd := exec.CommandContext(action.Context(), name, normalizedArgs...)
+	cmd := exec.CommandContext(action.Context(), name, args...)
 	cmd.Dir = workDir
 	cmd.Stdin = os.Stdin
 	cmd.Stdout = out
@@ -70,6 +70,8 @@ func Run(
 	}
 
 	err = cmd.Run()
+	output = fold(out.String())
+	output = strings.TrimSuffix(output, NewLine)
 
-	return fold(out.String()), err
+	return output, err
 }

@@ -43,7 +43,7 @@ func mv(action *goyek.A, delete bool, dstPath string, srcPaths ...string) (err e
 
 	for _, srcPath := range srcPaths {
 		srcPath = NormalizePath(srcPath)
-		fullDstPath := path.Join(dstPath, path.Base(srcPath))
+		fullDstPath := PathJoin(dstPath, path.Base(srcPath))
 
 		action.Logf(`> %s "%s" -> "%s"`, verb, PrettifyPath(srcPath), PrettifyPath(fullDstPath))
 
