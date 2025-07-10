@@ -40,6 +40,7 @@ var _ = goyek.Define(goyek.Task{
 		if err != nil {
 			action.Fatal(base.Combine(output, err))
 		}
+		action.Log("No formatting needed.")
 	},
 })
 
@@ -61,6 +62,7 @@ var lint = goyek.Define(goyek.Task{
 		if err != nil {
 			action.Fatal(base.Combine(output, err))
 		}
+		action.Log("No problems with code found.")
 	},
 })
 

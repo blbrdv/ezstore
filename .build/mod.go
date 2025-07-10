@@ -180,8 +180,9 @@ var _ = goyek.Define(goyek.Task{
 			}
 		}
 		if len(depsToUpdate) > 0 {
-			action.Fatal(base.Combine(strings.Join(depsToUpdate, base.NewLine), "project dependencies must be updated"))
+			action.Fatal(base.Combine(strings.Join(depsToUpdate, base.NewLine), "Project dependencies must be updated."))
 		}
+		action.Log("No dependencies to update.")
 	},
 })
 
@@ -195,10 +196,12 @@ var _ = goyek.Define(goyek.Task{
 		if err != nil {
 			action.Fatal(err)
 		}
+		action.Log("No license violations found.")
 
 		output, err := base.RunGoTool(action, true, base.LocalPath, nil, "osv-scanner", "scan", "source", lockfile)
 		if err != nil {
 			action.Fatal(base.Combine(output, err))
 		}
+		action.Log("No vulnerabilities found.")
 	},
 })
