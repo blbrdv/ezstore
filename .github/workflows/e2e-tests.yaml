@@ -12,7 +12,7 @@ on:
     paths:
       - '.github/actions/**'
       - '.github/workflows/e2e-tests.yaml'
-      - '.mage/**'
+      - '.build/**'
       - '**.go'
       - '**.mod'
       - '**.sum'

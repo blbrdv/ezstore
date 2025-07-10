@@ -7,7 +7,7 @@ on:
     paths:
       - '.github/actions/**'
       - '.github/workflows/go-check.yaml'
-      - '.mage/**'
+      - '.build/**'
       - '**.go'
       - '**.mod'
       - '**.sum'
