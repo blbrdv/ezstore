@@ -55,10 +55,4 @@ runs:
     - name: Download dependencies
       if: steps.cache.outputs.cache-hit != 'true'
       shell: pwsh
-      run: |
-        cd .build
-        go mod download -x
-        cd golangci-lint
-        go mod download -x
-        cd ..\..
-        go mod download -x
+      run: .\run.ps1 help > $null;
