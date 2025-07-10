@@ -4,7 +4,6 @@ import (
 	"fmt"
 	"github.com/goyek/goyek/v2"
 	"main/base"
-	"path/filepath"
 )
 
 func getPath(value *string) string {
@@ -19,7 +18,7 @@ var format = goyek.Define(goyek.Task{
 	Name:  "fmt",
 	Usage: "Format source code.",
 	Action: func(action *goyek.A) {
-		targetPath := getPath(targetPath) + base.RecursivePath
+		targetPath := base.PathJoin(getPath(targetPath), base.RecursivePath)
 
 		output, err := base.Run(action, true, base.LocalPath, nil, "go", "fmt", targetPath)
 		if len(output) > 0 {
@@ -46,7 +45,7 @@ var lint = goyek.Define(goyek.Task{
 	Name:  "lint",
 	Usage: `Runs "golangci-lint" on projects source code.`,
 	Action: func(action *goyek.A) {
-		internalPath := filepath.Join(base.LocalPath, "internal") + base.RecursivePath
+		internalPath := base.PathJoin(base.LocalPath, "internal", base.RecursivePath)
 
 		output, err := base.Run(
 			action,
@@ -69,7 +68,7 @@ var test = goyek.Define(goyek.Task{
 	Name:  "test",
 	Usage: "Runs unit tests.",
 	Action: func(action *goyek.A) {
-		internalPath := filepath.Join(base.LocalPath, "internal") + base.RecursivePath
+		internalPath := base.PathJoin(base.LocalPath, "internal", base.RecursivePath)
 
 		output, err := base.RunGoTool(
 			action,
