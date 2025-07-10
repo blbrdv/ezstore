@@ -6,6 +6,8 @@ import (
 	"main/base"
 )
 
+var internalPath = base.PathJoin(base.LocalPath, "internal", base.RecursivePath)
+
 func getPath(value *string) string {
 	if len(*value) == 0 {
 		return base.LocalPath
@@ -45,8 +47,6 @@ var lint = goyek.Define(goyek.Task{
 	Name:  "lint",
 	Usage: `Runs "golangci-lint" on projects source code.`,
 	Action: func(action *goyek.A) {
-		internalPath := base.PathJoin(base.LocalPath, "internal", base.RecursivePath)
-
 		output, err := base.Run(
 			action,
 			true,
@@ -68,8 +68,6 @@ var test = goyek.Define(goyek.Task{
 	Name:  "test",
 	Usage: "Runs unit tests.",
 	Action: func(action *goyek.A) {
-		internalPath := base.PathJoin(base.LocalPath, "internal", base.RecursivePath)
-
 		output, err := base.RunGoTool(
 			action,
 			true,

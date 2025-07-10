@@ -21,7 +21,7 @@ var (
 		"amd64",
 	}
 	archsList = strings.Join(allowedArchs, ",")
-	cmdPath   = "./cmd"
+	cmdPath   = base.PathJoin(base.LocalPath, "cmd")
 )
 
 func getWinresFiles(subdirs ...string) ([]string, error) {

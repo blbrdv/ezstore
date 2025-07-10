@@ -61,7 +61,6 @@ var pack = goyek.Define(goyek.Task{
 		}
 
 		for _, arch := range targetArchs {
-
 			fullOutputPath := base.PathJoin(*packPath, arch)
 
 			output, err = base.Run(
