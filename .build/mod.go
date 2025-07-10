@@ -189,14 +189,12 @@ var _ = goyek.Define(goyek.Task{
 	Name:  "sec",
 	Usage: "Checks dependencies for license violations and known vulnerabilities.",
 	Action: func(action *goyek.A) {
-		lockfile := fmt.Sprintf("--lockfile=%s", base.GoMod)
-
-		err := licensesScan(action, base.LocalPath, lockfile)
+		err := licensesScan(action, base.LocalPath, base.Lockfile)
 		if err != nil {
 			action.Fatal(err)
 		}
 
-		output, err := base.RunGoTool(action, true, base.LocalPath, nil, "osv-scanner", "scan", "source", lockfile)
+		output, err := base.RunGoTool(action, true, base.LocalPath, nil, "osv-scanner", "scan", "source", base.Lockfile)
 		if err != nil {
 			action.Fatal(base.Combine(output, err))
 		}
