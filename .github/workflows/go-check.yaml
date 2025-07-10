@@ -33,7 +33,7 @@ jobs:
         run: .\run.ps1 lint
 
       - name: Check code format
-        run: .\run.ps1 check
+        run: .\run.ps1 fmt-list
 
       - name: Run unit tests
         run: .\run.ps1 test
