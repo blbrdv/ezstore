@@ -36,11 +36,8 @@ var _ = goyek.Define(goyek.Task{
 	Usage: "Lists files that must be formated if any.",
 	Action: func(action *goyek.A) {
 		output, err := base.Run(action, true, base.LocalPath, nil, "gofmt", "-l", "-s", getPath(targetPath))
-		if len(output) > 0 {
-			action.Log(output)
-		}
 		if err != nil {
-			action.Fatal(err)
+			action.Fatal(base.Combine(output, err))
 		}
 	},
 })
@@ -62,11 +59,8 @@ var lint = goyek.Define(goyek.Task{
 			"run",
 			internalPath,
 		)
-		if len(output) > 0 {
-			action.Log(output)
-		}
 		if err != nil {
-			action.Fatal(err)
+			action.Fatal(base.Combine(output, err))
 		}
 	},
 })
