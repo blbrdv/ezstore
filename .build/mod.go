@@ -114,7 +114,7 @@ var _ = goyek.Define(goyek.Task{
 		err := filepath.WalkDir(base.LocalPath, func(path string, d fs.DirEntry, err error) error {
 			dir, file := filepath.Split(path)
 			if !d.IsDir() && file == base.GoMod {
-				paths = append(paths, dir)
+				paths = append(paths, strings.TrimSuffix(dir, `\`))
 			}
 			return nil
 		})
