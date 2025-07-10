@@ -44,11 +44,9 @@ Project need [Golang](https://go.dev/dl/) version `1.24` or later.
 
 ### Automation
 
-Use `.\run.ps1 -l` to see available tasks.
+Use `.\run.ps1 [flags] [tasks]`.
 
-Use `.\run.ps1 -h <task>` to see task description.
-
-Use `.\run.ps1 [-v] <task>` to run task. Flag `-v` sets verbose output.
+Use `.\run.ps1 help` to see available flags and tasks.
 
 ### End-to-end tests
 
