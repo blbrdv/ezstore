@@ -56,3 +56,9 @@ runs:
       if: steps.cache.outputs.cache-hit != 'true'
       shell: pwsh
       run: .\run.ps1 help > $null;
+
+    - shell: pwsh
+      run: |
+        ls %USERPROFILE%\go;
+        ls %LocalAppData%\go-build;
+        ls %LocalAppData%\golangci-lint;
