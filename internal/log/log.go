@@ -5,9 +5,7 @@ import (
 	"github.com/blbrdv/ezstore/internal/utils"
 	"github.com/gookit/color"
 	"os"
-	"path"
 	"path/filepath"
-	"strings"
 	"time"
 )
 
@@ -24,16 +22,6 @@ const (
 	// Detailed - same as Normal plus DEBUG logs and tracing net errors to log file
 	Detailed
 )
-
-func getCurrentDir() string {
-	exePath, err := os.Executable()
-	if err != nil {
-		panic(err.Error())
-	}
-
-	currentDir := path.Dir(strings.ReplaceAll(exePath, "\\", "/"))
-	return currentDir
-}
 
 // Level contains current app logging level.
 var Level = Normal
