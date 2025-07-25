@@ -1,5 +1,11 @@
 # Changelog
 
+## [1.4.1] - 2025-07
+
+### Fixed
+
+- Fixed panic and error on old Windows versions [#42](https://github.com/blbrdv/ezstore/issues/42)
+
 ## [1.4.0] - 2025-07-02
 
 ### Added
@@ -97,6 +103,7 @@
 
 Initial release.
 
+[1.4.1]: https://github.com/blbrdv/ezstore/releases/tag/v1.4.1
 [1.4.0]: https://github.com/blbrdv/ezstore/releases/tag/v1.4.0
 [1.3.3]: https://github.com/blbrdv/ezstore/releases/tag/v1.3.3
 [1.3.2]: https://github.com/blbrdv/ezstore/releases/tag/v1.3.2
