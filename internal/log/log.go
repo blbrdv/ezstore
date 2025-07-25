@@ -6,6 +6,7 @@ import (
 	"github.com/gookit/color"
 	"os"
 	"path"
+	"path/filepath"
 	"strings"
 	"time"
 )
@@ -38,7 +39,10 @@ func getCurrentDir() string {
 var Level = Normal
 
 // TraceFile contains path to log file for http package. Can be not exists.
-var TraceFile = utils.Join(getCurrentDir(), fmt.Sprintf("%s.log", time.Now().Format("060102150405")))
+var TraceFile = utils.Join(
+	getRoamingDir(),
+	fmt.Sprintf("%s.log", time.Now().Format("060102150405")),
+)
 
 var levels = map[string]LogLevel{
 	"q": Quiet,
@@ -131,4 +135,19 @@ func Error(value string) {
 // above.
 func Errorf(format string, values ...any) {
 	Error(fmt.Sprintf(format, values...))
+}
+
+func getRoamingDir() string {
+	roamingPath, err := os.UserConfigDir()
+	if err != nil {
+		panic(err)
+	}
+
+	appPath := filepath.Join(roamingPath, "ezstore")
+	err = os.MkdirAll(appPath, 0660)
+	if err != nil {
+		panic(err.Error())
+	}
+
+	return appPath
 }
