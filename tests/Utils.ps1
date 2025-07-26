@@ -93,12 +93,14 @@ function Import-ModuleSafe {
             $Params["MinimumVersion"] = $Version;
         }
 
-        if ( $null -ne $Env:GITHUB_ACTIONS ) {
-            Import-Module @Params -Force 3>$null;
-        } elseif ( $UseWindowsPowerShell ) {
+        if ( ($null -eq $Env:GITHUB_ACTIONS) -and ($UseWindowsPowerShell) ) {
             Import-Module @Params -UseWindowsPowerShell 3>$null;
-        } else {
+        } elseif ( $null -eq $Env:GITHUB_ACTIONS ) {
             Import-Module @Params 3>$null;
+        } elseif ( $UseWindowsPowerShell ) {
+            Import-Module @Params -UseWindowsPowerShell -Force 3>$null;
+        } else {
+            Import-Module @Params -Force 3>$null;
         }
     }
 
