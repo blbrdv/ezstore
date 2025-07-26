@@ -110,7 +110,7 @@ func (s *Powershell) CodePage() int {
 }
 
 func (s *Powershell) detectCodePage() (int, error) {
-	out, err := s.Exec("chcp")
+	out, err := s.Exec("[System.Text.Encoding]::Default.CodePage")
 	if err != nil {
 		return 0, fmt.Errorf("get codepage: %s", err.Error())
 	}
