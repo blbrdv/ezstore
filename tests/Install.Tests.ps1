@@ -47,7 +47,7 @@ Describe "Install subcommand (<arch>)" -ForEach $Targets {
         $Output | Select-Object -Last 2 | Select-Object -First 1 | Should -Match $PackageInstalledRegexp;
     }
 
-    It "Successfully install withput output color" {
+    It "Successfully install without output color" {
         try {
             $OldValue = $Env:NO_COLOR; $Env:NO_COLOR = "1";
             $Output, $Code = Invoke-EzstoreInstall $Path "9mvsm3j7zj7c" "1.1.0.0";
