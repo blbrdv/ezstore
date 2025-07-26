@@ -73,7 +73,11 @@ Describe "Install subcommand (<arch>)" -ForEach $Targets {
 
     AfterEach {
         Get-PackageFullName | Where-Object { $Before -NotContains $_; } | ForEach-Object {
-            Remove-AppxPackage $_;
+            try {
+                Remove-AppxPackage $_;
+            } catch {
+                Write-Warning $_;
+            }
         }
     }
 
