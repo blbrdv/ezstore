@@ -141,17 +141,20 @@ func (s *Powershell) Exec(cmd string) (stdout string, err error) {
 	if err != nil {
 		return "", fmt.Errorf("encode command: %s", err)
 	}
+	log.Trace("Command encoded") // TODO: remove after tests
 	_, err = s.stdin.Write([]byte(full))
 	if err != nil {
 		return "", fmt.Errorf("write command: %s", err)
 	}
+	log.Trace("Stdin filled") // TODO: remove after tests
 
 	var stderr string
 	var wg sync.WaitGroup
 	wg.Add(2)
-	go readOutput(s.stdout, s.enc.NewDecoder(), &stdout, boundary, &wg)
-	go readOutput(s.stderr, s.enc.NewDecoder(), &stderr, boundary, &wg)
+	go readOutput("out", s.stdout, s.enc.NewDecoder(), &stdout, boundary, &wg)
+	go readOutput("err", s.stderr, s.enc.NewDecoder(), &stderr, boundary, &wg)
 	wg.Wait()
+	log.Trace("Both readOutput finished") // TODO: remove after tests
 	if len(stderr) > 0 {
 		return "", errors.New(stderr)
 	}
@@ -181,7 +184,7 @@ func (s *Powershell) randomBoundary() string {
 	return string(s.boundaryBuf[:])
 }
 
-func readOutput(r io.Reader, dec *encoding.Decoder, out *string, boundary string, wg *sync.WaitGroup) {
+func readOutput(name string, r io.Reader, dec *encoding.Decoder, out *string, boundary string, wg *sync.WaitGroup) {
 	var bout []byte
 	defer func() {
 		*out = string(bout)
@@ -191,21 +194,25 @@ func readOutput(r io.Reader, dec *encoding.Decoder, out *string, boundary string
 	marker := []byte(boundary + newline)
 	const bufsize = 64
 	buf := make([]byte, bufsize)
+	log.Tracef("%s readOutput started", name) // TODO: remove after tests
 	for {
 		n, err := r.Read(buf)
 		if err != nil {
 			return
 		}
+		log.Tracef("%s: read buff: %d", name, n) // TODO: remove after tests
 
 		decoded, err := dec.Bytes(buf[:n])
 		if err != nil {
 			return
 		}
+		log.Tracef("%s: decoded: %+q", name, decoded) // TODO: remove after tests
 
 		bout = append(bout, decoded...)
 		if bytes.HasSuffix(bout, marker) {
 			bout = bout[:len(bout)-len(marker)]
 			return
 		}
+		log.Tracef("%s: bout: %+q", name, bout) // TODO: remove after tests
 	}
 }
