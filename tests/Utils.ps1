@@ -20,7 +20,15 @@ function Invoke-Ezstore {
         $ExitCode = $global:LASTEXITCODE;
         $global:LASTEXITCODE = $null;
 
-        return [string[]]($Output -split [Environment]::NewLine), [int]$ExitCode;
+        $Output = $Output -split [Environment]::NewLine;
+
+        Write-Verbose "Exit code: $ExitCode";
+        Write-Verbose "Output:";
+        foreach ( $Line in $Output ) {
+            Write-Verbose $Line;
+        }
+
+        return $Output, $ExitCode;
     } finally {
         Pop-Location;
     }
