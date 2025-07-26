@@ -15,7 +15,7 @@ function Invoke-Ezstore {
         Push-Location;
         Set-Location $Path;
 
-        $Output = & ".\ezstore.exe $Arguments 2>&1";
+        $Output = & .\ezstore.exe $Arguments 2>&1;
 
         $ExitCode = $global:LASTEXITCODE;
         $global:LASTEXITCODE = $null;
