@@ -18,8 +18,12 @@ func Install(_ context.Context, cmd *cli.Command) error {
 	if err != nil {
 		return err
 	}
-	//goland:noinspection GoUnhandledErrorResult
-	defer shell.Exit()
+	defer func(shell *windows.Powershell) {
+		shellErr := shell.Exit()
+		if shellErr != nil {
+			panic(shellErr)
+		}
+	}(shell)
 
 	verbosity, err := log.NewLevel(cmd.String("verbosity"))
 	if err != nil {

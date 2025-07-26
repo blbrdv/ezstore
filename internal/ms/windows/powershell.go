@@ -166,7 +166,10 @@ func (s *Powershell) Exit() error {
 }
 
 func (s *Powershell) randomBoundary() string {
-	_, _ = crand.Read(s.boundaryRndBuf[:])
+	_, err := crand.Read(s.boundaryRndBuf[:])
+	if err != nil {
+		panic(err)
+	}
 	hex.Encode(s.boundaryBuf[boundaryPrefixLen:], s.boundaryRndBuf[:])
 	return string(s.boundaryBuf[:])
 }
