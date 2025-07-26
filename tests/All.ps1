@@ -4,9 +4,7 @@ param (
     [Parameter(Mandatory=$true)]
     [string] $Path,
     [Parameter(Mandatory=$true)]
-    [string] $Archs,
-    [AllowEmptyString()]
-    [string] $Version
+    [string] $Archs
 )
 
 . "$PSScriptRoot\Utils.ps1"
