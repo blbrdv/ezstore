@@ -13,6 +13,10 @@ Set-StrictMode -Version 3.0;
 $ErrorActionPreference = "Stop";
 trap { Write-Output $_; exit 1 };
 
+[System.Diagnostics.CodeAnalysis.SuppressMessageAttribute(
+    "PSUseDeclaredVarsMoreThanAssignments", "",
+    Justification="This variable used in tests explicitly."
+)]
 $Targets = $Archs -split "," | ForEach-Object {
     @{
         Arch = $_

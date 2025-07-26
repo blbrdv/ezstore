@@ -1,3 +1,9 @@
+[System.Diagnostics.CodeAnalysis.SuppressMessageAttribute(
+    "PSUseDeclaredVarsMoreThanAssignments", "",
+    Justification="Declared variables in Before* blocks available and used inside It blocks."
+)]
+param()
+
 BeforeAll {
     . $PSCommandPath.Replace('.Tests.ps1','.ps1');
 
@@ -6,7 +12,7 @@ BeforeAll {
 
     Import-Module-Adhog -Name "Appx";
 
-    function Get-Package {
+    function Get-PackageFullName {
         return Get-AppxPackage | ForEach-Object { $_.PackageFullName; };
     }
 }
@@ -14,7 +20,7 @@ BeforeAll {
 Describe "Install subcommand (<arch>)" -ForEach $Targets {
 
     BeforeEach {
-        $Before = Get-Package;
+        $Before = Get-PackageFullName;
     }
 
     It "Successfully install '<name>' v<version>" -ForEach @(
@@ -63,7 +69,7 @@ Describe "Install subcommand (<arch>)" -ForEach $Targets {
     }
 
     AfterEach {
-        Get-Package | Where-Object { $Before -NotContains $_; } | ForEach-Object {
+        Get-PackageFullName | Where-Object { $Before -NotContains $_; } | ForEach-Object {
             Remove-AppxPackage $_;
         }
     }
