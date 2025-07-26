@@ -77,7 +77,9 @@ func Install(file *ms.BundleFileInfo, shell *Powershell) error {
 		depsStr = sb.String()
 	}
 
-	result, err := shell.Execf("Add-AppxPackage -Path %s%s", file.Path, depsStr)
+	addPkgCmd := fmt.Sprintf("Add-AppxPackage -Path %s%s", file.Path, depsStr)
+	log.Tracef("Powershell: %s", addPkgCmd)
+	result, err := shell.Exec(addPkgCmd)
 	if err != nil {
 		if result != "" {
 			result = fmt.Sprintf("\n%s", result)

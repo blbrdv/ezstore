@@ -14,10 +14,11 @@ import (
 // Install download package with its dependencies from MS Store by id, version, locale and architecture,
 // and then install it all.
 func Install(_ context.Context, cmd *cli.Command) error {
-	shell, err := windows.GetPowershell()
+	shell, err := windows.NewPowerShell()
 	if err != nil {
 		return err
 	}
+	//goland:noinspection GoUnhandledErrorResult
 	defer shell.Exit()
 
 	verbosity, err := log.NewLevel(cmd.String("verbosity"))
