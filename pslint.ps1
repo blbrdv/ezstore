@@ -8,7 +8,21 @@ if ( Test-Path env:GITHUB_ACTIONS ) {
     Install-Module -Name PSScriptAnalyzer;
 }
 
-$Files = Get-ChildItem -Path .\*.ps1 -Recurse;
+$Exclude = @("output", "release");
+$Files = Get-ChildItem -Path $PSScriptRoot -Directory -Name -Recurse
+    | Where-Object {
+        foreach ( $Name in $Exclude ) {
+            if ( ($_ -like "$Name\*") -or ($_ -eq $Name) ) {
+                return $false;
+            }
+
+            return $true;
+        }
+    }
+    | ForEach-Object {
+        Get-ChildItem -Path "$_\*.ps1";
+    }
+$Files += Get-ChildItem -Path ".\*.ps1";
 $Problems = [string[]]@();
 
 foreach ($File in $Files) {
