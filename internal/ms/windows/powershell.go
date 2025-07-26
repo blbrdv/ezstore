@@ -112,16 +112,17 @@ func (s *Powershell) CodePage() int {
 func (s *Powershell) detectCodePage() (int, error) {
 	out, err := s.Exec("chcp")
 	if err != nil {
-		return 0, fmt.Errorf("get codepage: %s", err)
+		return 0, fmt.Errorf("get codepage: %s", err.Error())
 	}
 	out = strings.TrimRight(out, " \r\n")
 	i := strings.LastIndex(out, ": ")
 	if i == -1 {
-		return 0, errors.New("invalid codepage output")
+		return 0, fmt.Errorf("invalid codepage output: '%s'", out)
 	}
-	cp, err := strconv.Atoi(out[i+len(": "):])
+	out = out[i+len(": "):]
+	cp, err := strconv.Atoi(out)
 	if err != nil {
-		return 0, errors.New("non-numeric codepage")
+		return 0, fmt.Errorf("non-numeric codepage: '%s'", out)
 	}
 	return cp, nil
 }
