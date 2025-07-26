@@ -6,7 +6,7 @@ BeforeAll {
 
     Import-Module-Adhog -Name "Appx";
 
-    function Get-Packages {
+    function Get-Package {
         return Get-AppxPackage | ForEach-Object { $_.PackageFullName; };
     }
 }
@@ -14,7 +14,7 @@ BeforeAll {
 Describe "Install subcommand (<arch>)" -ForEach $Targets {
 
     BeforeEach {
-        $Before = Get-Packages;
+        $Before = Get-Package;
     }
 
     It "Successfully install '<name>' v<version>" -ForEach @(
@@ -37,7 +37,7 @@ Describe "Install subcommand (<arch>)" -ForEach $Targets {
         $Output, $Code = Invoke-EzstoreInstall $Path $Id $Version;
 
         $Code | Should -Be 0;
-        $Output | Select -Last 2 | Select -First 1 | Should -Match $PackageInstalledRegexp;
+        $Output | Select-Object -Last 2 | Select-Object -First 1 | Should -Match $PackageInstalledRegexp;
     }
 
     It "Successfully install withput output color" {
@@ -59,11 +59,11 @@ Describe "Install subcommand (<arch>)" -ForEach $Targets {
         $Output, $Code = Invoke-EzstoreInstall $Path $Id "1.0.0.0";
 
         $Code | Should -Be 1;
-        ($Output | Select -Last 1) -replace $ColorRegexp | Should -BeExactly $Expected;
+        ($Output | Select-Object -Last 1) -replace $ColorRegexp | Should -BeExactly $Expected;
     }
 
     AfterEach {
-        Get-Packages | Where { $Before -NotContains $_; } | ForEach-Object {
+        Get-Package | Where-Object { $Before -NotContains $_; } | ForEach-Object {
             Remove-AppxPackage $_;
         }
     }

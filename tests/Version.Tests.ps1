@@ -4,7 +4,8 @@ BeforeAll {
     Set-Location $PSScriptRoot\..;
 
     try {
-        $Version = ((git describe --tags --abbrev=0) -split [Environment]::NewLine | Select -First 1) -replace "v";
+        $Version = (git describe --tags --abbrev=0) -split [Environment]::NewLine;
+        $Version = ($Version | Select-Object -First 1) -replace "v";
     } finally {
         Pop-Location;
     }
