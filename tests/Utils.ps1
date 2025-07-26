@@ -54,7 +54,7 @@ function Install-ModuleSafe {
             Name = $Name
         };
 
-        if ( "" -eq $Version ) {
+        if ( "" -ne $Version ) {
             $Params["MinimumVersion"] = $Version;
             $List = Get-Module -ListAvailable -Name $Name | Where-object Version -ge $Version;
         } else {
@@ -89,7 +89,7 @@ function Import-ModuleSafe {
             Name = $Name
         };
 
-        if ( "" -eq $Version ) {
+        if ( "" -ne $Version ) {
             $Params["MinimumVersion"] = $Version;
         }
 
