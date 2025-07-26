@@ -29,7 +29,7 @@ Import-ModuleSafe -Name "Pester" -Version "5.7.1";
 
 $Config = [PesterConfiguration]::Default;
 $Config.Should.ErrorAction = "Continue";
-$Config.Output = "Detailed";
+$Config.Output.Verbosity = "Detailed";
 $Config.Run.Container = Get-ChildItem -Path $PSScriptRoot -Filter "*.Tests.ps1" -ErrorAction 'SilentlyContinue'
     | ForEach-Object {
         New-PesterContainer -Path $_;
