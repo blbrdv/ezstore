@@ -9,5 +9,5 @@ function Invoke-EzstoreInstall {
         [string] $Version
     )
 
-    return Invoke-Ezstore $Path @("install", "$Id", "--ver $Version", "--verbosity d");
+    return Invoke-Ezstore $Path @("install", "$Id", "--ver", "$Version", "--verbosity", "d");
 }
