@@ -115,11 +115,6 @@ func (s *Powershell) detectCodePage() (int, error) {
 		return 0, fmt.Errorf("get codepage: %s", err.Error())
 	}
 	out = strings.TrimRight(out, " \r\n")
-	i := strings.LastIndex(out, ": ")
-	if i == -1 {
-		return 0, fmt.Errorf("invalid codepage output: '%s'", out)
-	}
-	out = out[i+len(": "):]
 	cp, err := strconv.Atoi(out)
 	if err != nil {
 		return 0, fmt.Errorf("non-numeric codepage: '%s'", out)
