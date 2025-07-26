@@ -11,7 +11,7 @@ param (
 
 Set-StrictMode -Version 3.0;
 $ErrorActionPreference = "Stop";
-$VerbosePreference = "Continue";
+$PesterPreference = "Continue";
 trap { Write-Output $_; exit 1 };
 
 [System.Diagnostics.CodeAnalysis.SuppressMessageAttribute(
