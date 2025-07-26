@@ -11,6 +11,10 @@ param (
 
 Set-StrictMode -Version 3.0;
 $ErrorActionPreference = "Stop";
+[System.Diagnostics.CodeAnalysis.SuppressMessageAttribute(
+    "PSUseDeclaredVarsMoreThanAssignments", "",
+    Justification="Preference used in Pester implicitly."
+)]
 $PesterPreference = "Continue";
 trap { Write-Output $_; exit 1 };
 
