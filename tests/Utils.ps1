@@ -82,7 +82,9 @@ function Import-ModuleSafe {
         if ( "" -eq $Version ) {
             Import-Module -Name $Name -UseWindowsPowerShell 3>$null;
         } else {
-            if ( $null -eq (Get-Module -ListAvailable -Name $Name | Where-object Version -ge $Version) ) {
+            if ( $null -ne $Env:GITHUB_ACTIONS ) {
+                Import-Module -Name $Name -MinimumVersion $Version -UseWindowsPowerShell 3>$null;
+            } elseif ( $null -eq (Get-Module -ListAvailable -Name $Name | Where-object Version -ge $Version) ) {
                 Import-Module -Name $Name -MinimumVersion $Version -UseWindowsPowerShell 3>$null;
             }
         }
