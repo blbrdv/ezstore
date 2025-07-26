@@ -10,7 +10,7 @@ BeforeAll {
     $PackageInstalledRegexp = 'Package ([a-zA-Z0-9.]+) v?([\d.]+) installed.$';
     $ColorRegexp = '\x1b\[[0-9;]*m';
 
-    Import-Module-Adhog -Name "Appx";
+    Import-ModuleSafe -Name "Appx";
 
     function Get-PackageFullName {
         return Get-AppxPackage | ForEach-Object { $_.PackageFullName; };
