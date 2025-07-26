@@ -57,12 +57,17 @@ function Install-ModuleSafe {
         if ( "" -ne $Version ) {
             $Params["MinimumVersion"] = $Version;
             $List = Get-Module -ListAvailable -Name $Name | Where-object Version -ge $Version;
+            $Message = "Module $Name ($Version) successfully installed."
         } else {
             $List = Get-Module -ListAvailable -Name $Name;
+            $Message = "Module $Name successfully installed."
         }
 
         if ( $null -eq $List ) {
             Install-Module @Params -SkipPublisherCheck 3>$null;
+            Write-Output $Message;
+        } else {
+            Write-Output "Module $Name already installed."
         }
     }
 
@@ -91,6 +96,9 @@ function Import-ModuleSafe {
 
         if ( "" -ne $Version ) {
             $Params["MinimumVersion"] = $Version;
+            $Message = "Module $Name ($Version) imported."
+        } else {
+            $Message = "Module $Name imported."
         }
 
         if ( ($null -eq $Env:GITHUB_ACTIONS) -and ($UseWindowsPowerShell) ) {
@@ -102,6 +110,8 @@ function Import-ModuleSafe {
         } else {
             Import-Module @Params -Force 3>$null;
         }
+
+        Write-Output $Message;
     }
 
 }
