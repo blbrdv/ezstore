@@ -50,13 +50,19 @@ function Install-ModuleSafe {
 
     & {
         $ProgressPreference = 'Ignore';
+        $Params = @{
+            Name = $Name
+        };
 
         if ( "" -eq $Version ) {
-            Install-Module -Name $Name -SkipPublisherCheck -Force 3>$null;
+            $Params["MinimumVersion"] = $Version;
+            $List = Get-Module -ListAvailable -Name $Name | Where-object Version -ge $Version;
         } else {
-            if ( $null -eq (Get-Module -ListAvailable -Name $Name | Where-object Version -ge $Version) ) {
-                Install-Module -Name $Name -MinimumVersion $Version -SkipPublisherCheck -Force 3>$null;
-            }
+            $List = Get-Module -ListAvailable -Name $Name;
+        }
+
+        if ( $null -eq $List ) {
+            Install-Module @Params -SkipPublisherCheck 3>$null;
         }
     }
 
@@ -73,20 +79,26 @@ function Import-ModuleSafe {
         [Parameter(Mandatory=$true)]
         [string] $Name,
         [AllowEmptyString()]
-        [string] $Version
+        [string] $Version,
+        [switch] $UseWindowsPowerShell
     )
 
     & {
         $ProgressPreference = 'Ignore';
+        $Params = @{
+            Name = $Name
+        };
 
         if ( "" -eq $Version ) {
-            Import-Module -Name $Name -UseWindowsPowerShell 3>$null;
+            $Params["MinimumVersion"] = $Version;
+        }
+
+        if ( $null -ne $Env:GITHUB_ACTIONS ) {
+            Import-Module @Params -Force 3>$null;
+        } elseif ( $UseWindowsPowerShell ) {
+            Import-Module @Params -UseWindowsPowerShell 3>$null;
         } else {
-            if ( $null -ne $Env:GITHUB_ACTIONS ) {
-                Import-Module -Name $Name -MinimumVersion $Version -UseWindowsPowerShell 3>$null;
-            } elseif ( $null -eq (Get-Module -ListAvailable -Name $Name | Where-object Version -ge $Version) ) {
-                Import-Module -Name $Name -MinimumVersion $Version -UseWindowsPowerShell 3>$null;
-            }
+            Import-Module @Params 3>$null;
         }
     }
 
