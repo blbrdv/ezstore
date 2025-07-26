@@ -14,6 +14,14 @@ import (
 // Install download package with its dependencies from MS Store by id, version, locale and architecture,
 // and then install it all.
 func Install(_ context.Context, cmd *cli.Command) error {
+	verbosity, err := log.NewLevel(cmd.String("verbosity"))
+	if err != nil {
+		return err
+	}
+	log.Level = verbosity
+
+	log.Trace("Initializing...") // TODO: remove after tests
+
 	shell, err := windows.NewPowerShell()
 	if err != nil {
 		return err
@@ -25,11 +33,7 @@ func Install(_ context.Context, cmd *cli.Command) error {
 		}
 	}(shell)
 
-	verbosity, err := log.NewLevel(cmd.String("verbosity"))
-	if err != nil {
-		return err
-	}
-	log.Level = verbosity
+	log.Trace("PowerShell initialized") // TODO: remove after tests
 
 	id := cmd.StringArg("id")
 	if id == "" {
