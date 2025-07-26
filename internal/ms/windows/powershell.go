@@ -6,6 +6,7 @@ import (
 	"encoding/hex"
 	"errors"
 	"fmt"
+	"github.com/blbrdv/ezstore/internal/log"
 	"golang.org/x/text/encoding"
 	"golang.org/x/text/encoding/charmap"
 	"golang.org/x/text/encoding/unicode"
@@ -53,6 +54,7 @@ func NewPowerShell(params ...string) (*Powershell, error) {
 	if err != nil {
 		return nil, ErrPowershellNotFound
 	}
+	log.Tracef("Found exe: '%s'", exePath) // TODO: remove after tests
 
 	var cmd *exec.Cmd
 	if len(params) > 0 {
@@ -60,26 +62,31 @@ func NewPowerShell(params ...string) (*Powershell, error) {
 	} else {
 		cmd = exec.Command(exePath, "-NoLogo", "-NoExit", "-NoProfile", "-Command", "-")
 	}
+	log.Trace("Set cmd") // TODO: remove after tests
 
 	stdin, err := cmd.StdinPipe()
 	if err != nil {
 		return nil, fmt.Errorf("stdin pipe: %w", err)
 	}
+	log.Trace("Set StdinPipe") // TODO: remove after tests
 
 	stdout, err := cmd.StdoutPipe()
 	if err != nil {
 		return nil, fmt.Errorf("stdout pipe: %w", err)
 	}
+	log.Trace("Set StdoutPipe") // TODO: remove after tests
 
 	stderr, err := cmd.StderrPipe()
 	if err != nil {
 		return nil, fmt.Errorf("stderr pipe: %w", err)
 	}
+	log.Trace("Set StderrPipe") // TODO: remove after tests
 
 	err = cmd.Start()
 	if err != nil {
 		return nil, fmt.Errorf("start powershell: %w", err)
 	}
+	log.Trace("Started PowerShell") // TODO: remove after tests
 
 	s := &Powershell{
 		enc:    encoding.Nop,
@@ -94,11 +101,13 @@ func NewPowerShell(params ...string) (*Powershell, error) {
 	if err != nil {
 		return nil, err
 	}
+	log.Tracef("Codepage detected: %d", cp) // TODO: remove after tests
 
 	enc := Encodings[cp]
 	if enc == nil {
 		return nil, ErrUnsupportedCodePage
 	}
+	log.Trace("Encoding set") // TODO: remove after tests
 
 	s.codePage = cp
 	s.enc = enc
@@ -114,6 +123,7 @@ func (s *Powershell) detectCodePage() (int, error) {
 	if err != nil {
 		return 0, fmt.Errorf("get codepage: %s", err.Error())
 	}
+	log.Tracef("Codepage recieved: %s", out) // TODO: remove after tests
 	out = strings.TrimRight(out, " \r\n")
 	cp, err := strconv.Atoi(out)
 	if err != nil {
@@ -126,6 +136,7 @@ func (s *Powershell) Exec(cmd string) (stdout string, err error) {
 	// wrap the command in special markers so we know when to stop reading from the pipes
 	boundary := s.randomBoundary()
 	full := fmt.Sprintf("%s; echo '%s'; [Console]::Error.WriteLine('%s')%s", cmd, boundary, boundary, newline)
+	log.Tracef("Full cmd: %s", full) // TODO: remove after tests
 	full, err = s.enc.NewEncoder().String(full)
 	if err != nil {
 		return "", fmt.Errorf("encode command: %s", err)
