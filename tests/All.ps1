@@ -11,11 +11,6 @@ param (
 
 Set-StrictMode -Version 3.0;
 $ErrorActionPreference = "Stop";
-[System.Diagnostics.CodeAnalysis.SuppressMessageAttribute(
-    "PSUseDeclaredVarsMoreThanAssignments", "",
-    Justification="Preference used in Pester implicitly."
-)]
-$PesterPreference = "Continue";
 trap { Write-Output $_; exit 1 };
 
 [System.Diagnostics.CodeAnalysis.SuppressMessageAttribute(
@@ -32,10 +27,12 @@ $Targets = $Archs -split "," | ForEach-Object {
 Import-ModuleSafe -Name "Pester" -Version "5.7.1";
 Import-ModuleSafe -Name "Pester" -Version "5.7.1";
 
-# For some reason default glob search in New-PesterContainer Path parameter didn't work for me so using Get-ChildItem
-$Containers = Get-ChildItem -Path $PSScriptRoot -Filter "*.Tests.ps1" -ErrorAction 'SilentlyContinue'
+$Config = [PesterConfiguration]::Default;
+$Config.Should.ErrorAction = "Continue";
+$Config.Output = "Detailed";
+$Config.Run.Container = Get-ChildItem -Path $PSScriptRoot -Filter "*.Tests.ps1" -ErrorAction 'SilentlyContinue'
     | ForEach-Object {
         New-PesterContainer -Path $_;
     };
 
-Invoke-Pester -Container $Containers -Output Detailed;
+Invoke-Pester -Configuration $config;
