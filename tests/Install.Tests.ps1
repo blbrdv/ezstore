@@ -1,0 +1,71 @@
+BeforeAll {
+    . $PSCommandPath.Replace('.Tests.ps1','.ps1');
+
+    $PackageInstalledRegexp = 'Package ([a-zA-Z0-9.]+) v?([\d.]+) installed.$';
+    $ColorRegexp = '\x1b\[[0-9;]*m';
+
+    Import-Module-Adhog -Name "Appx";
+
+    function Get-Packages {
+        return Get-AppxPackage | ForEach-Object { $_.PackageFullName; };
+    }
+}
+
+Describe "Install subcommand (<arch>)" -ForEach $Targets {
+
+    BeforeEach {
+        $Before = Get-Packages;
+    }
+
+    It "Successfully install '<name>' v<version>" -ForEach @(
+        @{
+            Name = "Tree CLI"
+            Id = "9mvsm3j7zj7c"
+            Version = "1.1.0.0"
+        },
+        @{
+            Name = "Wikipedia"
+            Id = "9wzdncrfhwm4"
+            Version = "1.0.0.0"
+        },
+        @{
+            Name = "VPN Proxy: Fast & Unlimited"
+            Id = "9pntscmcg01j"
+            Version = "1.0.20.0"
+        }
+    ) {
+        $Output, $Code = Invoke-EzstoreInstall $Path $Id $Version;
+
+        $Code | Should -Be 0;
+        $Output | Select -Last 2 | Select -First 1 | Should -Match $PackageInstalledRegexp;
+    }
+
+    It "Successfully install withput output color" {
+        try {
+            $OldValue = $Env:NO_COLOR; $Env:NO_COLOR = "1";
+            $Output, $Code = Invoke-EzstoreInstall $Path "9mvsm3j7zj7c" "1.1.0.0";
+        } finally {
+            $Env:NO_COLOR = $OldValue;
+        }
+
+        $Code | Should -Be 0;
+        $Output[0] | Should -Not -Match $ColorRegexp;
+    }
+
+    It "Fails to install unexisted app" {
+        $Id = "f1o2o3b4a5r6";
+        $Expected = '[ERR] Finished with error: can not fetch product info: product with id "' + $Id + '" and locale "en-US" not found';
+
+        $Output, $Code = Invoke-EzstoreInstall $Path $Id "1.0.0.0";
+
+        $Code | Should -Be 1;
+        ($Output | Select -Last 1) -replace $ColorRegexp | Should -BeExactly $Expected;
+    }
+
+    AfterEach {
+        Get-Packages | Where { $Before -NotContains $_; } | ForEach-Object {
+            Remove-AppxPackage $_;
+        }
+    }
+
+}
