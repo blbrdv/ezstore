@@ -9,7 +9,7 @@ if ( Test-Path env:GITHUB_ACTIONS ) {
 }
 
 $Exclude = @("output", "release");
-$Files = Get-ChildItem -Path $PSScriptRoot -Directory -Name -Recurse
+$Files = Get-ChildItem -Path $PSScriptRoot -Directory -Name -Recurse -ErrorAction 'SilentlyContinue'
     | Where-Object {
         foreach ( $Name in $Exclude ) {
             if ( ($_ -like "$Name\*") -or ($_ -eq $Name) ) {
@@ -20,9 +20,9 @@ $Files = Get-ChildItem -Path $PSScriptRoot -Directory -Name -Recurse
         }
     }
     | ForEach-Object {
-        Get-ChildItem -Path "$_\*.ps1";
+        Get-ChildItem -Path "$_\*.ps1" -ErrorAction 'SilentlyContinue';
     }
-$Files += Get-ChildItem -Path ".\*.ps1";
+$Files += Get-ChildItem -Path ".\*.ps1" -ErrorAction 'SilentlyContinue';
 $Problems = [string[]]@();
 
 foreach ($File in $Files) {
