@@ -18,7 +18,7 @@ Describe "Version flag (<arch>)" -ForEach $Targets {
         "-v"
         "--version"
     ) {
-        $Output, $Code = Invoke-Ezstore $Path $_;
+        $Output, $Code = Invoke-Ezstore $Path @($_);
 
         $Code | Should -Be 0;
         $Output.Count | Should -Be 1;

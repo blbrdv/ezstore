@@ -9,7 +9,7 @@ Describe "Help flag (<arch>)" -ForEach $Targets {
         "-h"
         "--help"
     ) {
-        $Output, $Code = Invoke-Ezstore $Path $_;
+        $Output, $Code = Invoke-Ezstore $Path @($_);
 
         $Code | Should -Be 0;
         $Output.Count | Should -Not -Be 0;
