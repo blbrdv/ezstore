@@ -196,6 +196,7 @@ func readOutput(name string, r io.Reader, dec *encoding.Decoder, out *string, bo
 
 func getDefaultSettings(exePath string, params ...string) (string, int, error) {
 	codepageParams := append(params, "[System.Text.Encoding]::Default.CodePage")
+	log.Tracef("Settings command: %s %s", exePath, strings.Join(codepageParams, " ")) // TODO: remove after tests
 	out, err := exec.Command(exePath, codepageParams...).Output()
 	if err != nil {
 		return "", 0, err
@@ -210,6 +211,7 @@ func getDefaultSettings(exePath string, params ...string) (string, int, error) {
 	log.Tracef("Codepage converted: %d", cp) // TODO: remove after tests
 
 	nlParams := append(params, "[Environment]::NewLine -replace '`',\"\\\"")
+	log.Tracef("Settings command: %s %s", exePath, strings.Join(nlParams, " ")) // TODO: remove after tests
 	out, err = exec.Command(exePath, nlParams...).Output()
 	if err != nil {
 		return "", 0, err
