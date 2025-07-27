@@ -2,9 +2,10 @@ package windows
 
 import (
 	"bytes"
+	crand "crypto/rand"
+	"encoding/hex"
 	"errors"
 	"fmt"
-	"github.com/blbrdv/ezstore/internal/log"
 	"golang.org/x/text/encoding"
 	"golang.org/x/text/encoding/charmap"
 	"golang.org/x/text/encoding/unicode"
@@ -18,51 +19,21 @@ import (
 const exeFilename = "powershell.exe"
 const newline = "\r\n"
 
-type cmd struct {
-	cmd    *exec.Cmd
-	stdin  io.WriteCloser
-	stdout io.ReadCloser
-	stderr io.ReadCloser
-}
-
-func (c *cmd) exec(cmd string, nl string, enc encoding.Encoding) (stdout string, err error) {
-	// wrap the command in special markers so we know when to stop reading from the pipes
-	boundary := "debugdebug"
-	full := fmt.Sprintf("%s; echo '%s'; [Console]::Error.WriteLine('%s')%s", cmd, boundary, boundary, nl)
-	log.Tracef("Full cmd: %s", full) // TODO: remove after tests
-	full, err = enc.NewEncoder().String(full)
-	if err != nil {
-		return "", fmt.Errorf("encode command: %s", err)
-	}
-	log.Trace("Command encoded") // TODO: remove after tests
-	_, err = c.stdin.Write([]byte(full))
-	if err != nil {
-		return "", fmt.Errorf("write command: %s", err)
-	}
-	log.Trace("Stdin filled") // TODO: remove after tests
-
-	var stderr string
-	var wg sync.WaitGroup
-	wg.Add(2)
-	go readOutput("out", c.stdout, enc.NewDecoder(), &stdout, boundary, nl, &wg)
-	go readOutput("err", c.stderr, enc.NewDecoder(), &stderr, boundary, nl, &wg)
-	wg.Wait()
-	log.Trace("Both readOutput finished") // TODO: remove after tests
-	if len(stderr) > 0 {
-		return "", errors.New(stderr)
-	}
-	return stdout, nil
-}
-
-func (c *cmd) Start() error {
-	return c.cmd.Start()
-}
+const (
+	boundaryPrefix            = "$command"
+	boundaryPrefixLen         = 8
+	boundaryRandomPartByteLen = 12
+)
 
 type Powershell struct {
-	*cmd
-	codePage int
-	enc      encoding.Encoding
-	newLine  string
+	codePage       int
+	enc            encoding.Encoding
+	cmd            *exec.Cmd
+	stdin          io.WriteCloser
+	stdout         io.ReadCloser
+	stderr         io.ReadCloser
+	boundaryRndBuf [boundaryRandomPartByteLen]byte
+	boundaryBuf    [boundaryPrefixLen + 2*boundaryRandomPartByteLen]byte
 }
 
 var (
@@ -82,8 +53,8 @@ var (
 		"-NoLogo",
 		"-NoProfile",
 	}
-	noExitParam = "-NoExit"
-	cmdParams   = []string{
+	mandatoryParams = []string{
+		"-NoExit",
 		"-Command",
 		"-",
 	}
@@ -94,61 +65,102 @@ func NewPowerShell(params ...string) (*Powershell, error) {
 	if err != nil {
 		return nil, ErrPowershellNotFound
 	}
-	log.Tracef("Found exe: '%s'", exePath) // TODO: remove after tests
 
-	var settingsParams []string
-	var commandParams []string
-	if len(params) > 0 {
-		settingsParams = append(params, cmdParams...)
-		commandParams = append(params, noExitParam)
-		commandParams = append(commandParams, cmdParams...)
-	} else {
-		settingsParams = append(defaultParams, cmdParams...)
-		commandParams = append(defaultParams, noExitParam)
-		commandParams = append(commandParams, cmdParams...)
+	if len(params) == 0 {
+		params = defaultParams
 	}
-	log.Trace("Params set") // TODO: remove after tests
 
-	nl, cp, err := getDefaultSettings(exePath, settingsParams...)
+	params = append(params, mandatoryParams...)
+	cmd := exec.Command(exePath, params...)
+
+	stdin, err := cmd.StdinPipe()
 	if err != nil {
-		return nil, err
+		return nil, fmt.Errorf("stdin pipe: %w", err)
 	}
 
-	execCmd, err := getCmd(exePath, commandParams...)
+	stdout, err := cmd.StdoutPipe()
 	if err != nil {
-		return nil, err
+		return nil, fmt.Errorf("stdout pipe: %w", err)
 	}
 
-	err = execCmd.Start()
+	stderr, err := cmd.StderrPipe()
+	if err != nil {
+		return nil, fmt.Errorf("stderr pipe: %w", err)
+	}
+
+	err = cmd.Start()
 	if err != nil {
 		return nil, fmt.Errorf("start powershell: %w", err)
 	}
-	log.Trace("Started PowerShell") // TODO: remove after tests
+
+	s := &Powershell{
+		enc:    encoding.Nop,
+		cmd:    cmd,
+		stdin:  stdin,
+		stdout: stdout,
+		stderr: stderr,
+	}
+	copy(s.boundaryBuf[:], boundaryPrefix)
+
+	cp, err := s.detectCodePage()
+	if err != nil {
+		return nil, err
+	}
 
 	enc := Encodings[cp]
 	if enc == nil {
 		return nil, ErrUnsupportedCodePage
 	}
-	log.Trace("Encoding set") // TODO: remove after tests
 
-	return &Powershell{
-		cmd:      execCmd,
-		codePage: cp,
-		enc:      encoding.Nop,
-		newLine:  nl,
-	}, nil
+	s.codePage = cp
+	s.enc = enc
+	return s, nil
 }
 
 func (s *Powershell) CodePage() int {
 	return s.codePage
 }
 
-func (s *Powershell) Exec(cmd string) (string, error) {
-	return s.exec(cmd, s.newLine, s.enc)
+func (s *Powershell) detectCodePage() (int, error) {
+	out, err := s.Exec("[System.Text.Encoding]::Default.CodePage")
+	if err != nil {
+		return 0, fmt.Errorf("get codepage: %s", err.Error())
+	}
+	out = strings.TrimRight(out, " \r\n")
+	cp, err := strconv.Atoi(out)
+	if err != nil {
+		return 0, fmt.Errorf("non-numeric codepage: '%s'", out)
+	}
+	return cp, nil
+}
+
+func (s *Powershell) Exec(cmd string) (stdout string, err error) {
+	// wrap the command in special markers so we know when to stop reading from the pipes
+	boundary := s.randomBoundary()
+	full := fmt.Sprintf("%s; echo '%s'; [Console]::Error.WriteLine('%s')%s", cmd, boundary, boundary, newline)
+	full, err = s.enc.NewEncoder().String(full)
+	if err != nil {
+		return "", fmt.Errorf("encode command: %s", err)
+	}
+	_, err = s.stdin.Write([]byte(full))
+	if err != nil {
+		return "", fmt.Errorf("write command: %s", err)
+	}
+
+	var stderr string
+	var wg sync.WaitGroup
+	wg.Add(2)
+	go readOutput(s.stdout, s.enc.NewDecoder(), &stdout, boundary, &wg)
+	go readOutput(s.stderr, s.enc.NewDecoder(), &stderr, boundary, &wg)
+	wg.Wait()
+	if len(stderr) > 0 {
+		return "", errors.New(stderr)
+	}
+	return stdout, nil
 }
 
 func (s *Powershell) Exit() error {
-	_, err := s.stdin.Write([]byte("exit" + s.newLine))
+	_, err := s.stdin.Write([]byte("exit" + newline))
 	if err != nil {
 		return fmt.Errorf("write exit: %s", err)
 	}
@@ -161,88 +173,40 @@ func (s *Powershell) Exit() error {
 	return nil
 }
 
-func readOutput(name string, r io.Reader, dec *encoding.Decoder, out *string, boundary string, nl string, wg *sync.WaitGroup) {
+func (s *Powershell) randomBoundary() string {
+	_, err := crand.Read(s.boundaryRndBuf[:])
+	if err != nil {
+		panic(err)
+	}
+	hex.Encode(s.boundaryBuf[boundaryPrefixLen:], s.boundaryRndBuf[:])
+	return string(s.boundaryBuf[:])
+}
+
+func readOutput(r io.Reader, dec *encoding.Decoder, out *string, boundary string, wg *sync.WaitGroup) {
 	var bout []byte
 	defer func() {
 		*out = string(bout)
 		wg.Done()
 	}()
 
-	marker := []byte(boundary + nl)
+	marker := []byte(boundary + newline)
 	const bufsize = 64
 	buf := make([]byte, bufsize)
-	log.Tracef("%s readOutput started", name) // TODO: remove after tests
 	for {
 		n, err := r.Read(buf)
 		if err != nil {
 			return
 		}
-		log.Tracef("%s: read buff: %d", name, n) // TODO: remove after tests
 
 		decoded, err := dec.Bytes(buf[:n])
 		if err != nil {
 			return
 		}
-		log.Tracef("%s: decoded: %+q", name, decoded) // TODO: remove after tests
 
 		bout = append(bout, decoded...)
 		if bytes.HasSuffix(bout, marker) {
 			bout = bout[:len(bout)-len(marker)]
 			return
 		}
-		log.Tracef("%s: bout: %+q", name, bout) // TODO: remove after tests
 	}
-}
-
-func getDefaultSettings(exePath string, params ...string) (string, int, error) {
-	codepageParams := append(params, "[System.Text.Encoding]::Default.CodePage")
-	log.Tracef("Settings command: %s %s", exePath, strings.Join(codepageParams, " ")) // TODO: remove after tests
-	out, err := exec.Command(exePath, codepageParams...).Output()
-	if err != nil {
-		return "", 0, err
-	}
-	codepage := string(out)
-	log.Tracef("Codepage recieved: %s", codepage) // TODO: remove after tests
-	codepage = strings.TrimRight(codepage, " "+newline)
-	cp, err := strconv.Atoi(codepage)
-	if err != nil {
-		return "", 0, fmt.Errorf("non-numeric codepage: '%s'", codepage)
-	}
-	log.Tracef("Codepage converted: %d", cp) // TODO: remove after tests
-
-	nlParams := append(params, "[Environment]::NewLine -replace '`',\"\\\"")
-	log.Tracef("Settings command: %s %s", exePath, strings.Join(nlParams, " ")) // TODO: remove after tests
-	out, err = exec.Command(exePath, nlParams...).Output()
-	if err != nil {
-		return "", 0, err
-	}
-	nl := string(out)
-	log.Tracef("NewLine recieved: %s", nl) // TODO: remove after tests
-
-	return nl, cp, nil
-}
-
-func getCmd(exePath string, params ...string) (*cmd, error) {
-	execCmd := exec.Command(exePath, params...)
-	log.Trace("Set cmd") // TODO: remove after tests
-
-	stdin, err := execCmd.StdinPipe()
-	if err != nil {
-		return nil, fmt.Errorf("stdin pipe: %w", err)
-	}
-	log.Trace("Set StdinPipe") // TODO: remove after tests
-
-	stdout, err := execCmd.StdoutPipe()
-	if err != nil {
-		return nil, fmt.Errorf("stdout pipe: %w", err)
-	}
-	log.Trace("Set StdoutPipe") // TODO: remove after tests
-
-	stderr, err := execCmd.StderrPipe()
-	if err != nil {
-		return nil, fmt.Errorf("stderr pipe: %w", err)
-	}
-	log.Trace("Set StderrPipe") // TODO: remove after tests
-
-	return &cmd{cmd: execCmd, stdin: stdin, stdout: stdout, stderr: stderr}, nil
 }
