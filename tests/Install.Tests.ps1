@@ -17,9 +17,9 @@ BeforeAll {
     }
 }
 
-Describe "Install subcommand (<arch>)" -ForEach $Targets {
+Describe "Install subcommand (<arch>)" -Skip:$SkipInstallTests -ForEach $Targets {
 
-    Context "positive tests" -Tag "Positive" -Skip:$SkipInstallTests {
+    Context "positive tests" -Tag "Positive" {
 
         BeforeEach {
             $Before = Get-PackageFullName;
@@ -74,7 +74,7 @@ Describe "Install subcommand (<arch>)" -ForEach $Targets {
 
     }
 
-    Context "negative tests" -Tag "Negative" -Skip:$SkipInstallTests {
+    Context "negative tests" -Tag "Negative" {
 
         It "fails to install unexisted app" {
             $Id = "f1o2o3b4a5r6";

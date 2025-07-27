@@ -1,10 +1,15 @@
 #Requires -Version 5.0
 
+[System.Diagnostics.CodeAnalysis.SuppressMessageAttribute(
+    "PSReviewUnusedParameter", "",
+    Justification="Param SkipInstallTests used in Install tests explicitly."
+)]
 param (
     [Parameter(Mandatory=$true)]
     [string] $Path,
     [Parameter(Mandatory=$true)]
-    [string] $Archs
+    [string] $Archs,
+    [switch] $SkipInstallTests
 )
 
 . "$PSScriptRoot\Utils.ps1"
@@ -23,26 +28,6 @@ $Targets = $Archs -split "," | ForEach-Object {
         Path = [IO.Path]::Combine($Path, $_, "bin")
     }
 };
-
-[System.Diagnostics.CodeAnalysis.SuppressMessageAttribute(
-    "PSUseDeclaredVarsMoreThanAssignments", "",
-    Justification="This variable used in Install tests explicitly."
-)]
-$SkipInstallTests = $false;
-
-# skipping 386 and ARM architectures on Windows 11 ARM64 on Github VMs due to this issue
-# https://learn.microsoft.com/en-us/windows/release-health/status-windows-11-21h2#2819msgdesc
-if ( $null -ne $Env:GITHUB_ACTION ) {
-    $OSArch = [System.Runtime.InteropServices.RuntimeInformation,mscorlib]::OSArchitecture.ToString().ToLower();
-    $OSBuild = [Environment]::OSVersion.Version.BuildNum;
-
-    $Is32bitApp = ( $Arch -eq "386" ) -or ( $Arch -eq "arm" );
-    $IsArm64Win11 = ( $OSBuild -ge 22000 ) -and ( $OSArch -eq "arm64" )
-
-    if ( $IsArm64Win11 -and $Is32bitApp ) {
-        $SkipInstallTests = $True;
-    }
-}
 
 Import-ModuleSafe -Name "Pester" -Version "5.7.1";
 Import-ModuleSafe -Name "Pester" -Version "5.7.1";
