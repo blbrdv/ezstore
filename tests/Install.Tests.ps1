@@ -7,6 +7,7 @@ param()
 BeforeAll {
     . $PSCommandPath.Replace('.Tests.ps1','.ps1');
 
+    $SkipInstallTests = $false;
     $PackageInstalledRegexp = 'Package ([a-zA-Z0-9.]+) v?([\d.]+) installed.$';
     $ColorRegexp = '\x1b\[[0-9;]*m';
 
@@ -15,27 +16,23 @@ BeforeAll {
     function Get-PackageFullName {
         return Get-AppxPackage | ForEach-Object { $_.PackageFullName; };
     }
+
+    # skipping 386 and ARM architectures on Windows 11 ARM64 on Github VMs due to this issue
+    # https://learn.microsoft.com/en-us/windows/release-health/status-windows-11-21h2#2819msgdesc
+    if ( $null -ne $Env:GITHUB_ACTION ) {
+        $OSArch = [System.Runtime.InteropServices.RuntimeInformation,mscorlib]::OSArchitecture.ToString().ToLower();
+        $OSBuild = [Environment]::OSVersion.Version.BuildNum;
+
+        $Is32bitApp = ( $Arch -eq "386" ) -or ( $Arch -eq "arm" );
+        $IsArm64Win11 = ( $OSBuild -ge 22000 ) -and ( $OSArch -eq "arm64" )
+
+        if ( $IsArm64Win11 -and $Is32bitApp ) {
+            $SkipInstallTests = $True;
+        }
+    }
 }
 
 Describe "Install subcommand (<arch>)" -ForEach $Targets {
-
-    BeforeAll {
-        $SkipInstallTests = $false;
-
-        # skipping 386 and ARM architectures on Windows 11 ARM64 on Github VMs due to this issue
-        # https://learn.microsoft.com/en-us/windows/release-health/status-windows-11-21h2#2819msgdesc
-        if ( $null -ne $Env:GITHUB_ACTION ) {
-            $OSArch = [System.Runtime.InteropServices.RuntimeInformation,mscorlib]::OSArchitecture.ToString().ToLower();
-            $OSBuild = [Environment]::OSVersion.Version.BuildNum;
-
-            $Is32bitApp = ( $Arch -eq "386" ) -or ( $Arch -eq "arm" );
-            $IsArm64Win11 = ( $OSBuild -ge 22000 ) -and ( $OSArch -eq "arm64" )
-
-            if ( $IsArm64Win11 -and $Is32bitApp ) {
-                $SkipInstallTests = $True;
-            }
-        }
-    }
 
     Context "positive tests" -Tag "Positive" -Skip:$SkipInstallTests {
 
