@@ -195,32 +195,29 @@ func readOutput(name string, r io.Reader, dec *encoding.Decoder, out *string, bo
 }
 
 func getDefaultSettings(exePath string, params ...string) (string, int, error) {
-	enc := Encodings[1252]
-
-	settingsCmd, err := getCmd(exePath, params...)
+	codepageParams := append(params, "[System.Text.Encoding]::Default.CodePage")
+	out, err := exec.Command(exePath, codepageParams...).Output()
 	if err != nil {
 		return "", 0, err
 	}
-
-	out, err := settingsCmd.exec("[System.Text.Encoding]::Default.CodePage", newline, enc)
+	codepage := string(out)
+	log.Tracef("Codepage recieved: %s", codepage) // TODO: remove after tests
+	codepage = strings.TrimRight(codepage, " "+newline)
+	cp, err := strconv.Atoi(codepage)
 	if err != nil {
-		return "", 0, err
-	}
-	log.Tracef("Codepage recieved: %s", out) // TODO: remove after tests
-	out = strings.TrimRight(out, " "+newline)
-	cp, err := strconv.Atoi(out)
-	if err != nil {
-		return "", 0, fmt.Errorf("non-numeric codepage: '%s'", out)
+		return "", 0, fmt.Errorf("non-numeric codepage: '%s'", codepage)
 	}
 	log.Tracef("Codepage converted: %d", cp) // TODO: remove after tests
 
-	out, err = settingsCmd.exec("[Environment]::NewLine -replace '`',\"\\\"", newline, enc)
+	nlParams := append(params, "[Environment]::NewLine -replace '`',\"\\\"")
+	out, err = exec.Command(exePath, nlParams...).Output()
 	if err != nil {
 		return "", 0, err
 	}
-	log.Tracef("NewLine recieved: %s", out) // TODO: remove after tests
+	nl := string(out)
+	log.Tracef("NewLine recieved: %s", nl) // TODO: remove after tests
 
-	return out, cp, nil
+	return nl, cp, nil
 }
 
 func getCmd(exePath string, params ...string) (*cmd, error) {
