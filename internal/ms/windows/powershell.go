@@ -28,13 +28,14 @@ type cmd struct {
 func (c *cmd) exec(cmd string, nl string, enc encoding.Encoding) (stdout string, err error) {
 	// wrap the command in special markers so we know when to stop reading from the pipes
 	boundary := "debugdebug"
-	log.Tracef("Full cmd: %s", cmd) // TODO: remove after tests
-	cmd, err = enc.NewEncoder().String(cmd)
+	full := fmt.Sprintf("%s; echo '%s'; [Console]::Error.WriteLine('%s')%s", cmd, boundary, boundary, nl)
+	log.Tracef("Full cmd: %s", full) // TODO: remove after tests
+	full, err = enc.NewEncoder().String(full)
 	if err != nil {
 		return "", fmt.Errorf("encode command: %s", err)
 	}
 	log.Trace("Command encoded") // TODO: remove after tests
-	_, err = c.stdin.Write([]byte(cmd))
+	_, err = c.stdin.Write([]byte(full))
 	if err != nil {
 		return "", fmt.Errorf("write command: %s", err)
 	}
@@ -143,7 +144,7 @@ func (s *Powershell) CodePage() int {
 }
 
 func (s *Powershell) Exec(cmd string) (string, error) {
-	return s.cmd.exec(cmd, s.newLine, s.enc)
+	return s.exec(cmd, s.newLine, s.enc)
 }
 
 func (s *Powershell) Exit() error {
