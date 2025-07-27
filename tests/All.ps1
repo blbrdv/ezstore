@@ -24,6 +24,10 @@ $Targets = $Archs -split "," | ForEach-Object {
     }
 };
 
+[System.Diagnostics.CodeAnalysis.SuppressMessageAttribute(
+    "PSUseDeclaredVarsMoreThanAssignments", "",
+    Justification="This variable used in Install tests explicitly."
+)]
 $SkipInstallTests = $false;
 
 # skipping 386 and ARM architectures on Windows 11 ARM64 on Github VMs due to this issue
