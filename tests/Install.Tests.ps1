@@ -19,66 +19,92 @@ BeforeAll {
 
 Describe "Install subcommand (<arch>)" -ForEach $Targets {
 
-    BeforeEach {
-        $Before = Get-PackageFullName;
-    }
+    BeforeAll {
+        $SkipInstallTests = $false;
 
-    It "Successfully install '<name>' v<version>" -ForEach @(
-        @{
-            Name = "Tree CLI"
-            Id = "9mvsm3j7zj7c"
-            Version = "1.1.0.0"
-        },
-        @{
-            Name = "Wikipedia"
-            Id = "9wzdncrfhwm4"
-            Version = "1.0.0.0"
-        },
-        @{
-            Name = "VPN Proxy: Fast & Unlimited"
-            Id = "9pntscmcg01j"
-            Version = "1.0.20.0"
-        }
-    ) {
-        $Output, $Code = Invoke-EzstoreInstall $Path $Id $Version;
+        # skipping 386 and ARM architectures on Windows 11 ARM64 on Github VMs due to this issue
+        # https://learn.microsoft.com/en-us/windows/release-health/status-windows-11-21h2#2819msgdesc
+        if ( $null -ne $Env:GITHUB_ACTION ) {
+            $OSArch = [System.Runtime.InteropServices.RuntimeInformation,mscorlib]::OSArchitecture.ToString().ToLower();
+            $OSBuild = [Environment]::OSVersion.Version.BuildNum;
 
-        $Code | Should -Be 0;
-        $Output.Count | Should -Not -Be 0;
-        $Output | Select-Object -Last 2 | Select-Object -First 1 | Should -Match $PackageInstalledRegexp;
-    }
+            $Is32bitApp = ( $Arch -eq "386" ) -or ( $Arch -eq "arm" );
+            $IsArm64Win11 = ( $OSBuild -ge 22000 ) -and ( $OSArch -eq "arm64" )
 
-    It "Successfully install without output color" {
-        try {
-            $OldValue = $Env:NO_COLOR; $Env:NO_COLOR = "1";
-            $Output, $Code = Invoke-EzstoreInstall $Path "9mvsm3j7zj7c" "1.1.0.0";
-        } finally {
-            $Env:NO_COLOR = $OldValue;
-        }
-
-        $Code | Should -Be 0;
-        $Output.Count | Should -Not -Be 0;
-        $Output[0] | Should -Not -Match $ColorRegexp;
-    }
-
-    It "Fails to install unexisted app" {
-        $Id = "f1o2o3b4a5r6";
-        $Expected = '[ERR] Finished with error: can not fetch product info: product with id "' + $Id + '" and locale "en-US" not found';
-
-        $Output, $Code = Invoke-EzstoreInstall $Path $Id "1.0.0.0";
-
-        $Code | Should -Be 1;
-        $Output.Count | Should -Not -Be 0;
-        ($Output | Select-Object -Last 1) -replace $ColorRegexp | Should -BeExactly $Expected;
-    }
-
-    AfterEach {
-        Get-PackageFullName | Where-Object { $Before -NotContains $_; } | ForEach-Object {
-            try {
-                Remove-AppxPackage $_;
-            } catch {
-                Write-Warning $_;
+            if ( $IsArm64Win11 -and $Is32bitApp ) {
+                $SkipInstallTests = $True;
             }
         }
+    }
+
+    Context "positive tests" -Tag "Positive" -Skip:$SkipInstallTests {
+
+        BeforeEach {
+            $Before = Get-PackageFullName;
+        }
+
+        It "successfully install '<name>' v<version>" -ForEach @(
+            @{
+                Name = "Tree CLI"
+                Id = "9mvsm3j7zj7c"
+                Version = "1.1.0.0"
+            },
+            @{
+                Name = "Wikipedia"
+                Id = "9wzdncrfhwm4"
+                Version = "1.0.0.0"
+            },
+            @{
+                Name = "VPN Proxy: Fast & Unlimited"
+                Id = "9pntscmcg01j"
+                Version = "1.0.20.0"
+            }
+        ) {
+            $Output, $Code = Invoke-EzstoreInstall $Path $Id $Version;
+
+            $Code | Should -Be 0;
+            $Output.Count | Should -Not -Be 0;
+            $Output | Select-Object -Last 2 | Select-Object -First 1 | Should -Match $PackageInstalledRegexp;
+        }
+
+        It "successfully install without output color" {
+            try {
+                $OldValue = $Env:NO_COLOR; $Env:NO_COLOR = "1";
+                $Output, $Code = Invoke-EzstoreInstall $Path "9mvsm3j7zj7c" "1.1.0.0";
+            } finally {
+                $Env:NO_COLOR = $OldValue;
+            }
+
+            $Code | Should -Be 0;
+            $Output.Count | Should -Not -Be 0;
+            $Output[0] | Should -Not -Match $ColorRegexp;
+        }
+
+        AfterEach {
+            Get-PackageFullName | Where-Object { $Before -NotContains $_; } | ForEach-Object {
+                try {
+                    Remove-AppxPackage $_;
+                } catch {
+                    Write-Warning $_;
+                }
+            }
+        }
+
+    }
+
+    Context "negative tests" -Tag "Negative" -Skip:$SkipInstallTests {
+
+        It "fails to install unexisted app" {
+            $Id = "f1o2o3b4a5r6";
+            $Expected = '[ERR] Finished with error: can not fetch product info: product with id "' + $Id + '" and locale "en-US" not found';
+
+            $Output, $Code = Invoke-EzstoreInstall $Path $Id "1.0.0.0";
+
+            $Code | Should -Be 1;
+            $Output.Count | Should -Not -Be 0;
+            ($Output | Select-Object -Last 1) -replace $ColorRegexp | Should -BeExactly $Expected;
+        }
+
     }
 
 }

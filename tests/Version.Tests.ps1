@@ -14,15 +14,19 @@ BeforeAll {
 
 Describe "Version flag (<arch>)" -ForEach $Targets {
 
-    It "Returned correct app version (<_>)" -ForEach @(
-        "-v"
-        "--version"
-    ) {
-        $Output, $Code = Invoke-Ezstore $Path @($_);
+    Context "positive tests" -Tag "Positive" {
 
-        $Code | Should -Be 0;
-        $Output.Count | Should -Be 1;
-        $Output[0] | Should -BeExactly "ezstore v$Version";
+        It "returned correct app version (<_>)" -ForEach @(
+            "-v"
+            "--version"
+        ) {
+            $Output, $Code = Invoke-Ezstore $Path @($_);
+
+            $Code | Should -Be 0;
+            $Output.Count | Should -Be 1;
+            $Output[0] | Should -BeExactly "ezstore v$Version";
+        }
+
     }
 
 }
