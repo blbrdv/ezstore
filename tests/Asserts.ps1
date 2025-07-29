@@ -64,10 +64,10 @@ function Should-AssertOutput {
         $Line = $Line | % $Script;
     }
 
-    if ( $null -ne $ShouldMatch ) {
+    if ( "" -ne $ShouldMatch ) {
         $Pass = $Line -match $ShouldMatch;
         $ErrorMessage = Get-ErrorMessage $Negate $LineNum "match" $ShouldMatch;
-    } elseif ( $null -ne $ShouldBeExactly ) {
+    } elseif ( "" -ne $ShouldBeExactly ) {
         $Pass = $Line.Equals($ShouldBeExactly);
         $ErrorMessage = Get-ErrorMessage $Negate $LineNum "equal to" $ShouldBeExactly;
     } else {
