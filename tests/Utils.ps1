@@ -7,31 +7,42 @@ function Invoke-Ezstore {
         [string[]] $Arguments
     )
 
-    $global:LASTEXITCODE = $null;
+    $Path = [IO.Path]::Combine((Get-Location).Path, $Path).Replace('\.','') | Convert-Path;
+    $CancelStatuses = @(
+        "Stopped",
+        "Blocked",
+        "Suspended",
+        "Disconnected"
+    )
 
-    $Path = [IO.Path]::Combine((Get-Location).Path, $Path).Replace('\.','');
+    if ( ! (Test-Path -Path $Path) ) {
+        throw "Path does not exists: $Path";
+    }
 
-    try {
-        Push-Location;
+    $Job = Start-Job {
+        param(
+            [string] $Path,
+            [string[]] $Arguments
+        )
+
         Set-Location $Path;
 
-        $Output = & .\ezstore.exe @Arguments 2>&1;
+        .\ezstore.exe @Arguments 2>&1;
+        $global:LASTEXITCODE;
+    } -ArgumentList @( $Path, $Arguments );
 
-        $ExitCode = $global:LASTEXITCODE;
-        $global:LASTEXITCODE = $null;
+    $Job | Wait-Job -Timeout 600 >$null;
+    $Result = Receive-Job -Job $Job -ErrorAction "Stop";
 
-        $Output = $Output -split [Environment]::NewLine;
-
-        Write-Verbose "Exit code: $ExitCode";
-        Write-Verbose "Output:";
-        foreach ( $Line in $Output ) {
-            Write-Verbose $Line;
-        }
-
-        return $Output, $ExitCode;
-    } finally {
-        Pop-Location;
+    if ( $CancelStatuses.Contains($Job.State) ) {
+        $Output = $Result;
+        $ExitCode = 124;
+    } else {
+        $Output = $Result[0..($Result.Count - 2)];
+        $ExitCode = $Result[-1];
     }
+
+    return [string[]]$Output, [int]$ExitCode;
 
 }
 
