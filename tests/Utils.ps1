@@ -19,7 +19,7 @@ function Invoke-Ezstore {
         "Disconnected"
     )
 
-    if ( ! (Test-Path -Path $Path) ) {
+    if ( -not (Test-Path -Path $Path) ) {
         throw "Path does not exists: $Path";
     }
 
