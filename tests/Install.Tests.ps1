@@ -76,7 +76,8 @@ Describe "Install subcommand (<arch>)" -Skip:$SkipInstallTests -ForEach $Targets
 
         It "fails to install unexisted app" {
             $Id = "f1o2o3b4a5r6";
-            $Expected = '[ERR] Finished with error: can not fetch product info: product with id "' + $Id + '" and locale "en-US" not found';
+            $Expected = '[ERR] Finished with error: can not fetch product info: product with id "' + $Id + '" and';
+            $Expected += ' locale "en-US" not found';
 
             $Output, $Code = Invoke-EzstoreInstall $Path $Id "1.0.0.0";
 
