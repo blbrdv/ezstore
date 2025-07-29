@@ -9,7 +9,8 @@ param (
     [string] $Path,
     [Parameter(Mandatory=$true)]
     [string] $Archs,
-    [switch] $SkipInstallTests
+    [string[]] $Tags,
+    [string[]] $ExcludeTags
 )
 
 . "$PSScriptRoot\Utils.ps1"
@@ -30,6 +31,12 @@ $TargetsList = $Targets | ForEach-Object { $_ | ForEach-Object { "{ Arch: '$($_.
 
 Write-Output "Targets:`t[ $($TargetsList -join ", ") ]";
 Write-Output "Test files:`t[ $($TestsList -join ", ") ]";
+if ( ($Tags | Measure-Object).Count -gt 0 ) {
+    Write-Output "Tags:`t[ $($Tags -join ", ") ]";
+}
+if ( ($ExcludeTags | Measure-Object).Count -gt 0 ) {
+    Write-Output "ExcludeTags:`t[ $($ExcludeTags -join ", ") ]";
+}
 
 if ( $null -eq $TestsList ) {
     Write-Error "No test files found.";
@@ -47,5 +54,7 @@ $Config.Output.Verbosity = "Detailed";
 $Config.Run.Container = $TestsList | ForEach-Object {
         New-PesterContainer -Path $_;
     };
+$Config.Filter.Tag = $Tags;
+$Config.Filter.ExcludeTag = $ExcludeTags;
 
 Invoke-Pester -Configuration $config;

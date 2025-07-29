@@ -13,7 +13,7 @@ BeforeAll {
     Import-ModuleSafe -Name "Appx" -UseWindowsPowerShell;
 }
 
-Describe "Install subcommand (<arch>)" -Skip:$SkipInstallTests -ForEach $Targets {
+Describe "Install subcommand (<arch>)" -Tag "Install" -ForEach $Targets {
 
     Context "positive tests" -Tag "Positive" {
 
