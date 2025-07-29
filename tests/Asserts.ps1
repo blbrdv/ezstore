@@ -74,6 +74,10 @@ function Should-AssertOutput {
         throw "Either -ShouldMatch or -ShouldBeExactly param must be provided"
     }
 
+    if ( $Negate ) {
+        $Pass = -not $Pass;
+    }
+
     if ( -not $Pass ) {
         if ( $LineNum -lt 0 ) {
             $DesiredIndex = $ActualValue.Count + $LineNum;
