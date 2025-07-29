@@ -126,3 +126,18 @@ function Import-ModuleSafe {
 function Get-PackageFullName {
     return Get-AppxPackage | ForEach-Object { $_.PackageFullName; };
 }
+
+function Assert-PackageInstalled {
+
+    param(
+        [Parameter(Mandatory=$true)]
+        [string]$Name,
+        [Parameter(Mandatory=$true)]
+        [string]$Version,
+        [Parameter(Mandatory=$true)]
+        [string]$PackageId
+    )
+
+    Get-PackageFullName | Where-Object { $_ -match "^$($Name)_$($Version)_[^_]+_[^_]*_$PackageId$" }
+
+}

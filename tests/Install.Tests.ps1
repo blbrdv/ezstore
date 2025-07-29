@@ -24,36 +24,51 @@ Describe "Install subcommand (<arch>)" -Skip:$SkipInstallTests -ForEach $Targets
         It "successfully install '<name>' v<version>" -ForEach @(
             @{
                 Name = "Tree CLI"
-                Id = "9mvsm3j7zj7c"
+                FullName = "PeterEtelej.TreeCLI"
                 Version = "1.1.0.0"
+                Id = "9mvsm3j7zj7c"
+                PackageId = "vvysxk2z46ddc"
             },
             @{
                 Name = "Wikipedia"
-                Id = "9wzdncrfhwm4"
+                FullName = "WikimediaFoundation.Wikipedia"
                 Version = "1.0.0.0"
+                Id = "9wzdncrfhwm4"
+                PackageId = "54ggd3ev8bvz6"
             },
             @{
                 Name = "VPN Proxy: Fast & Unlimited"
-                Id = "9pntscmcg01j"
+                FullName = "59992Roob.BestProxyFastUnlimitedVPNfunctionality"
                 Version = "1.0.20.0"
+                Id = "9pntscmcg01j"
+                PackageId = "bzvrdnc3w98g4"
             }
         ) {
             $Output, $Code = Invoke-EzstoreInstall $Path $Id $Version;
 
             $Code | Should -Be 0;
             $Output | Should -AssertOutput -LineNum -2 -ShouldMatch $PackageInstalledRegexp;
+
+            Assert-PackageInstalled -Name $FullName -Version $Version -PackageId $PackageId | Should -Be $true;
         }
 
         It "successfully install without output color" {
+            $FullName = "PeterEtelej.TreeCLI";
+            $Id = "9mvsm3j7zj7c";
+            $Version = "1.1.0.0";
+            $PackageId = "vvysxk2z46ddc"
+
             try {
                 $OldValue = $Env:NO_COLOR; $Env:NO_COLOR = "1";
-                $Output, $Code = Invoke-EzstoreInstall $Path "9mvsm3j7zj7c" "1.1.0.0";
+                $Output, $Code = Invoke-EzstoreInstall $Path $Id $Version;
             } finally {
                 $Env:NO_COLOR = $OldValue;
             }
 
             $Code | Should -Be 0;
             $Output | Should -AssertOutput -Not -LineNum 0 -ShouldMatch $ColorRegexp;
+
+            Assert-PackageInstalled -Name $FullName -Version $Version -PackageId $PackageId | Should -Be $true;
         }
 
         AfterEach {
