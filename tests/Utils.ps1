@@ -48,27 +48,20 @@ function Install-ModuleSafe {
         [string] $Version
     )
 
-    & {
-        $ProgressPreference = 'Ignore';
-        $Params = @{
-            Name = $Name
-        };
+    if ( "" -ne $Version ) {
+        $Params["MinimumVersion"] = $Version;
+        $List = Get-Module -ListAvailable -Name $Name | Where-object Version -ge $Version;
+        $Message = "Module $Name ($Version) successfully installed."
+    } else {
+        $List = Get-Module -ListAvailable -Name $Name;
+        $Message = "Module $Name successfully installed."
+    }
 
-        if ( "" -ne $Version ) {
-            $Params["MinimumVersion"] = $Version;
-            $List = Get-Module -ListAvailable -Name $Name | Where-object Version -ge $Version;
-            $Message = "Module $Name ($Version) successfully installed."
-        } else {
-            $List = Get-Module -ListAvailable -Name $Name;
-            $Message = "Module $Name successfully installed."
-        }
-
-        if ( $null -eq $List ) {
-            Install-Module @Params -SkipPublisherCheck 3>$null;
-            Write-Output $Message;
-        } else {
-            Write-Output "Module $Name already installed."
-        }
+    if ( $null -eq $List ) {
+        Install-Module -Name $Name -SkipPublisherCheck -Confirm:$false -Force -ErrorAction 'Stop' 3>$null;
+        Write-Output $Message;
+    } else {
+        Write-Output "Module $Name already installed."
     }
 
 }
