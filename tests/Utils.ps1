@@ -122,3 +122,7 @@ function Import-ModuleSafe {
     Write-Output $Message;
 
 }
+
+function Get-PackageFullName {
+    return Get-AppxPackage | ForEach-Object { $_.PackageFullName; };
+}

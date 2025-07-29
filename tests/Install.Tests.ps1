@@ -11,10 +11,6 @@ BeforeAll {
     $ColorRegexp = '\x1b\[[0-9;]*m';
 
     Import-ModuleSafe -Name "Appx" -UseWindowsPowerShell;
-
-    function Get-PackageFullName {
-        return Get-AppxPackage | ForEach-Object { $_.PackageFullName; };
-    }
 }
 
 Describe "Install subcommand (<arch>)" -Skip:$SkipInstallTests -ForEach $Targets {
