@@ -38,7 +38,8 @@ function Invoke-Ezstore {
         $Output = $Result;
         $ExitCode = 124;
     } else {
-        $Output = $Result[0..($Result.Count - 2)];
+        $Count = ($Result | Measure-Object).Count;
+        $Output = $Result[0..($Count - 2)];
         $ExitCode = $Result[-1];
     }
 
