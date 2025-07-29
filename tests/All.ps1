@@ -39,6 +39,8 @@ if ( $null -eq $TestsList ) {
 Install-ModuleSafe -Name "Pester" -Version "5.7.1";
 Import-ModuleSafe -Name "Pester" -Version "5.7.1";
 
+. "$PSScriptRoot\Asserts.ps1";
+
 $Config = [PesterConfiguration]::Default;
 $Config.Should.ErrorAction = "Continue";
 $Config.Output.Verbosity = "Detailed";

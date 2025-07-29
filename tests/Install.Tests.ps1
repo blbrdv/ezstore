@@ -45,8 +45,7 @@ Describe "Install subcommand (<arch>)" -Skip:$SkipInstallTests -ForEach $Targets
             $Output, $Code = Invoke-EzstoreInstall $Path $Id $Version;
 
             $Code | Should -Be 0;
-            $Output.Count | Should -Not -Be 0;
-            $Output | Select-Object -Last 2 | Select-Object -First 1 | Should -Match $PackageInstalledRegexp;
+            $Output | Should -AssertOutput -LineNum -2 -ShouldMatch $PackageInstalledRegexp;
         }
 
         It "successfully install without output color" {
@@ -58,8 +57,7 @@ Describe "Install subcommand (<arch>)" -Skip:$SkipInstallTests -ForEach $Targets
             }
 
             $Code | Should -Be 0;
-            $Output.Count | Should -Not -Be 0;
-            $Output[0] | Should -Not -Match $ColorRegexp;
+            $Output | Should -AssertOutput -Not -LineNum 0 -ShouldMatch $ColorRegexp;
         }
 
         AfterEach {
@@ -83,8 +81,7 @@ Describe "Install subcommand (<arch>)" -Skip:$SkipInstallTests -ForEach $Targets
             $Output, $Code = Invoke-EzstoreInstall $Path $Id "1.0.0.0";
 
             $Code | Should -Be 1;
-            $Output.Count | Should -Not -Be 0;
-            ($Output | Select-Object -Last 1) -replace $ColorRegexp | Should -BeExactly $Expected;
+            $Output | Should -AssertOutput -Script { $_ -replace $ColorRegexp; } -ShouldBeExactly $Expected;
         }
 
     }
