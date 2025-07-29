@@ -59,6 +59,14 @@ function Install-ModuleSafe {
         [string] $Version
     )
 
+    $Params = @{
+        Name = $Name
+        SkipPublisherCheck = $true
+        Confirm = $false
+        Force = $true
+        ErrorAction = 'Stop'
+    };
+
     if ( "" -ne $Version ) {
         $Params["MinimumVersion"] = $Version;
         $List = Get-Module -ListAvailable -Name $Name | Where-object Version -ge $Version;
@@ -69,7 +77,7 @@ function Install-ModuleSafe {
     }
 
     if ( $null -eq $List ) {
-        Install-Module -Name $Name -SkipPublisherCheck -Confirm:$false -Force -ErrorAction 'Stop' 3>$null;
+        Install-Module @Params 3>$null;
         Write-Output $Message;
     } else {
         Write-Output "Module $Name already installed."
