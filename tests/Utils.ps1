@@ -88,30 +88,25 @@ function Import-ModuleSafe {
         [switch] $UseWindowsPowerShell
     )
 
-    & {
-        $ProgressPreference = 'Ignore';
-        $Params = @{
-            Name = $Name
-        };
+    $Params = @{
+        Name = $Name
+        Force = ($null -eq $Env:GITHUB_ACTIONS)
+        ErrorAction = 'Stop'
+    };
 
-        if ( "" -ne $Version ) {
-            $Params["MinimumVersion"] = $Version;
-            $Message = "Module $Name ($Version) imported."
-        } else {
-            $Message = "Module $Name imported."
-        }
-
-        if ( ($null -eq $Env:GITHUB_ACTIONS) -and ($UseWindowsPowerShell) ) {
-            Import-Module @Params -UseWindowsPowerShell 3>$null;
-        } elseif ( $null -eq $Env:GITHUB_ACTIONS ) {
-            Import-Module @Params 3>$null;
-        } elseif ( $UseWindowsPowerShell ) {
-            Import-Module @Params -UseWindowsPowerShell -Force 3>$null;
-        } else {
-            Import-Module @Params -Force 3>$null;
-        }
-
-        Write-Output $Message;
+    if ( "" -ne $Version ) {
+        $Params["MinimumVersion"] = $Version;
+        $Message = "Module $Name ($Version) imported."
+    } else {
+        $Message = "Module $Name imported."
     }
+
+    if ( ($PSVersionTable.PSVersion.Major -gt 5) -and $UseWindowsPowerShell ) {
+        Import-Module @Params -UseWindowsPowerShell 3>$null;
+    } else {
+        Import-Module @Params 3>$null;
+    }
+
+    Write-Output $Message;
 
 }
