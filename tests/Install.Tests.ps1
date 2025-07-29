@@ -81,7 +81,7 @@ Describe "Install subcommand (<arch>)" -Skip:$SkipInstallTests -ForEach $Targets
             $Output, $Code = Invoke-EzstoreInstall $Path $Id "1.0.0.0";
 
             $Code | Should -Be 1;
-            $Output | Should -AssertOutput -Script { $_ -replace $ColorRegexp; } -ShouldBeExactly $Expected;
+            $Output | Should -AssertOutput -LineNum -1 -Script { $_ -replace $ColorRegexp; } -ShouldBeExactly $Expected;
         }
 
     }
