@@ -15,28 +15,34 @@ param (
 . "$PSScriptRoot\Utils.ps1"
 
 Set-StrictMode -Version 3.0;
+$ProgressPreference = "SilentlyContinue";
 $ErrorActionPreference = "Stop";
 trap { Write-Output $_; exit 1 };
 
-[System.Diagnostics.CodeAnalysis.SuppressMessageAttribute(
-    "PSUseDeclaredVarsMoreThanAssignments", "",
-    Justification="This variable used in tests explicitly."
-)]
 $Targets = $Archs -split "," | ForEach-Object {
     @{
         Arch = $_
         Path = [IO.Path]::Combine($Path, $_, "bin")
     }
 };
+$TestsList = Get-ChildItem -Path $PSScriptRoot -Filter "*.Tests.ps1" -ErrorAction 'SilentlyContinue';
+$TargetsList = $Targets | ForEach-Object { $_ | ForEach-Object { "{ Arch: '$($_.Arch)'; Path: '$($_.Path)' }" } };
 
-Import-ModuleSafe -Name "Pester" -Version "5.7.1";
+Write-Output "Targets:`t[ $($TargetsList -join ", ") ]";
+Write-Output "Test files:`t[ $($TestsList -join ", ") ]";
+
+if ( $null -eq $TestsList ) {
+    Write-Error "No test files found.";
+    exit 1;
+}
+
+Install-ModuleSafe -Name "Pester" -Version "5.7.1";
 Import-ModuleSafe -Name "Pester" -Version "5.7.1";
 
 $Config = [PesterConfiguration]::Default;
 $Config.Should.ErrorAction = "Continue";
 $Config.Output.Verbosity = "Detailed";
-$Config.Run.Container = Get-ChildItem -Path $PSScriptRoot -Filter "*.Tests.ps1" -ErrorAction 'SilentlyContinue'
-    | ForEach-Object {
+$Config.Run.Container = $TestsList | ForEach-Object {
         New-PesterContainer -Path $_;
     };
 
