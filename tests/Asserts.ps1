@@ -16,13 +16,13 @@ function Assert-Fail {
 function Get-ErrorMessage {
 
     param(
-        [Parameter(Mandatory=$true,Position=0)]
+        [Parameter(Mandatory=$true)]
         [bool] $Negate,
-        [Parameter(Mandatory=$true,Position=1)]
+        [Parameter(Mandatory=$true)]
         [int] $LineNum,
-        [Parameter(Mandatory=$true,Position=2)]
+        [Parameter(Mandatory=$true)]
         [string] $Text,
-        [Parameter(Mandatory=$true,Position=3)]
+        [Parameter(Mandatory=$true)]
         [string] $Value
     )
 
@@ -38,6 +38,10 @@ function Get-ErrorMessage {
 
 function Should-AssertOutput {
 
+    [System.Diagnostics.CodeAnalysis.SuppressMessageAttribute(
+        "PSUseApprovedVerbs", "",
+        Justification="'Should' is a verb used in Pester module."
+    )]
     param(
         $ActualValue,
 
@@ -61,15 +65,15 @@ function Should-AssertOutput {
     $Line = $ActualValue[$LineNum];
 
     if ( $null -ne $Script ) {
-        $Line = $Line | % $Script;
+        $Line = $Line | ForEach-Object $Script;
     }
 
     if ( "" -ne $ShouldMatch ) {
         $Pass = $Line -match $ShouldMatch;
-        $ErrorMessage = Get-ErrorMessage $Negate $LineNum "match" $ShouldMatch;
+        $ErrorMessage = Get-ErrorMessage -Negate $Negate -LineNum $LineNum -Text "match" -Value $ShouldMatch;
     } elseif ( "" -ne $ShouldBeExactly ) {
         $Pass = $Line.Equals($ShouldBeExactly);
-        $ErrorMessage = Get-ErrorMessage $Negate $LineNum "equal to" $ShouldBeExactly;
+        $ErrorMessage = Get-ErrorMessage -Negate $Negate -LineNum $LineNum -Text "equal to" -Value $ShouldBeExactly;
     } else {
         throw "Either -ShouldMatch or -ShouldBeExactly param must be provided"
     }

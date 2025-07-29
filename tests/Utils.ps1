@@ -1,5 +1,9 @@
 function Invoke-Ezstore {
 
+    [System.Diagnostics.CodeAnalysis.SuppressMessageAttribute(
+        "PSReviewUnusedParameter", "",
+        Justification="Parameters are used below. PS linter just blind."
+    )]
     param(
         [Parameter(Mandatory=$true,Position=0)]
         [string] $Path,
@@ -20,16 +24,12 @@ function Invoke-Ezstore {
     }
 
     $Job = Start-Job {
-        param(
-            [string] $Path,
-            [string[]] $Arguments
-        )
+        $global:LASTEXITCODE = $null;
+        Set-Location $using:Path;
 
-        Set-Location $Path;
-
-        .\ezstore.exe @Arguments 2>&1;
+        .\ezstore.exe @using:Arguments 2>&1;
         $global:LASTEXITCODE;
-    } -ArgumentList @( $Path, $Arguments );
+    };
 
     $Job | Wait-Job -Timeout 600 >$null;
     $Result = Receive-Job -Job $Job -ErrorAction "Stop";
