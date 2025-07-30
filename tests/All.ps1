@@ -20,7 +20,15 @@ $ProgressPreference = "SilentlyContinue";
 $ErrorActionPreference = "Stop";
 trap { Write-Output $_; exit 1 };
 
-$Targets = $Archs -split "," | ForEach-Object {
+$AllowedArchList = @( "amd64", "386", "arm64", "arm" );
+$ArchList = $Archs -split ",";
+$InvalidArchs = $ArchList | Where-Object { $AllowedArchList -notcontains $_ };
+if ( $null -ne $InvalidArchs ) {
+    Write-Error "Invalid target architectures list: $ArchList, allowed values: $AllowedArchList.";
+    exit 1;
+}
+
+$Targets = $ArchList | ForEach-Object {
     @{
         Arch = $_
         Path = [IO.Path]::Combine($Path, $_, "bin")
