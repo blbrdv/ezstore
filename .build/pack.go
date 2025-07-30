@@ -12,6 +12,13 @@ import (
 	"strings"
 )
 
+var OSNames = map[string]string{
+	"amd64": "x64",
+	"386":   "x86",
+	"arm64": "arm64",
+	"arm":   "arm32",
+}
+
 var pack = goyek.Define(goyek.Task{
 	Name:  "pack",
 	Usage: "Pack project's files for distribution.",
@@ -72,7 +79,7 @@ var pack = goyek.Define(goyek.Task{
 				"-bso0",
 				"-bd",
 				"-sse",
-				base.PathJoin(fullOutputPath, fmt.Sprintf("ezstore-%s-portable.7z", arch)),
+				base.PathJoin(fullOutputPath, fmt.Sprintf("ezstore-%s-portable.7z", OSNames[arch])),
 				base.PathJoin(srcPath, arch, "*"),
 			)
 			if len(output) > 0 {
