@@ -82,7 +82,7 @@ func Install(file *ms.BundleFileInfo, shell *Powershell) error {
 	result, err := shell.Exec(addPkgCmd)
 	if err != nil {
 		if result != "" {
-			result = fmt.Sprintf("\n%s", result)
+			result = fmt.Sprintf("%s%s", utils.WindowsNewline, result)
 		}
 		return fmt.Errorf("can not install app %s: console command error: %s%s", file.Name, err.Error(), result)
 	}
@@ -103,7 +103,7 @@ func GetLocale(shell *Powershell) *ms.Locale {
 	}
 
 	localeStr := strings.TrimSpace(result)
-	localeStr = strings.Trim(localeStr, "\r\n")
+	localeStr = strings.Trim(localeStr, utils.WindowsNewline)
 
 	locale, err := ms.NewLocale(localeStr)
 	if err != nil {

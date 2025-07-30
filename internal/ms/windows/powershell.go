@@ -6,6 +6,7 @@ import (
 	"encoding/hex"
 	"errors"
 	"fmt"
+	"github.com/blbrdv/ezstore/internal/utils"
 	"golang.org/x/text/encoding"
 	"golang.org/x/text/encoding/charmap"
 	"golang.org/x/text/encoding/unicode"
@@ -17,7 +18,6 @@ import (
 )
 
 const exeFilename = "powershell.exe"
-const newline = "\r\n"
 
 const (
 	boundaryPrefix            = "$command"
@@ -126,7 +126,7 @@ func (s *Powershell) detectCodePage() (int, error) {
 	if err != nil {
 		return 0, fmt.Errorf("get codepage: %s", err.Error())
 	}
-	out = strings.TrimRight(out, " \r\n")
+	out = strings.TrimRight(out, fmt.Sprintf(" %s", utils.WindowsNewline))
 	cp, err := strconv.Atoi(out)
 	if err != nil {
 		return 0, fmt.Errorf("non-numeric codepage: '%s'", out)
@@ -137,7 +137,7 @@ func (s *Powershell) detectCodePage() (int, error) {
 func (s *Powershell) Exec(cmd string) (stdout string, err error) {
 	// wrap the command in special markers so we know when to stop reading from the pipes
 	boundary := s.randomBoundary()
-	full := fmt.Sprintf("%s; echo '%s'; [Console]::Error.WriteLine('%s')%s", cmd, boundary, boundary, newline)
+	full := fmt.Sprintf("%s; echo '%s'; [Console]::Error.WriteLine('%s')%s", cmd, boundary, boundary, utils.WindowsNewline)
 	full, err = s.enc.NewEncoder().String(full)
 	if err != nil {
 		return "", fmt.Errorf("encode command: %s", err)
@@ -160,7 +160,7 @@ func (s *Powershell) Exec(cmd string) (stdout string, err error) {
 }
 
 func (s *Powershell) Exit() error {
-	_, err := s.stdin.Write([]byte("exit" + newline))
+	_, err := s.stdin.Write([]byte("exit" + utils.WindowsNewline))
 	if err != nil {
 		return fmt.Errorf("write exit: %s", err)
 	}
@@ -189,7 +189,7 @@ func readOutput(r io.Reader, dec *encoding.Decoder, out *string, boundary string
 		wg.Done()
 	}()
 
-	marker := []byte(boundary + newline)
+	marker := []byte(boundary + utils.WindowsNewline)
 	const bufsize = 64
 	buf := make([]byte, bufsize)
 	for {

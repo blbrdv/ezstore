@@ -2,6 +2,7 @@ package ms_test
 
 import (
 	"fmt"
+	"github.com/blbrdv/ezstore/internal/utils"
 	"github.com/google/go-cmp/cmp"
 	"testing"
 
@@ -29,7 +30,7 @@ func TestLocaleLangOnly(t *testing.T) {
 			}
 
 			if !expected.Equal(actual) {
-				t.Fatalf("Incorrect Locale.\n%s", cmp.Diff(expected, actual))
+				t.Fatalf("Incorrect Locale.%s%s", utils.NewLine, cmp.Diff(expected, actual))
 			}
 
 			expectedStr := data.Raw
@@ -64,7 +65,7 @@ func TestLocaleLangOnlyWithNoise(t *testing.T) {
 			}
 
 			if !expected.Equal(actual) {
-				t.Fatalf("Incorrect Locale.\n%s", cmp.Diff(expected, actual))
+				t.Fatalf("Incorrect Locale.%s%s", utils.NewLine, cmp.Diff(expected, actual))
 			}
 
 			expectedStr := data.Language
@@ -110,7 +111,7 @@ func TestLocaleLangWithCountry(t *testing.T) {
 			}
 
 			if !expected.Equal(actual) {
-				t.Fatalf("Incorrect Locale.\n%s", cmp.Diff(expected, actual))
+				t.Fatalf("Incorrect Locale.%s%s", utils.NewLine, cmp.Diff(expected, actual))
 			}
 
 			expectedStr := fmt.Sprintf("%s-%s", data.Language, data.Country)

@@ -2,6 +2,7 @@ package store
 
 import (
 	"fmt"
+	"github.com/blbrdv/ezstore/internal/utils"
 	"github.com/google/go-cmp/cmp"
 	"testing"
 )
@@ -20,7 +21,7 @@ func TestApp(t *testing.T) {
 	}
 
 	if !expected.Equal(actual) {
-		t.Fatalf("Invalid app.\n%s", cmp.Diff(expected, actual))
+		t.Fatalf("Invalid app.%s%s", utils.NewLine, cmp.Diff(expected, actual))
 	}
 }
 

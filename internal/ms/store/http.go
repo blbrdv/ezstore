@@ -25,20 +25,20 @@ func traceRequest(traceFile *windows.File, req *req.Request) {
 
 	var sb strings.Builder
 
-	utils.Fprintf(&sb, "> %s %s\n", strings.ToUpper(req.Method), req.RawURL)
+	utils.Fprintf(&sb, "> %s %s%s", strings.ToUpper(req.Method), req.RawURL, utils.WindowsNewline)
 
 	for key, values := range req.Headers {
 		for _, value := range values {
-			utils.Fprintf(&sb, "> %s: %s\n", key, value)
+			utils.Fprintf(&sb, "> %s: %s%s", key, value, utils.WindowsNewline)
 		}
 	}
 
 	if req.Body != nil {
 		utils.Fprintln(&sb, "> Body:")
-		utils.Fprintf(&sb, "%s\n", req.Body)
+		utils.Fprintf(&sb, "%s%s", req.Body, utils.WindowsNewline)
 	}
 
-	utils.Fprint(&sb, "\n")
+	utils.Fprint(&sb, utils.WindowsNewline)
 
 	traceFile.WriteString(sb.String())
 }
@@ -55,10 +55,10 @@ func traceError(traceFile *windows.File, err error) {
 	if text == "" {
 		utils.Fprintln(&sb, "! (empty)")
 	} else {
-		utils.Fprintf(&sb, "! %s\n", text)
+		utils.Fprintf(&sb, "! %s%s", text, utils.WindowsNewline)
 	}
 
-	utils.Fprint(&sb, "\n")
+	utils.Fprint(&sb, utils.WindowsNewline)
 
 	traceFile.WriteString(sb.String())
 }
@@ -72,13 +72,13 @@ func traceResponse(traceFile *windows.File, res *req.Response) {
 
 	status := res.GetStatus()
 	if status != "" {
-		utils.Fprintf(&sb, "< %s\n", status)
+		utils.Fprintf(&sb, "< %s%s", status, utils.WindowsNewline)
 	}
 
 	if len(res.Header) > 0 {
 		for key, values := range res.Header {
 			for _, value := range values {
-				utils.Fprintf(&sb, "< %s: %s\n", key, value)
+				utils.Fprintf(&sb, "< %s: %s%s", key, value, utils.WindowsNewline)
 			}
 		}
 	}
@@ -95,11 +95,11 @@ func traceResponse(traceFile *windows.File, res *req.Response) {
 				utils.Fprintf(&sb, "%b", data)
 			}
 		} else {
-			utils.Fprintf(&sb, "%s\n", body)
+			utils.Fprintf(&sb, "%s%s", body, utils.WindowsNewline)
 		}
 	}
 
-	utils.Fprint(&sb, "\n")
+	utils.Fprint(&sb, utils.WindowsNewline)
 
 	traceFile.WriteString(sb.String())
 }
