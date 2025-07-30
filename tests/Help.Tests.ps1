@@ -1,3 +1,9 @@
+[System.Diagnostics.CodeAnalysis.SuppressMessageAttribute(
+    "PSUseDeclaredVarsMoreThanAssignments", "",
+    Justification="Declared variables in Before* blocks available and used inside It blocks."
+)]
+param()
+
 Describe "Help flag (<arch>)" -ForEach $Targets {
 
     Context "positive tests" -Tag "Positive" {
