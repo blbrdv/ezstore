@@ -50,14 +50,13 @@ Use `.\run.ps1 help` to see available flags and tasks.
 
 ### End-to-end tests
 
-#### Requirements
+Run `.\tests\All.ps1 -Path <path> -Archs <archs> -Tags <tags> -ExcludeTags <exclude-tags>`.
 
-1. Windows OS 8 or higher
-2. Powershell 5.1 or higher
-
-#### Execution
-
-Run `.\tests\<scenario>.ps1`.
+ - `<path>` - path to directory with app binaries, e.g. `.\output`.
+ - `<archs>` - list of app architectures to run separated with comma, e.g. `amd64,386`.
+Allowed values: `amd64`, `386`, `arm64`, `arm`.
+ - `<tags>` - list of test tags to include in test run. Optional parameter.
+ - `<exclude-tags>` - list of test tags to exclude from test run. Optional parameter.
 
 ## License
 
