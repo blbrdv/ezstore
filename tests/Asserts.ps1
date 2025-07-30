@@ -21,18 +21,16 @@ function Get-ErrorMessage {
         [Parameter(Mandatory=$true)]
         [int] $LineNum,
         [Parameter(Mandatory=$true)]
-        [string] $Text,
-        [Parameter(Mandatory=$true)]
-        [string] $Value
+        [string] $Text
     )
 
     if ( $Negate ) {
-        $ComparisonMessage = $Text;
+        $ComparisonMessage = "is $Text";
     } else {
-        $ComparisonMessage = "didn't $Text";
+        $ComparisonMessage = "is not $Text";
     }
 
-    return "Line at index $LineNum $ComparisonMessage '$Value':";
+    return "Line at index $LineNum $($ComparisonMessage):";
 
 }
 
@@ -58,11 +56,18 @@ function Should-AssertOutput {
         [scriptblock] $Script
     )
 
-    if ( $ActualValue.Count -lt 1 ) {
+    if ( $null -ne $ActualValue ) {
+        $Output = [string[]]($ActualValue | ForEach-Object { [string]$_ });
+    } else {
+        $Output = [string[]]@()
+    }
+    $Count = $Output.Count;
+
+    if ( $Count -eq 0 ) {
         return Assert-Fail "Output is empty.";
     }
 
-    $Line = $ActualValue[$LineNum];
+    $Line = $Output[$LineNum];
 
     if ( $null -ne $Script ) {
         $Line = $Line | ForEach-Object $Script;
@@ -70,10 +75,10 @@ function Should-AssertOutput {
 
     if ( "" -ne $ShouldMatch ) {
         $Pass = $Line -match $ShouldMatch;
-        $ErrorMessage = Get-ErrorMessage -Negate $Negate -LineNum $LineNum -Text "match" -Value $ShouldMatch;
+        $ErrorMessage = Get-ErrorMessage -Negate $Negate -LineNum $LineNum -Text "match";
     } elseif ( "" -ne $ShouldBeExactly ) {
         $Pass = $Line.Equals($ShouldBeExactly);
-        $ErrorMessage = Get-ErrorMessage -Negate $Negate -LineNum $LineNum -Text "equal to" -Value $ShouldBeExactly;
+        $ErrorMessage = Get-ErrorMessage -Negate $Negate -LineNum $LineNum -Text "equal to";
     } else {
         throw "Either -ShouldMatch or -ShouldBeExactly param must be provided"
     }
@@ -84,23 +89,30 @@ function Should-AssertOutput {
 
     if ( -not $Pass ) {
         if ( $LineNum -lt 0 ) {
-            $DesiredIndex = $ActualValue.Count + $LineNum;
+            $DesiredIndex = $Count + $LineNum;
         } else {
             $DesiredIndex = $LineNum;
         }
 
         $FullErrorMessage = @(
-            $ErrorMessage;
+            $ErrorMessage
         )
 
-        for ($i = 0; $i -lt $ActualValue.Count; $i++) {
+        for ($i = 0; $i -lt $Count; $i++) {
             if ( $i -eq $DesiredIndex ) {
                 $Mark = ">";
             } else {
                 $Mark = " ";
             }
 
-            $FullErrorMessage += "$Mark '$($ActualValue[$i])'";
+            $FullErrorMessage += "$Mark '$($Output[$i])'";
+            if ( $i -eq $DesiredIndex ) {
+                if ( "" -ne $ShouldMatch ) {
+                    $FullErrorMessage += "> '$ShouldMatch'";
+                } else {
+                    $FullErrorMessage += "> '$ShouldBeExactly'";
+                }
+            }
         }
 
         return Assert-Fail ($FullErrorMessage -join [Environment]::NewLine);

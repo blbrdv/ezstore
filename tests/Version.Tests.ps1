@@ -23,8 +23,7 @@ Describe "Version flag (<arch>)" -ForEach $Targets {
             $Output, $Code = Invoke-Ezstore $Path @($_);
 
             $Code | Should -Be 0;
-            $Output.Count | Should -Be 1;
-            $Output[0] | Should -BeExactly "ezstore v$Version";
+            $Output | Should -AssertOutput -LineNum 0 -ShouldMatch "ezstore v$Version";
         }
 
     }

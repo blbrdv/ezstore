@@ -12,12 +12,6 @@ function Invoke-Ezstore {
     )
 
     $Path = [IO.Path]::Combine((Get-Location).Path, $Path).Replace('\.','') | Convert-Path;
-    $CancelStatuses = @(
-        "Stopped",
-        "Blocked",
-        "Suspended",
-        "Disconnected"
-    )
 
     if ( -not (Test-Path -Path $Path) ) {
         throw "Path does not exists: $Path";
@@ -25,22 +19,38 @@ function Invoke-Ezstore {
 
     $Job = Start-Job {
         $global:LASTEXITCODE = $null;
-        Set-Location $using:Path;
+        Set-Location ($using:Path | Convert-Path);
 
         .\ezstore.exe @using:Arguments 2>&1;
         $global:LASTEXITCODE;
     };
 
-    $Job | Wait-Job -Timeout 600 >$null;
+    $Job | Wait-Job -Timeout 300 >$null;
     $Result = Receive-Job -Job $Job -ErrorAction "Stop";
+    $Result = $Result | ForEach-Object { [string]$_ };
+    $Output = @();
 
-    if ( $CancelStatuses.Contains($Job.State) ) {
-        $Output = $Result;
+    if ( $Job.State -eq "Running" ) {
         $ExitCode = 124;
     } else {
-        $Count = ($Result | Measure-Object).Count;
-        $Output = $Result[0..($Count - 2)];
-        $ExitCode = $Result[-1];
+        $Count = $Result.Count;
+        if ( $Count -eq 0 ) {
+            $ExitCode = 33;
+        } elseif ( $Count -eq 1 ) {
+            $Line = [string]($Result[0]);
+            $RefCode = 0;
+
+            if ( [int32]::TryParse($Line, [ref]$RefCode ) ) {
+                $Output = @();
+                $ExitCode = [int]$Line;
+            } else {
+                $Output = $Line;
+                $ExitCode = 44;
+            }
+        } else {
+            $Output = $Result[0..($Count - 2)];
+            $ExitCode = $Result[-1];
+        }
     }
 
     return [string[]]$Output, [int]$ExitCode;

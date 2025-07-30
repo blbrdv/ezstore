@@ -3,8 +3,7 @@ Describe "Help flag (<arch>)" -ForEach $Targets {
     Context "positive tests" -Tag "Positive" {
 
         BeforeAll {
-            $HelpText = Get-Content -Raw -Path "$PSScriptRoot\..\cmd\README.txt" -WarningAction 'SilentlyContinue';
-            $HelpText = $HelpText -join [Environment]::NewLine;
+            $HelpText = Get-Content -Path "$PSScriptRoot\..\cmd\README.txt" -WarningAction 'SilentlyContinue';
         }
 
         It "returned correct help text (<_>)" -ForEach @(
