@@ -125,4 +125,66 @@ function Should-AssertOutput {
 
 }
 
-Add-ShouldOperator -Name AssertOutput -InternalName 'Should-AssertOutput' -Test ${function:Should-AssertOutput} -SupportsArrayInput;
+function Should-EqualOutput {
+
+    [System.Diagnostics.CodeAnalysis.SuppressMessageAttribute(
+        "PSUseApprovedVerbs", "",
+        Justification="'Should' is a verb used in Pester module."
+    )]
+    param(
+        $ActualValue,
+        [string[]] $ExpectedValue
+    )
+
+    if ( $null -ne $ActualValue ) {
+        $Output = [string[]]($ActualValue | ForEach-Object { [string]$_ });
+    } else {
+        $Output = [string[]]@();
+    }
+    $ActualCount = $Output.Count;
+    $ExpectedCount = $ExpectedValue.Count;
+
+    $ErrorMessage = [string[]]@();
+
+    if ( $ActualCount -ne $ExpectedCount ) {
+        $ErrorMessage += "Expected output length $ExpectedCount, but got $ActualCount";
+
+        for ( $i = 0; $i -lt $ActualCount; $i++ ) {
+            $ErrorMessage += "$($i + 1)`t$($Output[$i])";
+        }
+
+        return Assert-Fail ($ErrorMessage -join [Environment]::NewLine);
+    }
+
+    $Pass = $true;
+    $ErrorMessage += "Output is invalid:"
+
+    for ( $i = 0; $i -lt $ActualCount; $i++ ) {
+        $ActualLine = $Output[$i];
+        $ExpectedLine = $ExpectedValue[$i];
+
+        if ( $ActualLine.Equals($ExpectedLine) ) {
+            $ErrorMessage += "  '$ActualLine'";
+        } else {
+            $ErrorMessage += "> '$ActualLine'";
+            $ErrorMessage += "> '$ExpectedLine'";
+            $Pass = $false;
+        }
+    }
+
+    if ( $Pass ) {
+        return New-Object PSObject -Property @{
+               Succeeded      = $true
+               FailureMessage = $null
+           }
+    } else {
+        return Assert-Fail ($ErrorMessage -join [Environment]::NewLine);
+    }
+
+}
+
+Add-ShouldOperator -Name AssertOutput -InternalName 'Should-AssertOutput' -Test ${function:Should-AssertOutput} `
+    -SupportsArrayInput;
+
+Add-ShouldOperator -Name EqualOutput -InternalName 'Should-EqualOutput' -Test ${function:Should-EqualOutput} `
+    -SupportsArrayInput;
