@@ -47,7 +47,7 @@ Describe "Install subcommand (<arch>)" -Tag "Install" -ForEach $Targets {
             $Output, $Code = Invoke-EzstoreInstall $Path $Id $Version;
 
             $Code | Should -Be 0;
-            $Output | Should -AssertOutput -LineNum -2 -ShouldMatch $PackageInstalledRegexp;
+            $Output | Should -AssertOutput -LineNum -2 -ShouldMatch $PackageInstalledRegexp -ErrorAction "Stop";
 
             Assert-PackageInstalled -Name $FullName -Version $Version -PackageId $PackageId | Should -Be $true;
         }
@@ -66,7 +66,7 @@ Describe "Install subcommand (<arch>)" -Tag "Install" -ForEach $Targets {
             }
 
             $Code | Should -Be 0;
-            $Output | Should -AssertOutput -Not -LineNum 0 -ShouldMatch $ColorRegexp;
+            $Output | Should -AssertOutput -Not -LineNum 0 -ShouldMatch $ColorRegexp -ErrorAction "Stop";
 
             Assert-PackageInstalled -Name $FullName -Version $Version -PackageId $PackageId | Should -Be $true;
         }
