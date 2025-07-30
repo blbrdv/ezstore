@@ -6,6 +6,23 @@
 
 Easy install apps from MS Store.
 
+## Requirements
+
+1. Windows OS 8 or higher
+2. Powershell 5.1 or higher
+
+App tested on following Windows versions:
+
+| Version | Buid  | OS arch | App arch   |
+|---------|-------|---------|------------|
+| 8       | 9200  | x86     | x86        |
+| 8.1     | 9600  | x86     | x86        |
+| 10 22H2 | 19042 | x64     | x64        |
+| 10 21H2 | 20348 | x64     | x64, x86   |
+| 10 24H2 | 26100 | x64     | x64, x86   |
+| 11 21H2 | 22000 | x64     | x64        |
+| 11 24H2 | 26100 | arm64   | arm64, x64 |
+
 ## Installation
 
 Download installer or portable version from
