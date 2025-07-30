@@ -149,6 +149,8 @@ function Assert-PackageInstalled {
         [string]$PackageId
     )
 
-    Get-PackageFullName | Where-Object { $_ -match "^$($Name)_$($Version)_[^_]+_[^_]*_$PackageId$" }
+    $Result = Get-PackageFullName | Where-Object { $_ -match "^$($Name)_$($Version)_[^_]+_[^_]*_$PackageId$" };
+
+    return [bool]$Result;
 
 }
