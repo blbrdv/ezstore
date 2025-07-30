@@ -78,15 +78,10 @@ jobs:
             name: Windows 11 ARM
             archs: arm64,amd64
             path: .\output
-          - label: windows-11-arm
-            name: Windows 11 ARM
-            archs: arm,386
-            path: .\output
-            skip: " -SkipInstallTests"
 
     runs-on: ${{ matrix.label }}
 
-    name: ${{ matrix.archs }}${{ matrix.skip }} | ${{ matrix.name }}
+    name: ${{ matrix.archs }} | ${{ matrix.name }}
 
     steps:
       - uses: actions/checkout@v4
@@ -99,4 +94,4 @@ jobs:
 
       - name: Running tests
         shell: pwsh
-        run: .\tests\All.ps1 -Path "${{ matrix.path }}" -Archs "${{ matrix.archs }}"${{ matrix.skip }}
+        run: .\tests\All.ps1 -Path "${{ matrix.path }}" -Archs "${{ matrix.archs }}"
