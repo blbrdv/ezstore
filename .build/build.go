@@ -148,6 +148,7 @@ var build = goyek.Define(goyek.Task{
 				base.LocalPath,
 				map[string]string{
 					"GOARCH": arch,
+					"GOOS":   "windows",
 				},
 				"go", "build",
 				ldFlag,
