@@ -2,7 +2,7 @@
 
 ## [1.4.1] - 2025-08-25
 
-### CHanged
+### Changed
 
 - `github.com/imroc/req/v3` bump from `v3.53.0` to `v3.54.0`
 - `golang.org/x/net` bump from `v0.41.0` to `v0.42.0`
