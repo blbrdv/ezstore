@@ -42,6 +42,13 @@ Describe "Install subcommand (<arch>)" -Tag "Install" -ForEach $Targets {
                 Version = "1.0.20.0"
                 Id = "9pntscmcg01j"
                 PackageId = "bzvrdnc3w98g4"
+            },
+            @{
+                Name = "Calculator X8"
+                FullName = "6617GergelyOrosz.Calc8"
+                Version = "1.8.0.11"
+                Id = "9wzdncrfj305"
+                PackageId = "8z1s9sjepw0w4"
             }
         ) {
             $Output, $Code = Invoke-EzstoreInstall $Path $Id $Version;
