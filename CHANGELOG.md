@@ -1,6 +1,6 @@
 # Changelog
 
-## [1.4.1] - 2025-08-25
+## [1.4.1] - 2025-08-26
 
 ### Changed
 
@@ -10,6 +10,7 @@
 ### Fixed
 
 - Fixed panic and error on old Windows versions [#42](https://github.com/blbrdv/ezstore/issues/42)
+- Fixed incorrect detecting supported apps from Windows Store on old Windows versions 
 
 ## [1.4.0] - 2025-07-02
 
