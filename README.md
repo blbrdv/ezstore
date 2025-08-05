@@ -8,8 +8,7 @@ Easy install apps from MS Store.
 
 ## Requirements
 
-1. Windows OS 8 or higher
-2. Powershell 5.1 or higher
+Windows OS 8 or higher
 
 App tested on following Windows versions:
 
@@ -61,11 +60,17 @@ Project need [Golang](https://go.dev/dl/) version `1.24` or later.
 
 ### Automation
 
-Use `.\run.ps1 [flags] [tasks]`.
+On Linux/macOS run `./run.sh [flags] [tasks]`
 
-Use `.\run.ps1 help` to see available flags and tasks.
+On Windows run `.\run.ps1 [flags] [tasks]`.
+
+Use `help` task to see all available flags and tasks.
 
 ### End-to-end tests
+
+Requirements:
+1. Windows 8 or higher
+2. PowerShell 5 or higher
 
 Run `.\tests\All.ps1 -Path <path> -Archs <archs> -Tags <tags> -ExcludeTags <exclude-tags>`.
 
