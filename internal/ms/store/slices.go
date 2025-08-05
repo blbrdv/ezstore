@@ -121,3 +121,9 @@ func Equal[T any](left, right []T, f func(l, r T) bool) bool {
 
 	return true
 }
+
+func Contains[T interface{ ~[]E }, E comparable](left, right T) bool {
+	return slices.ContainsFunc(left, func(t E) bool {
+		return slices.Contains(right, t)
+	})
+}

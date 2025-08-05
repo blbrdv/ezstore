@@ -4,6 +4,7 @@ go 1.24.4
 
 require (
 	github.com/antchfx/xmlquery v1.4.4
+	github.com/gonutz/w32/v2 v2.12.1
 	github.com/google/go-cmp v0.7.0
 	github.com/gookit/color v1.5.4
 	github.com/imroc/req/v3 v3.54.0

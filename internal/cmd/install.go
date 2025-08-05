@@ -2,6 +2,7 @@ package cmd
 
 import (
 	"errors"
+	"fmt"
 	"github.com/blbrdv/ezstore/internal/log"
 	"github.com/blbrdv/ezstore/internal/ms"
 	"github.com/blbrdv/ezstore/internal/ms/store"
@@ -14,6 +15,10 @@ import (
 // Install download package with its dependencies from MS Store by id, version, locale and architecture,
 // and then install it all.
 func Install(_ context.Context, cmd *cli.Command) error {
+	if windows.Version == windows.Unsupported {
+		return fmt.Errorf("unsupportded Windows version detected")
+	}
+
 	shell, err := windows.NewPowerShell()
 	if err != nil {
 		return err
