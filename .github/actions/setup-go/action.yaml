@@ -24,7 +24,7 @@ runs:
         $NeedInstall = 'true';
 
         try {
-          (& go version) -match '^go version (go)?([0-9]+)(?:\.([0-9]+))?(?:\.([0-9]+))?' > $null;
+          (& go version) -match '^go version (?:go)?([0-9]+)(?:\.([0-9]+))?(?:\.([0-9]+))?' > $null;
           $GoInstalledVersion = [version]::New($Matches[1], $Matches[2], $Matches[3]);
           echo "Go installed version: '$GoInstalledVersion'";
 
