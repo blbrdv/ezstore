@@ -24,14 +24,15 @@ runs:
         $NeedInstall = 'true';
 
         try {
-          (& go version) -match '^go version (go)?([.0-9]+)' > $null;
-          $GoInstalledVersion = $Matches[2];
+          (& go version) -match '^go version (go)?([0-9]+)(?:\.([0-9]+))?(?:\.([0-9]+))?' > $null;
+          $GoInstalledVersion = [version]::New($Matches[1], $Matches[2], $Matches[3]);
           echo "Go installed version: '$GoInstalledVersion'";
 
-          $GoNeededVersion = & go list -f '{{.GoVersion}}' -m;
+          (& go list -f '{{.GoVersion}}' -m) -match '^([0-9]+)(?:\.([0-9]+))?(?:\.([0-9]+))?$' > $null;
+          $GoNeededVersion = [version]::New($Matches[1], $Matches[2], $Matches[3]);
           echo "Go needed version:    '$GoNeededVersion'";
 
-          if ( $GoNeededVersion -eq $GoInstalledVersion ) {
+          if ( $GoNeededVersion -lt $GoInstalledVersion ) {
             $NeedInstall = 'false';
           }
         } finally {
