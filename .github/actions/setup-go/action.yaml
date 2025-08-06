@@ -32,7 +32,7 @@ runs:
           $GoNeededVersion = [version]::New($Matches[1], $Matches[2], $Matches[3]);
           echo "Go needed version:    '$GoNeededVersion'";
 
-          if ( $GoNeededVersion -lt $GoInstalledVersion ) {
+          if ( $GoNeededVersion -gt $GoInstalledVersion ) {
             $NeedInstall = 'false';
           }
         } finally {
