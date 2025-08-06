@@ -12,7 +12,7 @@ on:
     paths:
       - '.github/actions/**'
       - '.github/workflows/e2e-tests.yaml'
-      - '.mage/**'
+      - '.build/**'
       - '**.go'
       - '**.mod'
       - '**.sum'
@@ -59,60 +59,29 @@ jobs:
           name: build
           path: output
 
-  generation:
-    runs-on: windows-latest
-
-    outputs:
-      matrix: ${{ steps.set-matrix.outputs.matrix }}
-
-    steps:
-      - uses: actions/checkout@v4
-
-      - name: Generating matrix
-        id: set-matrix
-        run: |
-          $Data = Get-Content -Raw '.\.github\matrix.json' | ConvertFrom-Json;
-          $Include = @();
-
-          foreach ( $Target in $Data.targets ) {
-            foreach ( $Os in $Data.os ) {
-              if ( $Target.label -eq $Os.label ) {
-                $Include += @{
-                  label = $Os.label
-                  name = "'$($Target.scenario)' on $($Os.name)"
-                  run = ".\tests\$($Target.scenario).ps1"
-                };
-              }
-            }
-          }
-
-          foreach ( $Install in $Data.install ) {
-            $Target = $Install | ConvertTo-Json;
-            foreach ( $Os in $Data.os ) {
-              $Include += @{
-                label = $Os.label
-                name = "'$($Install.id)' on $($Os.name)"
-                run = ".\tests\install.ps1 '$Target'"
-              };
-            }
-          }
-
-          $Matrix = (@{ include = $Include } | ConvertTo-JSON) -replace '\n';
-          $JSON = "matrix=$Matrix";
-
-          echo $JSON;
-          echo $JSON | Out-File -FilePath $env:GITHUB_OUTPUT -Append -Encoding utf8;
-
   test:
-    needs: [build, generation]
+    needs: build
 
     strategy:
       fail-fast: false
-      matrix: ${{ fromJson( needs.generation.outputs.matrix ) }}
+      matrix:
+        include:
+          - label: windows-2022
+            name: Windows 10 2022 x64
+            archs: amd64,386
+            path: .\output
+          - label: windows-2025
+            name: Windows 10 2025 x64
+            archs: amd64,386
+            path: .\output
+          - label: windows-11-arm
+            name: Windows 11 ARM
+            archs: arm64,amd64
+            path: .\output
 
     runs-on: ${{ matrix.label }}
 
-    name: ${{ matrix.name }}
+    name: ${{ matrix.archs }} | ${{ matrix.name }}
 
     steps:
       - uses: actions/checkout@v4
@@ -123,5 +92,6 @@ jobs:
           name: build
           path: output
 
-      - name: Running scenario
-        run: ${{ matrix.run }}
+      - name: Running tests
+        shell: pwsh
+        run: .\tests\All.ps1 -Path "${{ matrix.path }}" -Archs "${{ matrix.archs }}"

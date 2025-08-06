@@ -2,14 +2,16 @@ Set-StrictMode -Version 3.0;
 $ErrorActionPreference = "Stop";
 trap { Write-Error $_ -ErrorAction Continue; exit 1 };
 
-Set-Location ".mage"
-& go mod download -x
-Set-Location "golangci-lint"
-& go mod download -x
-Set-Location ..
-Set-Location ..
+$CurrentLocation = Get-Location;
 
+Set-Location "$PSScriptRoot\.build";
+& go mod download -x
+Set-Location "$PSScriptRoot\.build\golangci-lint";
+& go mod download -x
+Set-Location "$PSScriptRoot";
 & go mod download -x
 
-& go tool -modfile='.mage\go.mod' mage -d .mage -w . $args
-exit $global:LASTEXITCODE
+Set-Location "$PSScriptRoot\.build";
+& go run -trimpath=1 . $args;
+Set-Location "$CurrentLocation";
+exit $global:LASTEXITCODE;

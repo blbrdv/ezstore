@@ -5,8 +5,7 @@ import (
 	"github.com/blbrdv/ezstore/internal/utils"
 	"github.com/gookit/color"
 	"os"
-	"path"
-	"strings"
+	"path/filepath"
 	"time"
 )
 
@@ -24,21 +23,14 @@ const (
 	Detailed
 )
 
-func getCurrentDir() string {
-	exePath, err := os.Executable()
-	if err != nil {
-		panic(err.Error())
-	}
-
-	currentDir := path.Dir(strings.ReplaceAll(exePath, "\\", "/"))
-	return currentDir
-}
-
 // Level contains current app logging level.
 var Level = Normal
 
 // TraceFile contains path to log file for http package. Can be not exists.
-var TraceFile = utils.Join(getCurrentDir(), fmt.Sprintf("%s.log", time.Now().Format("060102150405")))
+var TraceFile = utils.Join(
+	getRoamingDir(),
+	fmt.Sprintf("%s.log", time.Now().Format("060102150405")),
+)
 
 var levels = map[string]LogLevel{
 	"q": Quiet,
@@ -131,4 +123,19 @@ func Error(value string) {
 // above.
 func Errorf(format string, values ...any) {
 	Error(fmt.Sprintf(format, values...))
+}
+
+func getRoamingDir() string {
+	roamingPath, err := os.UserConfigDir()
+	if err != nil {
+		panic(err)
+	}
+
+	appPath := filepath.Join(roamingPath, "ezstore")
+	err = os.MkdirAll(appPath, 0660)
+	if err != nil {
+		panic(err.Error())
+	}
+
+	return appPath
 }

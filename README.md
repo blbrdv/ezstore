@@ -6,6 +6,22 @@
 
 Easy install apps from MS Store.
 
+## Requirements
+
+Windows OS 8 or higher
+
+App tested on following Windows versions:
+
+| Version | Buid  | OS arch | App arch   |
+|---------|-------|---------|------------|
+| 8       | 9200  | x86     | x86        |
+| 8.1     | 9600  | x86     | x86        |
+| 10 22H2 | 19042 | x64     | x64        |
+| 10 21H2 | 20348 | x64     | x64, x86   |
+| 10 24H2 | 26100 | x64     | x64, x86   |
+| 11 21H2 | 22000 | x64     | x64        |
+| 11 24H2 | 26100 | arm64   | arm64, x64 |
+
 ## Installation
 
 Download installer or portable version from
@@ -44,22 +60,25 @@ Project need [Golang](https://go.dev/dl/) version `1.24` or later.
 
 ### Automation
 
-Use `.\run.ps1 -l` to see available tasks.
+On Linux/macOS run `./run.sh [flags] [tasks]`
 
-Use `.\run.ps1 -h <task>` to see task description.
+On Windows run `.\run.ps1 [flags] [tasks]`.
 
-Use `.\run.ps1 [-v] <task>` to run task. Flag `-v` sets verbose output.
+Use `help` task to see all available flags and tasks.
 
 ### End-to-end tests
 
-#### Requirements
+Requirements:
+1. Windows 8 or higher
+2. PowerShell 5 or higher
 
-1. Windows OS 8 or higher
-2. Powershell 5.1 or higher
+Run `.\tests\All.ps1 -Path <path> -Archs <archs> -Tags <tags> -ExcludeTags <exclude-tags>`.
 
-#### Execution
-
-Run `.\tests\<scenario>.ps1`.
+ - `<path>` - path to directory with app binaries, e.g. `.\output`.
+ - `<archs>` - list of app architectures to run separated with comma, e.g. `amd64,386`.
+Allowed values: `amd64`, `386`, `arm64`, `arm`.
+ - `<tags>` - list of test tags to include in test run. Optional parameter.
+ - `<exclude-tags>` - list of test tags to exclude from test run. Optional parameter.
 
 ## License
 

@@ -31,9 +31,12 @@ ChangesEnvironment=true
 
 ;------------------------------------------------------------------------------
 [Files]
-Source: "output\bin\ezstore.exe"; DestDir: "{app}/bin"; Flags: ignoreversion
-Source: "output\README.txt"; DestDir: "{app}"; Flags: ignoreversion
-Source: "output\update.ps1"; DestDir: "{app}"; Flags: ignoreversion
+Source: "output\386\bin\ezstore.exe"; DestDir: "{app}/bin"; Check: IsI386; Flags: "ignoreversion solidbreak"
+Source: "output\amd64\bin\ezstore.exe"; DestDir: "{app}/bin"; Check: IsAmd64; Flags: "ignoreversion solidbreak"
+Source: "output\arm\bin\ezstore.exe"; DestDir: "{app}/bin"; Check: IsArm; Flags: "ignoreversion solidbreak"
+Source: "output\arm64\bin\ezstore.exe"; DestDir: "{app}/bin"; Check: IsArm64; Flags: "ignoreversion solidbreak"
+Source: "cmd\README.txt"; DestDir: "{app}"; Flags: "ignoreversion solidbreak"
+Source: "cmd\update.ps1"; DestDir: "{app}"; Flags: "ignoreversion solidbreak"
 
 
 ;------------------------------------------------------------------------------
@@ -59,4 +62,24 @@ procedure CurUninstallStepChanged(CurUninstallStep: TUninstallStep);
 begin
   if CurUninstallStep = usPostUninstall
   then EnvRemovePath(ExpandConstant('{app}') + '\bin');
+end;
+
+function IsAmd64: Boolean;
+begin
+  Result := (ProcessorArchitecture = paX64);
+end;
+
+function IsArm64: Boolean;
+begin
+  Result := (ProcessorArchitecture = paARM64);
+end;
+
+function IsI386: Boolean;
+begin
+  Result := (ProcessorArchitecture = paX86);
+end;
+
+function IsArm: Boolean;
+begin
+  Result := (not IsAmd64) and (not IsArm64) and (not IsI386);
 end;

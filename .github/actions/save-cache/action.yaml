@@ -2,12 +2,10 @@ name: 'Teardown'
 runs:
   using: 'composite'
   steps:
-    - name: Save cache
-      uses: actions/cache/save@v4
+    - uses: actions/cache/save@v4
       with:
         path: |
           ~\go
           %LocalAppData%\go-build
           %LocalAppData%\golangci-lint
-          %USERPROFILE%\magefile
-        key: ${{ runner.os }}-${{ runner.arch }}-go-${{ hashFiles('.\go.mod', '.\.mage\go.mod', '.\.mage\golangci-lint\go.mod') }}
+        key: ${{ runner.os }}-${{ runner.arch }}-go-${{ hashFiles('.\go.mod', '.\.build\go.mod', '.\.build\golangci-lint\go.mod') }}

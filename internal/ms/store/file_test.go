@@ -3,6 +3,7 @@ package store
 import (
 	"fmt"
 	"github.com/blbrdv/ezstore/internal/ms"
+	"github.com/blbrdv/ezstore/internal/utils"
 	"github.com/google/go-cmp/cmp"
 	"testing"
 )
@@ -16,7 +17,7 @@ func TestFile(t *testing.T) {
 	actual := newFile(bundle)
 
 	if !expected.Equal(actual) {
-		t.Fatalf("Invalid file.\n%s", cmp.Diff(expected, actual))
+		t.Fatalf("Invalid file.%s%s", utils.NewLine, cmp.Diff(expected, actual))
 	}
 
 	expectedStr := expected.String()

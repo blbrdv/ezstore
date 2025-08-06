@@ -8,30 +8,37 @@ if ( Test-Path env:GITHUB_ACTIONS ) {
     Install-Module -Name PSScriptAnalyzer;
 }
 
-$Settings = @{
-    ExcludeRules = @(
-        'PSAvoidGlobalVars',
-        'PSUseDeclaredVarsMoreThanAssignments',
-        'PSAvoidUsingInvokeExpression',
-        'PSAvoidUsingWriteHost'
-    )
-}
+$Exclude = @("output", "release");
+$Files = Get-ChildItem -Path $PSScriptRoot -Directory -Name -Recurse -ErrorAction 'SilentlyContinue'
+    | Where-Object {
+        foreach ( $Name in $Exclude ) {
+            if ( ($_ -like "$Name\*") -or ($_ -eq $Name) ) {
+                return $false;
+            }
 
-$Files = Get-ChildItem -Path .\*.ps1 -Recurse;
-$Found = $false;
+            return $true;
+        }
+    }
+    | ForEach-Object {
+        Get-ChildItem -Path "$_\*.ps1" -ErrorAction 'SilentlyContinue';
+    }
+$Files += Get-ChildItem -Path ".\*.ps1" -ErrorAction 'SilentlyContinue';
+$Problems = [string[]]@();
 
 foreach ($File in $Files) {
-    $Output = Invoke-ScriptAnalyzer -Path $File -Settings $Settings;
+    $Output = Invoke-ScriptAnalyzer -Path $File;
     Write-Output "Analyzing '$File'";
     foreach ($Data in $Output) {
-        $Found = $true;
-        Write-Output "$($Data.ScriptName):$($Data.Line) $($Data.Message)";
+        $Problems += "$($Data.ScriptName):$($Data.Line)`t[$($Data.RuleName)]`t$($Data.Message)"
     }
 }
 
-if ( $Found ) {
-    Write-Output "Error. Problems found.";
+if ( $Problems.Count -ne 0 ) {
+    Write-Output "Problems found:";
+    foreach ( $Problem in $Problems ) {
+        Write-Output $Problem;
+    }
     exit 1;
 }
 
-Write-Output "Success. No problems found."
+Write-Output "No problems found."

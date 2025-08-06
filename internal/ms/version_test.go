@@ -2,6 +2,7 @@ package ms_test
 
 import (
 	"fmt"
+	"github.com/blbrdv/ezstore/internal/utils"
 	"github.com/google/go-cmp/cmp"
 	"testing"
 
@@ -35,7 +36,7 @@ func TestVersion(t *testing.T) {
 			}
 
 			if !expected.Equal(actual) {
-				t.Fatalf("Incorrect Version.\n%s", cmp.Diff(expected, actual))
+				t.Fatalf("Incorrect Version.%s%s", utils.NewLine, cmp.Diff(expected, actual))
 			}
 
 			expectedStr := expected.String()
@@ -92,7 +93,7 @@ func TestVersionFromNumber(t *testing.T) {
 			actual := NewVersionFromNumber(data.Raw)
 
 			if !expected.Equal(actual) {
-				t.Fatalf("Incorrect Version.\n%s", cmp.Diff(expected, actual))
+				t.Fatalf("Incorrect Version.%s%s", utils.NewLine, cmp.Diff(expected, actual))
 			}
 
 			expectedStr := expected.String()

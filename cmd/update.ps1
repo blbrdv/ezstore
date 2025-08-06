@@ -7,14 +7,14 @@ $ExePath = Join-Path (Join-Path $ScriptPath "bin") "ezstore.exe";
 $TempPath = [Environment]::GetFolderPath('LocalApplicationData');
 $InstallerPath = Join-Path (Join-Path $TempPath "ezstore") "ezsetup.exe";
 
-$global:Wait = $true;
+$script:Wait = $true;
 
 if ($myInvocation.line -notmatch "ExecutionPolicy") {
-    $global:Wait = $false;
+    $script:Wait = $false;
 }
 
 function Wait {
-    if ( $global:Wait ) {
+    if ( $script:Wait ) {
         Pause;
     }
 }

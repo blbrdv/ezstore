@@ -54,7 +54,7 @@ func OpenFile(path string, flag int) *File {
 }
 
 // Install package if its version higher that installed counterpart.
-func Install(file *ms.BundleFileInfo) error {
+func Install(file *ms.BundleFileInfo, shell *Powershell) error {
 	var depsStr string
 	deps := file.Dependencies()
 	length := len(deps)
@@ -77,10 +77,12 @@ func Install(file *ms.BundleFileInfo) error {
 		depsStr = sb.String()
 	}
 
-	result, err := Shell.Execf("Add-AppxPackage -Path %s%s", file.Path, depsStr)
+	addPkgCmd := fmt.Sprintf("Add-AppxPackage -Path %s%s", file.Path, depsStr)
+	log.Tracef("Powershell: %s", addPkgCmd)
+	result, err := shell.Exec(addPkgCmd)
 	if err != nil {
 		if result != "" {
-			result = fmt.Sprintf("\n%s", result)
+			result = fmt.Sprintf("%s%s", utils.WindowsNewline, result)
 		}
 		return fmt.Errorf("can not install app %s: console command error: %s%s", file.Name, err.Error(), result)
 	}
@@ -94,14 +96,14 @@ var defaultLocale = ms.Locale{Language: "en", Country: "US"}
 
 // GetLocale returns current locale set in hosted OS.
 // If error occurred or returned value is empty, returns default locale.
-func GetLocale() *ms.Locale {
-	result, err := Shell.Exec("Get-Culture | select -exp Name")
+func GetLocale(shell *Powershell) *ms.Locale {
+	result, err := shell.Exec("Get-Culture | select -exp Name")
 	if err != nil {
 		return &defaultLocale
 	}
 
 	localeStr := strings.TrimSpace(result)
-	localeStr = strings.Trim(localeStr, "\r\n")
+	localeStr = strings.Trim(localeStr, utils.WindowsNewline)
 
 	locale, err := ms.NewLocale(localeStr)
 	if err != nil {

@@ -3,8 +3,8 @@ module main
 go 1.24.4
 
 require (
-	github.com/Masterminds/semver/v3 v3.3.1
-	github.com/magefile/mage v1.15.0
+	github.com/Masterminds/semver/v3 v3.4.0
+	github.com/goyek/goyek/v2 v2.3.0
 )
 
 require (
@@ -81,7 +81,6 @@ require (
 	github.com/google/go-containerregistry v0.20.5 // indirect
 	github.com/google/osv-scalibr v0.3.0 // indirect
 	github.com/google/osv-scanner/v2 v2.0.3 // indirect
-	github.com/google/pprof v0.0.0-20250423184734-337e5dd93bb4 // indirect
 	github.com/google/shlex v0.0.0-20191202100458-e7afc7fbc510 // indirect
 	github.com/google/uuid v1.6.0 // indirect
 	github.com/gorilla/css v1.0.1 // indirect
@@ -111,7 +110,6 @@ require (
 	github.com/muesli/termenv v0.16.0 // indirect
 	github.com/ncruces/go-strftime v0.1.9 // indirect
 	github.com/nfnt/resize v0.0.0-20180221191011-83c6a9932646 // indirect
-	github.com/onsi/gomega v1.36.3 // indirect
 	github.com/opencontainers/go-digest v1.0.0 // indirect
 	github.com/opencontainers/image-spec v1.1.1 // indirect
 	github.com/opencontainers/runtime-spec v1.2.1 // indirect
@@ -189,7 +187,6 @@ require (
 
 tool (
 	github.com/google/osv-scanner/v2/cmd/osv-scanner
-	github.com/magefile/mage
 	github.com/tc-hib/go-winres
 	gotest.tools/gotestsum
 )

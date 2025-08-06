@@ -3,7 +3,9 @@ package store
 import (
 	"fmt"
 	"github.com/blbrdv/ezstore/internal/ms"
+	"github.com/blbrdv/ezstore/internal/ms/windows"
 	"net/http"
+	"slices"
 	"strings"
 )
 
@@ -39,8 +41,17 @@ type sku struct {
 	Properties properties `json:"Properties"`
 }
 
+type clientConditions struct {
+	AllowedPlatforms []platform `json:"AllowedPlatforms"`
+}
+
+type conditions struct {
+	ClientConditions clientConditions `json:"ClientConditions"`
+}
+
 type availability struct {
-	Actions []string `json:"Actions"`
+	Actions    []string   `json:"Actions"`
+	Conditions conditions `json:"Conditions"`
 }
 
 type skuAvailability struct {
@@ -54,6 +65,18 @@ type product struct {
 
 type appInfo struct {
 	Product product `json:"Product"`
+}
+
+func getAllowedPlatforms(skuAvailabilities skuAvailability) []string {
+	var result []string
+	for _, availabilities := range skuAvailabilities.Availabilities {
+		for _, platform := range availabilities.Conditions.ClientConditions.AllowedPlatforms {
+			dep := strings.ToLower(platform.Name)
+			result = append(result, dep)
+		}
+	}
+
+	return result
 }
 
 func canRedeem(skuAvailability skuAvailability) (bool, error) {
@@ -93,6 +116,17 @@ func getAppInfo(id string, locale *ms.Locale) (*apps, string, error) {
 		return nil, "", fmt.Errorf("can not get app info: no availabilities for this app")
 	}
 
+	hardwarePlatforms := []string{
+		"windows.desktop",
+		"windows.universal",
+	}
+	OSPlatforms := []string{
+		"windows.windows8x",
+	}
+	if windows.Version >= 10 {
+		OSPlatforms = append(OSPlatforms, hardwarePlatforms...)
+	}
+
 	var packages []jsonPkg
 	for _, availability := range info.Product.SkuAvailabilities {
 		redeemable, err2 := canRedeem(availability)
@@ -101,10 +135,12 @@ func getAppInfo(id string, locale *ms.Locale) (*apps, string, error) {
 		}
 
 		if redeemable {
+			allowedPlatforms := getAllowedPlatforms(availability)
+
 			for _, skuPackage := range availability.Sku.Properties.Packages {
 				for _, platform := range skuPackage.PlatformDependencies {
 					dep := strings.ToLower(platform.Name)
-					if dep == "windows.desktop" || dep == "windows.universal" {
+					if slices.Contains(OSPlatforms, dep) && Contains(allowedPlatforms, hardwarePlatforms) {
 						packages = append(packages, skuPackage)
 					}
 				}

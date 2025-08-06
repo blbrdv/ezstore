@@ -5,6 +5,11 @@ import (
 	"io"
 )
 
+const (
+	WindowsNewline = "\r\n"
+	NewLine        = "\n"
+)
+
 func Fprint(w io.Writer, input ...any) {
 	_, err := fmt.Fprint(w, input...)
 	if err != nil {

@@ -1,5 +1,17 @@
 # Changelog
 
+## [1.4.1] - 2025-08-26
+
+### Changed
+
+- `github.com/imroc/req/v3` bump from `v3.53.0` to `v3.54.0`
+- `golang.org/x/net` bump from `v0.41.0` to `v0.42.0`
+
+### Fixed
+
+- Fixed panic and error on old Windows versions [#42](https://github.com/blbrdv/ezstore/issues/42)
+- Fixed incorrect detecting supported apps from Windows Store on old Windows versions 
+
 ## [1.4.0] - 2025-07-02
 
 ### Added
@@ -97,6 +109,7 @@
 
 Initial release.
 
+[1.4.1]: https://github.com/blbrdv/ezstore/releases/tag/v1.4.1
 [1.4.0]: https://github.com/blbrdv/ezstore/releases/tag/v1.4.0
 [1.3.3]: https://github.com/blbrdv/ezstore/releases/tag/v1.3.3
 [1.3.2]: https://github.com/blbrdv/ezstore/releases/tag/v1.3.2

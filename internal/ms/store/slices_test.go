@@ -113,3 +113,31 @@ func TestEqualSlices(t *testing.T) {
 		})
 	}
 }
+
+var containsData = []struct {
+	Name     string
+	Left     []string
+	Right    []string
+	Contains bool
+}{
+	{"TestContainsEqual", []string{"a", "b"}, []string{"a", "b"}, true},
+	{"TestContainsLeftEqual", []string{"a", "b"}, []string{"a"}, true},
+	{"TestContainsRightEqual", []string{"a"}, []string{"a", "b"}, true},
+	{"TestContainsNotEqual", []string{"c", "d"}, []string{"a", "b"}, false},
+}
+
+func TestContains(t *testing.T) {
+	for _, data := range containsData {
+		t.Run(data.Name, func(t *testing.T) {
+			left := data.Left
+			right := data.Right
+			expected := data.Contains
+
+			actual := Contains(left, right)
+
+			if actual != expected {
+				t.Fatalf("expected %t, got %t", expected, actual)
+			}
+		})
+	}
+}

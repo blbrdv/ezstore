@@ -1,12 +1,14 @@
 #!/bin/bash
 set -euo pipefail
 
-cd .mage
-go mod download -x
-cd golangci-lint
-go mod download -x
-cd ../..
+DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" >/dev/null && pwd )"
 
+cd "$DIR/.build"
+go mod download -x
+cd "$DIR/.build/golangci-lint"
+go mod download -x
+cd "$DIR"
 go mod download -x
 
-go tool -modfile='.mage/go.mod' mage -d .mage -w . "$@"
+cd "$DIR/.build"
+go run -trimpath=1 . "$@"
