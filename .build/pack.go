@@ -68,8 +68,6 @@ var pack = goyek.Define(goyek.Task{
 		}
 
 		for _, arch := range targetArchs {
-			fullOutputPath := base.PathJoin(*packPath, arch)
-
 			output, err = base.Run(
 				action,
 				true,
@@ -79,7 +77,7 @@ var pack = goyek.Define(goyek.Task{
 				"-bso0",
 				"-bd",
 				"-sse",
-				base.PathJoin(fullOutputPath, fmt.Sprintf("ezstore-%s-portable.7z", OSNames[arch])),
+				base.PathJoin(*packPath, fmt.Sprintf("ezstore-%s-portable.7z", OSNames[arch])),
 				base.PathJoin(srcPath, arch, "*"),
 			)
 			if len(output) > 0 {
