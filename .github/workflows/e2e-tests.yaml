@@ -19,6 +19,19 @@ on:
       - 'internal/**'
       - 'tests/**'
       - 'run.ps1'
+  pull_request:
+    branches:
+      - 'main'
+    paths:
+      - '.github/actions/**'
+      - '.github/workflows/e2e-tests.yaml'
+      - '.build/**'
+      - '**.go'
+      - '**.mod'
+      - '**.sum'
+      - 'internal/**'
+      - 'tests/**'
+      - 'run.ps1'
 
 jobs:
   build:
