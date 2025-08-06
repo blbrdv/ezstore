@@ -4,6 +4,7 @@ import (
 	"flag"
 	"fmt"
 	"github.com/goyek/goyek/v2"
+	"github.com/goyek/goyek/v2/middleware"
 	"io"
 	"os"
 	"strings"
@@ -29,6 +30,10 @@ func main() {
 	if err := os.Chdir(".."); err != nil {
 		_, _ = fmt.Fprintln(out, err)
 		os.Exit(1)
+	}
+
+	if os.Getenv("GITHUB_ACTIONS") == "" {
+		goyek.Use(middleware.ReportStatus)
 	}
 
 	flag.CommandLine.SetOutput(out)
