@@ -2,25 +2,16 @@
 ![GitHub License](https://img.shields.io/github/license/blbrdv/ezstore)
 ![GitHub Release](https://img.shields.io/github/v/release/blbrdv/ezstore)
 [![E2e tests](https://github.com/blbrdv/ezstore/actions/workflows/e2e-tests.yaml/badge.svg)](https://github.com/blbrdv/ezstore/actions/workflows/e2e-tests.yaml)
-![GitHub Downloads (all assets, all releases)](https://img.shields.io/github/downloads/blbrdv/ezstore/total)
+
+> [!CAUTION]
+> This project has been retired. Instead, use [WinGet CLI](https://github.com/microsoft/winget-cli). Since the release 
+> of `1.8.1791`, it has been compatible with the Microsoft Store.
 
 Easy install apps from MS Store.
 
 ## Requirements
 
 Windows OS 8 or higher
-
-App tested on following Windows versions:
-
-| Version | Buid  | OS arch | App arch   |
-|---------|-------|---------|------------|
-| 8       | 9200  | x86     | x86        |
-| 8.1     | 9600  | x86     | x86        |
-| 10 22H2 | 19042 | x64     | x64        |
-| 10 21H2 | 20348 | x64     | x64, x86   |
-| 10 24H2 | 26100 | x64     | x64, x86   |
-| 11 21H2 | 22000 | x64     | x64        |
-| 11 24H2 | 26100 | arm64   | arm64, x64 |
 
 ## Installation
 
